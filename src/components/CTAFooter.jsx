@@ -21,7 +21,7 @@ export function CTA() {
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap', position: 'relative' }}>
           <a
-            href="#contact"
+            href="/#contact"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#faf9f7', color: '#18181a', padding: '14px 28px', borderRadius: 100, fontSize: 15, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(-2px)' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#faf9f7'; e.currentTarget.style.transform = 'none' }}
@@ -29,7 +29,7 @@ export function CTA() {
             Start a project <span style={{ width: 22, height: 22, background: 'rgba(0,0,0,0.08)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>→</span>
           </a>
           <a
-            href="#pricing"
+            href="/pricing"
             style={{ color: 'rgba(255,255,255,0.42)', padding: '14px 22px', borderRadius: 100, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s', fontWeight: 400 }}
             onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.42)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
@@ -48,16 +48,16 @@ export function Footer() {
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 40, marginBottom: 44 }}>
           <div>
-            <BrandLogo href="#" size="nav" />
+            <BrandLogo href="/" size="nav" />
             <p style={{ fontSize: 13, color: '#7a7888', marginTop: 10, lineHeight: 1.6, maxWidth: 200, fontWeight: 300 }}>
               Websites and custom apps for small businesses that want to grow.
             </p>
           </div>
 
           {[
-            { heading: 'Services', links: [['Landing Pages','#services'],['Business Websites','#services'],['Custom Web Apps','#services'],['SEO & Content','#services']] },
-            { heading: 'Plans', links: [['Starter — $200/mo','#pricing'],['Growth — $500/mo','#pricing'],['Pro — $900/mo','#pricing'],['Custom quote','mailto:richie@vibefoxstudio.com']] },
-            { heading: 'Contact', links: [['richie@vibefoxstudio.com','mailto:richie@vibefoxstudio.com'],['@vibefoxstudio','#'],['LinkedIn','#']] },
+            { heading: 'Services', links: [['Landing Pages','/services'],['Business Websites','/services'],['Custom Web Apps','/services'],['SEO & Content','/services']] },
+            { heading: 'Plans', links: [['Starter — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blog','/blog']] },
+            { heading: 'Contact', links: [['richie@vibefoxstudio.com','mailto:richie@vibefoxstudio.com'],['Jacksonville, FL','/services'],['FAQ','/faq']] },
           ].map(col => (
             <div key={col.heading}>
               <div style={{ fontSize: 11.5, fontWeight: 700, color: '#18181a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 13 }}>{col.heading}</div>

@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import BrandLogo from '../BrandLogo'
+import SEOHead from '../SEOHead'
 
 const navItems = [
   { to: '/client/dashboard', label: 'Dashboard' },
@@ -20,6 +21,12 @@ export default function ClientLayout() {
 
   return (
     <div style={{ minHeight: '100svh', fontFamily: 'system-ui, sans-serif', background: '#f8f6f2' }}>
+      <SEOHead
+        title="Client Portal"
+        description="Client portal"
+        path="/client"
+        noindex
+      />
       <header style={{ background: 'white', borderBottom: '1px solid rgba(0,0,0,0.08)', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
         <BrandLogo size="xs" />
         <nav style={{ display: 'flex', gap: 4 }}>

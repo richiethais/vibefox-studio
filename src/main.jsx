@@ -22,6 +22,12 @@ import Join from './pages/Join.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import ClientLayout from './components/client/ClientLayout.jsx'
 import { AdminRoute, ClientRoute } from './components/ProtectedRoute.jsx'
+import ServicesPage from './pages/marketing/ServicesPage.jsx'
+import WorkPage from './pages/marketing/WorkPage.jsx'
+import PricingPage from './pages/marketing/PricingPage.jsx'
+import FAQPage from './pages/marketing/FAQPage.jsx'
+import BlogPage from './pages/marketing/BlogPage.jsx'
+import BlogPostPage from './pages/marketing/BlogPostPage.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -29,6 +35,12 @@ createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/work" element={<WorkPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/join" element={<Join />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
