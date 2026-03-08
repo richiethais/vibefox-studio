@@ -18,6 +18,7 @@ import ClientProjects from './pages/client/Projects.jsx'
 import ClientInvoices from './pages/client/Invoices.jsx'
 import ClientMessages from './pages/client/Messages.jsx'
 import ClientRequests from './pages/client/Requests.jsx'
+import Join from './pages/Join.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import ClientLayout from './components/client/ClientLayout.jsx'
 import { AdminRoute, ClientRoute } from './components/ProtectedRoute.jsx'
@@ -28,6 +29,7 @@ createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<App />} />
+          <Route path="/join" element={<Join />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>

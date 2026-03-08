@@ -12,6 +12,10 @@ export default function AdminClients() {
   const [form, setForm] = useState({ name: '', email: '', company: '', phone: '', plan: 'starter', status: 'active' })
   const [inviting, setInviting] = useState(false)
   const [inviteMsg, setInviteMsg] = useState('')
+  const [linkModal, setLinkModal] = useState(false)
+  const [linkForm, setLinkForm] = useState({ name: '', email: '' })
+  const [generatedLink, setGeneratedLink] = useState('')
+  const [generating, setGenerating] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -51,13 +55,28 @@ export default function AdminClients() {
     setInviteMsg(error ? `Error: ${error.message}` : `Invite sent to ${client.email}`)
   }
 
+  async function generateLink() {
+    setGenerating(true)
+    const { data, error } = await supabase
+      .from('invite_tokens')
+      .insert({ name: linkForm.name, email: linkForm.email })
+      .select('token')
+      .single()
+    setGenerating(false)
+    if (error) return
+    setGeneratedLink(`https://vibefoxstudio.com/join?token=${data.token}`)
+  }
+
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
   return (
     <div style={{ padding: '36px 40px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', letterSpacing: '-0.4px' }}>Clients</h1>
-        <button onClick={openCreate} style={darkBtn}>+ New client</button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button onClick={() => { setLinkModal(true); setGeneratedLink(''); setLinkForm({ name: '', email: '' }) }} style={ghostBtn}>Generate invite link</button>
+          <button onClick={openCreate} style={darkBtn}>+ New client</button>
+        </div>
       </div>
 
       {inviteMsg && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 16px', fontSize: 13, color: '#16a34a', marginBottom: 16 }}>{inviteMsg}</div>}
@@ -94,6 +113,37 @@ export default function AdminClients() {
           </tbody>
         </table>
       </div>
+
+      {linkModal && (
+        <div style={overlay}>
+          <div style={modalBox}>
+            <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 6 }}>Generate invite link</h2>
+            <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 20 }}>Pre-fill the client's details. The link expires in 7 days and is single-use.</p>
+            {!generatedLink ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <input placeholder="Client name *" value={linkForm.name} onChange={e => setLinkForm(f => ({ ...f, name: e.target.value }))} style={inp} />
+                <input placeholder="Client email *" type="email" value={linkForm.email} onChange={e => setLinkForm(f => ({ ...f, email: e.target.value }))} style={inp} />
+                <div style={{ display: 'flex', gap: 10, marginTop: 12, justifyContent: 'flex-end' }}>
+                  <button onClick={() => setLinkModal(false)} style={ghostBtn}>Cancel</button>
+                  <button onClick={generateLink} disabled={generating || !linkForm.name || !linkForm.email} style={darkBtn}>
+                    {generating ? 'Generating…' : 'Generate link'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ background: '#f8f6f2', borderRadius: 10, padding: '12px 14px', fontSize: 12, color: '#18181a', wordBreak: 'break-all', border: '1px solid rgba(0,0,0,0.08)' }}>
+                  {generatedLink}
+                </div>
+                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                  <button onClick={() => setLinkModal(false)} style={ghostBtn}>Close</button>
+                  <button onClick={() => navigator.clipboard.writeText(generatedLink)} style={darkBtn}>Copy link</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {modal && (
         <div style={overlay}>
