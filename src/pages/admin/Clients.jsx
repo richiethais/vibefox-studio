@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 
@@ -8,21 +8,46 @@ const STATUSES = ['active', 'inactive']
 export default function AdminClients() {
   const session = useAuth()
   const [clients, setClients] = useState([])
+  const [inviteLinks, setInviteLinks] = useState([])
   const [modal, setModal] = useState(null)
   const [form, setForm] = useState({ name: '', email: '', company: '', phone: '', plan: 'starter', status: 'active' })
   const [inviting, setInviting] = useState(false)
-  const [inviteMsg, setInviteMsg] = useState('')
+  const [notice, setNotice] = useState(null)
   const [linkModal, setLinkModal] = useState(false)
   const [linkForm, setLinkForm] = useState({ name: '', email: '' })
   const [generatedLink, setGeneratedLink] = useState('')
   const [generating, setGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [copiedToken, setCopiedToken] = useState('')
 
-  useEffect(() => { load() }, [])
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://vibefoxstudio.com'
+  const registeredEmails = useMemo(
+    () => new Set(clients.filter(c => c.user_id).map(c => (c.email || '').trim().toLowerCase())),
+    [clients]
+  )
 
-  async function load() {
-    const { data } = await supabase.from('clients').select('*').order('created_at', { ascending: false })
-    setClients(data ?? [])
+  const load = async () => {
+    const [clientsRes, linksRes] = await Promise.all([
+      supabase.from('clients').select('*').order('created_at', { ascending: false }),
+      supabase.from('invite_tokens').select('*').order('created_at', { ascending: false }),
+    ])
+
+    setClients(clientsRes.data ?? [])
+    setInviteLinks(linksRes.data ?? [])
+  }
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('clients').select('*').order('created_at', { ascending: false }),
+      supabase.from('invite_tokens').select('*').order('created_at', { ascending: false }),
+    ]).then(([clientsRes, linksRes]) => {
+      setClients(clientsRes.data ?? [])
+      setInviteLinks(linksRes.data ?? [])
+    })
+  }, [])
+
+  function buildInviteLink(token) {
+    return `${baseUrl}/join?token=${token}`
   }
 
   function openCreate() {
@@ -47,25 +72,63 @@ export default function AdminClients() {
 
   async function sendInvite(client) {
     setInviting(true)
-    setInviteMsg('')
+    setNotice(null)
+
     const { error } = await supabase.functions.invoke('invite-client', {
       body: { email: client.email, name: client.name },
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
+
     setInviting(false)
-    setInviteMsg(error ? `Error: ${error.message}` : `Invite sent to ${client.email}`)
+    setNotice(error
+      ? { type: 'error', text: `Error: ${error.message}` }
+      : { type: 'success', text: `Invite sent to ${client.email}` }
+    )
   }
 
   async function generateLink() {
+    const cleanName = linkForm.name.trim()
+    const cleanEmail = linkForm.email.trim().toLowerCase()
+    if (!cleanName || !cleanEmail) return
+
     setGenerating(true)
+    setNotice(null)
+
+    const { data: existing } = await supabase
+      .from('clients')
+      .select('id, user_id')
+      .eq('email', cleanEmail)
+      .maybeSingle()
+
+    if (existing?.user_id) {
+      setGenerating(false)
+      setNotice({ type: 'error', text: `${cleanEmail} already has a registered account. No new invite link was created.` })
+      return
+    }
+
     const { data, error } = await supabase
       .from('invite_tokens')
-      .insert({ name: linkForm.name, email: linkForm.email })
+      .insert({ name: cleanName, email: cleanEmail })
       .select('token')
       .single()
+
     setGenerating(false)
-    if (error) return
-    setGeneratedLink(`https://vibefoxstudio.com/join?token=${data.token}`)
+    if (error) {
+      setNotice({ type: 'error', text: `Error: ${error.message}` })
+      return
+    }
+
+    setGeneratedLink(buildInviteLink(data.token))
+    setNotice({ type: 'success', text: `Invite link created for ${cleanEmail}` })
+    await load()
+  }
+
+  function getLinkStatus(link) {
+    const email = (link.email || '').trim().toLowerCase()
+    const isRegistered = Boolean(link.used || registeredEmails.has(email))
+
+    if (isRegistered) return { label: 'Registered', bg: '#dcfce7', text: '#16a34a' }
+    return { label: 'Pending', bg: '#fef3c7', text: '#d97706' }
   }
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
@@ -80,7 +143,19 @@ export default function AdminClients() {
         </div>
       </div>
 
-      {inviteMsg && <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 16px', fontSize: 13, color: '#16a34a', marginBottom: 16 }}>{inviteMsg}</div>}
+      {notice && (
+        <div style={{
+          background: notice.type === 'error' ? '#fef2f2' : '#f0fdf4',
+          border: `1px solid ${notice.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
+          borderRadius: 10,
+          padding: '10px 16px',
+          fontSize: 13,
+          color: notice.type === 'error' ? '#dc2626' : '#16a34a',
+          marginBottom: 16,
+        }}>
+          {notice.text}
+        </div>
+      )}
 
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -115,11 +190,66 @@ export default function AdminClients() {
         </table>
       </div>
 
+      <div style={{ marginTop: 24, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#18181a' }}>Invite links</h2>
+          <span style={{ fontSize: 12, color: '#7a7888' }}>{inviteLinks.length} total</span>
+        </div>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+              {['Name', 'Email', 'Created', 'Status', 'Link', 'Actions'].map(h => (
+                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {inviteLinks.map(link => {
+              const status = getLinkStatus(link)
+              const url = buildInviteLink(link.token)
+              return (
+                <tr key={link.token} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{link.name || '—'}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{link.email}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{link.created_at ? new Date(link.created_at).toLocaleString() : '—'}</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <span style={{ ...badge, background: status.bg, color: status.text, textTransform: 'none' }}>{status.label}</span>
+                  </td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888', maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={url}>
+                    {url}
+                  </td>
+                  <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(url)
+                        setCopiedToken(link.token)
+                        setTimeout(() => setCopiedToken(''), 2000)
+                      }}
+                      style={ghostBtn}
+                    >
+                      {copiedToken === link.token ? 'Copied' : 'Copy'}
+                    </button>
+                    <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Open</a>
+                  </td>
+                </tr>
+              )
+            })}
+            {inviteLinks.length === 0 && (
+              <tr>
+                <td colSpan={6} style={{ padding: '18px 16px', color: '#7a7888', fontSize: 13 }}>
+                  No invite links generated yet.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       {linkModal && (
         <div style={overlay}>
           <div style={modalBox}>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 6 }}>Generate invite link</h2>
-            <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 20 }}>Pre-fill the client's details. The link expires in 7 days and is single-use.</p>
+            <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 20 }}>Pre-fill the client's details. The link is single-use.</p>
             {!generatedLink ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <input placeholder="Client name *" value={linkForm.name} onChange={e => setLinkForm(f => ({ ...f, name: e.target.value }))} style={inp} />
@@ -138,7 +268,16 @@ export default function AdminClients() {
                 </div>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                   <button onClick={() => setLinkModal(false)} style={ghostBtn}>Close</button>
-                  <button onClick={() => { navigator.clipboard.writeText(generatedLink); setCopied(true); setTimeout(() => setCopied(false), 2000) }} style={darkBtn}>{copied ? 'Link copied!' : 'Copy link'}</button>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generatedLink)
+                      setCopied(true)
+                      setTimeout(() => setCopied(false), 2000)
+                    }}
+                    style={darkBtn}
+                  >
+                    {copied ? 'Link copied!' : 'Copy link'}
+                  </button>
                 </div>
               </div>
             )}
