@@ -89,22 +89,19 @@ export default function BlogPostPage() {
             <div
               style={{
                 width: '100%',
-                minHeight: 360,
-                maxHeight: 640,
-                borderRadius: 16,
+                aspectRatio: '16 / 10',
+                borderRadius: 20,
                 marginBottom: 26,
                 border: '1px solid rgba(0,0,0,0.07)',
-                background: '#f3eee8',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 16,
+                background: 'linear-gradient(135deg, #f6f1ea 0%, #eee6db 100%)',
+                overflow: 'hidden',
+                boxShadow: '0 14px 30px rgba(0,0,0,0.1)',
               }}
             >
               <img
                 src={post.coverImageUrl}
                 alt={post.title}
-                style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
           )}
@@ -128,8 +125,8 @@ export default function BlogPostPage() {
             {related.map(item => (
               <article key={item.slug} style={{ background: '#faf9f7', borderRadius: 14, border: '1px solid rgba(0,0,0,0.08)', padding: 18 }}>
                 {item.coverImageUrl && (
-                  <div style={{ width: '100%', aspectRatio: '16 / 10', borderRadius: 10, overflow: 'hidden', background: '#f3eee8', border: '1px solid rgba(0,0,0,0.06)', marginBottom: 10, padding: 8 }}>
-                    <img src={item.coverImageUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }} />
+                  <div style={{ width: '100%', aspectRatio: '16 / 10', borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, #f6f1ea 0%, #eee6db 100%)', border: '1px solid rgba(0,0,0,0.06)', marginBottom: 10, boxShadow: '0 8px 20px rgba(0,0,0,0.08)' }}>
+                    <img src={item.coverImageUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 )}
                 <div style={{ fontSize: 12, color: '#7a7888', marginBottom: 8 }}>{new Date(item.publishedAt).toLocaleDateString()} · {item.readTime}</div>

@@ -63,20 +63,17 @@ export default function BlogPage() {
                     <div style={{
                       width: '100%',
                       aspectRatio: '16 / 10',
-                      borderRadius: 12,
-                      background: '#f3eee8',
+                      borderRadius: 18,
+                      background: 'linear-gradient(135deg, #f6f1ea 0%, #eee6db 100%)',
                       border: '1px solid rgba(0,0,0,0.06)',
                       overflow: 'hidden',
                       marginBottom: 14,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: 12,
+                      boxShadow: '0 10px 24px rgba(0,0,0,0.09)',
                     }}>
                       <img
                         src={post.coverImageUrl}
                         alt={post.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 10 }}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>
                   )}
