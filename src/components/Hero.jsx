@@ -89,7 +89,7 @@ export default function Hero() {
 
       <div className="anim-rise-4" style={s.btns}>
         <a
-          href="mailto:richie@vibefoxstudio.com"
+          href="#contact"
           style={s.btnDark}
           onMouseEnter={e => { e.currentTarget.style.background = '#2a2830'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#18181a'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}

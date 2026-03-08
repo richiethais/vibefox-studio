@@ -52,7 +52,7 @@ export default function Nav() {
         ))}
         <li>
           <a
-            href="mailto:richie@vibefoxstudio.com"
+            href="#contact"
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               background: '#18181a', color: '#fff',

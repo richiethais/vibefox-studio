@@ -8,6 +8,7 @@ import Comparison from './components/Comparison'
 import Pricing from './components/Pricing'
 import Testimonial from './components/Testimonial'
 import FAQ from './components/FAQ'
+import Contact from './components/Contact'
 import { CTA, Footer } from './components/CTAFooter'
 
 export default function App() {
@@ -23,6 +24,7 @@ export default function App() {
       <Pricing />
       <Testimonial />
       <FAQ />
+      <Contact />
       <CTA />
       <Footer />
     </>

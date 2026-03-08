@@ -20,7 +20,7 @@ export function CTA() {
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap', position: 'relative' }}>
           <a
-            href="mailto:richie@vibefoxstudio.com"
+            href="#contact"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#faf9f7', color: '#18181a', padding: '14px 28px', borderRadius: 100, fontSize: 15, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(-2px)' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#faf9f7'; e.currentTarget.style.transform = 'none' }}
