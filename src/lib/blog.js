@@ -37,8 +37,13 @@ export async function fetchPublishedPosts() {
     .eq('status', 'published')
     .order('published_at', { ascending: false })
 
-  if (error || !data || data.length === 0) return fallbackPosts()
-  return data.map(normalizeRow)
+  const legacy = fallbackPosts()
+  if (error || !data || data.length === 0) return legacy
+
+  const dbPosts = data.map(normalizeRow)
+  const dbSlugs = new Set(dbPosts.map(post => post.slug))
+  const merged = [...dbPosts, ...legacy.filter(post => !dbSlugs.has(post.slug))]
+  return merged.sort((a, b) => new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime())
 }
 
 export async function fetchPostBySlug(slug) {

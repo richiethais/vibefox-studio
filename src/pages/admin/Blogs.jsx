@@ -200,7 +200,7 @@ export default function AdminBlogs() {
     setEditing(post)
     setForm(postToForm(post))
     if (post.status === 'published') {
-      setNotice('Editing live post. Use Post Blog to update it, or Save Draft to create a draft copy.')
+      setNotice('Viewing a published blog. Posting from here creates a new blog and keeps existing blogs intact.')
     } else {
       setNotice('Editing saved draft.')
     }
@@ -240,15 +240,6 @@ export default function AdminBlogs() {
       setUploading(false)
       setNotice(`Image processing failed: ${error?.message || 'unknown error'}`)
     }
-  }
-
-  function handlePasteImage(e) {
-    const item = Array.from(e.clipboardData?.items || []).find(it => it.type?.startsWith('image/'))
-    if (!item) return
-    const file = item.getAsFile()
-    if (!file) return
-    e.preventDefault()
-    uploadImage(file)
   }
 
   async function saveDraft(e) {
@@ -323,7 +314,8 @@ export default function AdminBlogs() {
     try {
       const nowIso = new Date().toISOString()
       const baseSlug = form.slug || form.title
-      const slug = await ensureUniqueSlug(baseSlug, editing?.id)
+      const updateExistingDraft = Boolean(editing?.id && editing.status === 'draft')
+      const slug = await ensureUniqueSlug(baseSlug, updateExistingDraft ? editing.id : null)
 
       const payload = {
         ...form,
@@ -334,7 +326,7 @@ export default function AdminBlogs() {
       }
 
       let error
-      if (editing?.id) {
+      if (updateExistingDraft) {
         ;({ error } = await supabase.from('blog_posts').update(payload).eq('id', editing.id))
       } else {
         ;({ error } = await supabase.from('blog_posts').insert({ ...payload, created_at: nowIso }))
@@ -416,7 +408,7 @@ export default function AdminBlogs() {
   }
 
   return (
-    <div style={{ padding: '36px 40px' }} onPaste={handlePasteImage}>
+    <div style={{ padding: '36px 40px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 10, flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', margin: 0, letterSpacing: '-0.4px' }}>Blogs</h1>
         <button onClick={beginCreate} style={darkBtn}>+ New blog</button>
@@ -510,8 +502,6 @@ export default function AdminBlogs() {
                 />
               </label>
             </div>
-            <div style={{ fontSize: 11, color: '#7a7888' }}>Tip: paste an image directly (Cmd/Ctrl + V). It will auto-crop and smooth edges.</div>
-
             <textarea
               placeholder="Blog content. Separate paragraphs with blank lines."
               value={form.content}
@@ -531,7 +521,7 @@ export default function AdminBlogs() {
                 onClick={publishCurrent}
                 disabled={saving || uploading}
               >
-                {saving ? 'Posting…' : (isEditingPublished ? 'Update Live Blog' : 'Post Blog')}
+                {saving ? 'Posting…' : (isEditingPublished ? 'Post as New Blog' : 'Post Blog')}
               </button>
             </div>
           </form>
