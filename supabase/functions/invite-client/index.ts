@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const ADMIN_EMAIL = 'richie@vibefoxstudio.com'
+const ADMIN_EMAIL = 'richiethais@gmail.com'
 
 Deno.serve(async (req) => {
   const authHeader = req.headers.get('Authorization')
@@ -22,6 +22,7 @@ Deno.serve(async (req) => {
 
   const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
     data: { name },
+    redirectTo: 'https://vibefoxstudio.com/client/login',
   })
 
   if (error) {
