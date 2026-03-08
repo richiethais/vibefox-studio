@@ -133,7 +133,7 @@ export default function AdminBlogs() {
     if (error) {
       if (isMissingTableError(error)) {
         setSetupRequired(true)
-        setNotice('Blog setup is incomplete. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+        setNotice(`Supabase error: ${error.message} (code: ${error.code})`)
       } else {
         setNotice(`Load failed: ${error.message}`)
       }
@@ -156,7 +156,7 @@ export default function AdminBlogs() {
         if (error) {
           if (isMissingTableError(error)) {
             setSetupRequired(true)
-            setNotice('Blog setup is incomplete. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+            setNotice(`Blog setup error: ${error.message}`)
           } else {
             setNotice(`Load failed: ${error.message}`)
           }
@@ -290,7 +290,7 @@ export default function AdminBlogs() {
       if (error) {
         if (isMissingTableError(error)) {
           setSetupRequired(true)
-          setNotice('Blog table missing. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+          setNotice(`Supabase error: ${error.message} (code: ${error.code})`)
           return
         }
         setNotice(`Save failed: ${error.message}`)
@@ -344,7 +344,7 @@ export default function AdminBlogs() {
       if (error) {
         if (isMissingTableError(error)) {
           setSetupRequired(true)
-          setNotice('Blog table missing. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+          setNotice(`Supabase error: ${error.message} (code: ${error.code})`)
           return
         }
         setNotice(`Publish failed: ${error.message}`)
