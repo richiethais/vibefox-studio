@@ -1,4 +1,5 @@
 import { useFadeUp } from './useFadeUp'
+import BrandLogo from './BrandLogo'
 
 export function CTA() {
   const ref = useFadeUp()
@@ -47,9 +48,7 @@ export function Footer() {
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 40, marginBottom: 44 }}>
           <div>
-            <a href="#" style={{ fontFamily: '"DM Serif Display", serif', fontSize: 19, color: '#18181a', textDecoration: 'none' }}>
-              Vibefox <span style={{ color: '#b8906a' }}>Studio</span>
-            </a>
+            <BrandLogo href="#" size="nav" />
             <p style={{ fontSize: 13, color: '#7a7888', marginTop: 10, lineHeight: 1.6, maxWidth: 200, fontWeight: 300 }}>
               Websites and custom apps for small businesses that want to grow.
             </p>

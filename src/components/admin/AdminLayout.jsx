@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import BrandLogo from '../BrandLogo'
 
 const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard' },
@@ -23,9 +24,7 @@ export default function AdminLayout() {
     <div style={{ display: 'flex', minHeight: '100svh', fontFamily: 'system-ui, sans-serif' }}>
       <aside style={{ width: 200, background: '#18181a', display: 'flex', flexDirection: 'column', flexShrink: 0 }}>
         <div style={{ padding: '22px 18px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 15, color: 'rgba(255,255,255,0.88)' }}>
-            Vibefox <span style={{ color: '#b8906a' }}>Studio</span>
-          </span>
+          <BrandLogo size="sm" textColor="rgba(255,255,255,0.88)" accentColor="#dca66b" />
         </div>
 
         <nav style={{ flex: 1, padding: '10px 10px' }}>

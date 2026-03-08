@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import BrandLogo from './BrandLogo'
 
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
@@ -33,9 +34,7 @@ export default function Nav() {
         transition: 'box-shadow 0.3s',
       }}
     >
-      <a href="#" style={{ fontFamily: '"DM Serif Display", serif', fontSize: 19, color: '#18181a', textDecoration: 'none', letterSpacing: '-0.3px' }}>
-        Vibefox <span style={{ color: '#b8906a' }}>Studio</span>
-      </a>
+      <BrandLogo href="#" size="nav" />
 
       <ul style={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}>
         {['Services', 'Work', 'Pricing', 'FAQ'].map(link => (

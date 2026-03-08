@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import BrandLogo from '../../components/BrandLogo'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -21,9 +22,7 @@ export default function AdminLogin() {
   return (
     <div style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3f0' }}>
       <div style={{ background: 'white', borderRadius: 20, padding: '48px 40px', width: '100%', maxWidth: 400, boxShadow: '0 8px 40px rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
-        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 24, color: '#18181a', marginBottom: 6 }}>
-          Vibefox <span style={{ color: '#b8906a' }}>Studio</span>
-        </div>
+        <BrandLogo size="md" style={{ marginBottom: 6 }} />
         <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 32 }}>Admin panel</p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
