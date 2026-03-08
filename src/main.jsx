@@ -12,6 +12,7 @@ import AdminProjects from './pages/admin/Projects.jsx'
 import AdminInvoices from './pages/admin/Invoices.jsx'
 import AdminMessages from './pages/admin/Messages.jsx'
 import AdminNotes from './pages/admin/Notes.jsx'
+import AdminBlogs from './pages/admin/Blogs.jsx'
 import ClientLogin from './pages/client/Login.jsx'
 import ClientDashboard from './pages/client/Dashboard.jsx'
 import ClientProjects from './pages/client/Projects.jsx'
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="invoices" element={<AdminInvoices />} />
             <Route path="messages" element={<AdminMessages />} />
             <Route path="notes" element={<AdminNotes />} />
+            <Route path="blogs" element={<AdminBlogs />} />
           </Route>
 
           <Route path="/client/login" element={<ClientLogin />} />

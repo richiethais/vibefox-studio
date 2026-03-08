@@ -1,11 +1,21 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
-import { getAllBlogPosts } from '../../content/blogPosts'
+import { fetchPublishedPosts } from '../../lib/blog'
 
 export default function BlogPage() {
-  const posts = getAllBlogPosts()
+  const [posts, setPosts] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchPublishedPosts().then(data => {
+      setPosts(data)
+      setLoading(false)
+    })
+  }, [])
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
@@ -37,30 +47,34 @@ export default function BlogPage() {
 
       <section style={{ padding: '22px 40px 96px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-            {posts.map(post => (
-              <article key={post.slug} style={{
-                background: '#faf9f7',
-                border: '1px solid rgba(0,0,0,0.08)',
-                borderRadius: 16,
-                padding: 22,
-                transition: 'all 0.2s ease',
-              }}>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#b8906a' }}>{post.category}</span>
-                  <span style={{ fontSize: 12, color: '#7a7888' }}>• {new Date(post.publishedAt).toLocaleDateString()}</span>
-                  <span style={{ fontSize: 12, color: '#7a7888' }}>• {post.readTime}</span>
-                </div>
-                <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 32, lineHeight: 1.1, letterSpacing: '-0.8px', color: '#18181a', margin: '0 0 10px' }}>
-                  {post.title}
-                </h2>
-                <p style={{ fontSize: 15, color: '#7a7888', lineHeight: 1.62, margin: '0 0 18px' }}>{post.excerpt}</p>
-                <Link to={`/blog/${post.slug}`} style={{ color: '#18181a', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
-                  Read article →
-                </Link>
-              </article>
-            ))}
-          </div>
+          {loading ? (
+            <div style={{ padding: '18px 0', color: '#7a7888', fontSize: 14 }}>Loading blog posts…</div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+              {posts.map(post => (
+                <article key={post.slug} style={{
+                  background: '#faf9f7',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 16,
+                  padding: 22,
+                  transition: 'all 0.2s ease',
+                }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#b8906a' }}>{post.category}</span>
+                    <span style={{ fontSize: 12, color: '#7a7888' }}>• {new Date(post.publishedAt).toLocaleDateString()}</span>
+                    <span style={{ fontSize: 12, color: '#7a7888' }}>• {post.readTime}</span>
+                  </div>
+                  <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 32, lineHeight: 1.1, letterSpacing: '-0.8px', color: '#18181a', margin: '0 0 10px' }}>
+                    {post.title}
+                  </h2>
+                  <p style={{ fontSize: 15, color: '#7a7888', lineHeight: 1.62, margin: '0 0 18px' }}>{post.excerpt}</p>
+                  <Link to={`/blog/${post.slug}`} style={{ color: '#18181a', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+                    Read article →
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </MarketingLayout>

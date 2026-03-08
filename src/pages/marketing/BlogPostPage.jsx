@@ -1,17 +1,40 @@
+import { useEffect, useState } from 'react'
 import { Link, Navigate, useParams } from 'react-router-dom'
 import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
-import { getAllBlogPosts, getBlogPostBySlug } from '../../content/blogPosts'
+import { fetchPostBySlug, fetchPublishedPosts } from '../../lib/blog'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
-  const post = getBlogPostBySlug(slug)
+  const [post, setPost] = useState(undefined)
+  const [related, setRelated] = useState([])
+
+  useEffect(() => {
+    let active = true
+
+    Promise.all([fetchPostBySlug(slug), fetchPublishedPosts()]).then(([entry, allPosts]) => {
+      if (!active) return
+      setPost(entry)
+      setRelated((allPosts || []).filter(p => p.slug !== slug).slice(0, 3))
+    })
+
+    return () => { active = false }
+  }, [slug])
+
+  if (post === undefined) {
+    return (
+      <MarketingLayout>
+        <div style={{ padding: '140px 40px 100px', maxWidth: 840, margin: '0 auto', color: '#7a7888' }}>
+          Loading post…
+        </div>
+      </MarketingLayout>
+    )
+  }
 
   if (!post) {
     return <Navigate to="/blog" replace />
   }
 
-  const related = getAllBlogPosts().filter(p => p.slug !== post.slug).slice(0, 3)
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -61,6 +84,14 @@ export default function BlogPostPage() {
           <p style={{ fontSize: 18, color: '#7a7888', lineHeight: 1.66, margin: '0 0 26px' }}>
             {post.excerpt}
           </p>
+
+          {post.coverImageUrl && (
+            <img
+              src={post.coverImageUrl}
+              alt={post.title}
+              style={{ width: '100%', borderRadius: 16, marginBottom: 26, border: '1px solid rgba(0,0,0,0.07)' }}
+            />
+          )}
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 24 }} />
 

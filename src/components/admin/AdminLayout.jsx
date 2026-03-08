@@ -11,6 +11,7 @@ const navItems = [
   { to: '/admin/invoices', label: 'Invoices' },
   { to: '/admin/messages', label: 'Messages' },
   { to: '/admin/notes', label: 'Notes' },
+  { to: '/admin/blogs', label: 'Blogs' },
 ]
 
 export default function AdminLayout() {

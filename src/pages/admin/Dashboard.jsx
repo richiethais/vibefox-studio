@@ -4,19 +4,31 @@ import { supabase } from '../../lib/supabase'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
-  const [stats, setStats] = useState({ inquiries: 0, clients: 0, projects: 0, invoices: 0 })
-  const [recent, setRecent] = useState({ inquiries: [], invoices: [], invites: [] })
+  const [stats, setStats] = useState({ inquiries: 0, clients: 0, projects: 0, invoices: 0, drafts: 0 })
+  const [recent, setRecent] = useState({ inquiries: [], invoices: [], invites: [], draft: null })
 
   useEffect(() => {
     async function load() {
-      const [inquiryCountRes, clientCountRes, projectCountRes, invoiceCountRes, inquiriesRes, invoicesRes, invitesRes] = await Promise.all([
+      const [
+        inquiryCountRes,
+        clientCountRes,
+        projectCountRes,
+        invoiceCountRes,
+        draftCountRes,
+        inquiriesRes,
+        invoicesRes,
+        invitesRes,
+        latestDraftRes,
+      ] = await Promise.all([
         supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('status', 'unpaid'),
+        supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
         supabase.from('inquiries').select('id, name, service_type, created_at').eq('status', 'new').order('created_at', { ascending: false }).limit(5),
         supabase.from('invoices').select('id, description, amount, created_at, clients(name)').eq('status', 'unpaid').order('created_at', { ascending: false }).limit(5),
         supabase.from('invite_tokens').select('token, name, email, used, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase.from('blog_posts').select('id, title, excerpt, updated_at, slug, status').eq('status', 'draft').order('updated_at', { ascending: false }).limit(1).maybeSingle(),
       ])
 
       setStats({
@@ -24,12 +36,14 @@ export default function AdminDashboard() {
         clients: clientCountRes.count ?? 0,
         projects: projectCountRes.count ?? 0,
         invoices: invoiceCountRes.count ?? 0,
+        drafts: draftCountRes.count ?? 0,
       })
 
       setRecent({
         inquiries: inquiriesRes.data ?? [],
         invoices: invoicesRes.data ?? [],
         invites: invitesRes.data ?? [],
+        draft: latestDraftRes.data ?? null,
       })
     }
 
@@ -41,6 +55,7 @@ export default function AdminDashboard() {
     { label: 'Active clients', value: stats.clients, color: '#16a34a', route: '/admin/clients', hint: 'Current accounts' },
     { label: 'Active projects', value: stats.projects, color: '#7c3aed', route: '/admin/projects', hint: 'In progress' },
     { label: 'Unpaid invoices', value: stats.invoices, color: '#d97706', route: '/admin/invoices', hint: 'Cashflow check' },
+    { label: 'Draft blogs', value: stats.drafts, color: '#b45309', route: '/admin/blogs', hint: 'Ready to publish' },
   ]), [stats])
 
   return (
@@ -50,7 +65,7 @@ export default function AdminDashboard() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {[
             { label: 'Review inquiries', route: '/admin/inquiries' },
-            { label: 'Open clients', route: '/admin/clients' },
+            { label: 'Write blog', route: '/admin/blogs' },
             { label: 'Check invoices', route: '/admin/invoices' },
           ].map(action => (
             <button
@@ -81,7 +96,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 18 }}>
         {cards.map((card, idx) => (
           <button
             key={card.label}
@@ -114,7 +129,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr 1fr', gap: 16 }}>
+      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr 1.1fr', gap: 16 }}>
         <Panel title="New inquiries" actionLabel="Open CRM" onAction={() => navigate('/admin/inquiries')}>
           {recent.inquiries.length === 0 ? (
             <EmptyRow text="No new inquiries." />
@@ -153,6 +168,28 @@ export default function AdminDashboard() {
             />
           ))}
         </Panel>
+
+        <Panel title="Blog preview" actionLabel="Open blogs" onAction={() => navigate('/admin/blogs')}>
+          {!recent.draft ? (
+            <EmptyRow text="No draft blog yet." />
+          ) : (
+            <div style={{ padding: 14 }}>
+              <div style={{ fontSize: 12, color: '#b8906a', textTransform: 'uppercase', letterSpacing: '0.7px', marginBottom: 6 }}>
+                Draft preview
+              </div>
+              <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 24, color: '#18181a', lineHeight: 1.12 }}>
+                {recent.draft.title}
+              </div>
+              <div style={{ fontSize: 13, color: '#7a7888', marginTop: 8, lineHeight: 1.55 }}>
+                {recent.draft.excerpt || 'No excerpt added yet.'}
+              </div>
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <button style={smallBtn} onClick={() => navigate(`/admin/blogs?preview=${recent.draft.id}`)}>Preview</button>
+                <button style={smallBtn} onClick={() => navigate('/admin/blogs')}>Edit draft</button>
+              </div>
+            </div>
+          )}
+        </Panel>
       </div>
     </div>
   )
@@ -163,9 +200,7 @@ function Panel({ title, actionLabel, onAction, children }) {
     <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
       <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
         <h2 style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#18181a' }}>{title}</h2>
-        <button onClick={onAction} style={{
-          padding: '6px 10px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', color: '#18181a', fontSize: 11, cursor: 'pointer',
-        }}>
+        <button onClick={onAction} style={smallBtn}>
           {actionLabel}
         </button>
       </div>
@@ -210,4 +245,14 @@ function formatDate(date) {
 
 function formatMoney(value) {
   return `$${Number(value || 0).toLocaleString()}`
+}
+
+const smallBtn = {
+  padding: '6px 10px',
+  borderRadius: 100,
+  border: '1px solid rgba(0,0,0,0.1)',
+  background: 'white',
+  color: '#18181a',
+  fontSize: 11,
+  cursor: 'pointer',
 }
