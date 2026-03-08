@@ -33,6 +33,11 @@ function upsertLink(selector, attrs, href) {
   tag.setAttribute('href', href)
 }
 
+function removeTag(selector) {
+  const tag = document.head.querySelector(selector)
+  if (tag) tag.remove()
+}
+
 function mergeKeywords(customKeywords) {
   const all = [...GLOBAL_KEYWORDS, ...(customKeywords ? customKeywords.split(',') : [])]
   return [...new Set(all.map(item => item.trim().toLowerCase()).filter(Boolean))].join(', ')
@@ -46,6 +51,8 @@ export default function SEOHead({
   image = DEFAULT_IMAGE,
   type = 'website',
   noindex = false,
+  publishedTime,
+  modifiedTime,
   structuredData,
 }) {
   useEffect(() => {
@@ -84,14 +91,29 @@ export default function SEOHead({
     upsertMeta('meta[property="og:description"]', { property: 'og:description' }, description)
     upsertMeta('meta[property="og:url"]', { property: 'og:url' }, canonicalUrl)
     upsertMeta('meta[property="og:image"]', { property: 'og:image' }, image)
+    upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, `${DEFAULT_DISPLAY_NAME} logo`)
     upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name' }, DEFAULT_SITE_NAME)
+    upsertMeta('meta[property="og:locale"]', { property: 'og:locale' }, 'en_US')
 
     upsertMeta('meta[name="twitter:card"]', { name: 'twitter:card' }, 'summary_large_image')
     upsertMeta('meta[name="twitter:title"]', { name: 'twitter:title' }, fullTitle)
     upsertMeta('meta[name="twitter:description"]', { name: 'twitter:description' }, description)
     upsertMeta('meta[name="twitter:image"]', { name: 'twitter:image' }, image)
+    upsertMeta('meta[name="twitter:site"]', { name: 'twitter:site' }, '@vibefoxstudio')
 
     upsertLink('link[rel="canonical"]', { rel: 'canonical' }, canonicalUrl)
+
+    if (type === 'article' && publishedTime) {
+      upsertMeta('meta[property="article:published_time"]', { property: 'article:published_time' }, publishedTime)
+    } else {
+      removeTag('meta[property="article:published_time"]')
+    }
+
+    if (type === 'article' && (modifiedTime || publishedTime)) {
+      upsertMeta('meta[property="article:modified_time"]', { property: 'article:modified_time' }, modifiedTime || publishedTime)
+    } else {
+      removeTag('meta[property="article:modified_time"]')
+    }
 
     let schemaScript = document.head.querySelector('script[data-seo-schema="true"]')
     if (schemas.length > 0) {
@@ -105,7 +127,7 @@ export default function SEOHead({
     } else if (schemaScript) {
       schemaScript.remove()
     }
-  }, [title, description, path, keywords, image, type, noindex, structuredData])
+  }, [title, description, path, keywords, image, type, noindex, publishedTime, modifiedTime, structuredData])
 
   return null
 }

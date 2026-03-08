@@ -1,6 +1,7 @@
 import { useFadeUp } from './useFadeUp'
 import Eyebrow from './Eyebrow'
 import { h2Style, subStyle } from './sectionStyles'
+import useIsMobile from './useIsMobile'
 
 const plans = [
   {
@@ -22,19 +23,20 @@ const plans = [
 
 export default function Pricing() {
   const ref = useFadeUp()
+  const isMobile = useIsMobile()
 
   return (
-    <section id="pricing" ref={ref} style={{ padding: '96px 40px' }}>
+    <section id="pricing" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow icon="💳">Retainer plans</Eyebrow>
-        <h2 className="fade-up d1" style={h2Style}>Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>monthly pricing.</em></h2>
-        <p className="fade-up d2" style={subStyle}>Month-to-month. No contracts. Cancel anytime. Project quotes separate.</p>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>monthly pricing.</em></h2>
+        <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>Month-to-month. No contracts. Cancel anytime. Project quotes separate.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, marginTop: 52, alignItems: 'start' }}>
-          {plans.map((p, i) => <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} />)}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 14, marginTop: isMobile ? 36 : 52, alignItems: 'start' }}>
+          {plans.map((p, i) => <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={isMobile} />)}
         </div>
 
-        <p className="fade-up" style={{ textAlign: 'center', marginTop: 22, fontSize: 13, color: '#7a7888' }}>
+        <p className="fade-up" style={{ textAlign: 'center', marginTop: 22, fontSize: isMobile ? 12 : 13, color: '#7a7888' }}>
           One-time project pricing from $1,500 —{' '}
           <a href="mailto:richie@vibefoxstudio.com" style={{ color: '#b8906a', textDecoration: 'none' }}>get a custom quote →</a>
         </p>
@@ -43,7 +45,7 @@ export default function Pricing() {
   )
 }
 
-function PricingCard({ plan, delay }) {
+function PricingCard({ plan, delay, isMobile }) {
   const { name, price, desc, features, featured, badge } = plan
 
   return (
@@ -52,7 +54,7 @@ function PricingCard({ plan, delay }) {
       style={{
         background: featured ? '#18181a' : '#faf9f7',
         border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 16, padding: '30px 26px',
+        borderRadius: 16, padding: isMobile ? '24px 20px' : '30px 26px',
         position: 'relative',
         boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
@@ -70,7 +72,7 @@ function PricingCard({ plan, delay }) {
 
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 2, marginBottom: 6 }}>
         <span style={{ fontSize: 16, color: featured ? 'rgba(255,255,255,0.35)' : '#7a7888', fontWeight: 400, marginTop: 8 }}>$</span>
-        <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 54, color: featured ? 'white' : '#18181a', letterSpacing: '-2px', lineHeight: 1 }}>{price}</span>
+        <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 46 : 54, color: featured ? 'white' : '#18181a', letterSpacing: '-2px', lineHeight: 1 }}>{price}</span>
         <span style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', alignSelf: 'flex-end', marginBottom: 4 }}>/mo</span>
       </div>
 

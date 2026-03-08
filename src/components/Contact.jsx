@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useFadeUp } from './useFadeUp'
+import useIsMobile from './useIsMobile'
 
 const services = ['Landing Page', 'Business Website', 'Custom Web App', 'E-commerce', 'Retainer', 'Other']
 const budgets = ['Under $1,000', '$1,000–$3,000', '$3,000–$10,000', '$10,000+']
 
 export default function Contact() {
   const ref = useFadeUp()
+  const isMobile = useIsMobile()
   const [form, setForm] = useState({ name: '', email: '', company: '', service_type: '', budget: '', message: '' })
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
@@ -24,7 +26,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" ref={ref} style={{ padding: '96px 40px', background: '#faf9f7' }}>
+    <section id="contact" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px', background: '#faf9f7' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <div className="fade-up d1" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#b8906a', marginBottom: 14 }}>
           Get in touch
@@ -32,7 +34,7 @@ export default function Contact() {
         <h2 className="fade-up d2" style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.08, color: '#18181a', letterSpacing: '-1.2px', margin: '0 0 14px' }}>
           Start a project
         </h2>
-        <p className="fade-up d3" style={{ fontSize: 16, color: '#7a7888', marginBottom: 40, fontWeight: 300, lineHeight: 1.6 }}>
+        <p className="fade-up d3" style={{ fontSize: isMobile ? 15 : 16, color: '#7a7888', marginBottom: isMobile ? 30 : 40, fontWeight: 300, lineHeight: 1.6 }}>
           Tell us what you need and our Jacksonville digital marketing team will be in touch within 24 hours.
         </p>
 
@@ -44,12 +46,12 @@ export default function Contact() {
           </div>
         ) : (
           <form className="fade-up d4" onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
               <input placeholder="Your name *" value={form.name} onChange={set('name')} required style={inp} />
               <input placeholder="Email address *" type="email" value={form.email} onChange={set('email')} required style={inp} />
             </div>
             <input placeholder="Company (optional)" value={form.company} onChange={set('company')} style={inp} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
               <select value={form.service_type} onChange={set('service_type')} required style={inp}>
                 <option value="">Service interest *</option>
                 {services.map(s => <option key={s}>{s}</option>)}
@@ -72,7 +74,7 @@ export default function Contact() {
               padding: '14px 28px', borderRadius: 100, border: 'none',
               background: '#18181a', color: 'white', fontSize: 15, fontWeight: 500,
               cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
-              alignSelf: 'flex-start', transition: 'all 0.2s',
+              alignSelf: isMobile ? 'stretch' : 'flex-start', transition: 'all 0.2s',
             }}>
               {loading ? 'Sending…' : 'Send message →'}
             </button>

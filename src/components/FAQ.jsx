@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useFadeUp } from './useFadeUp'
 import Eyebrow from './Eyebrow'
 import { h2Style } from './sectionStyles'
+import useIsMobile from './useIsMobile'
 
 const faqs = [
   { q: "What's included in a typical project?", a: "Every project includes design, development, launch, and two rounds of revisions. We handle domain connection, SSL, and hosting setup. Retainer plans are optional but recommended to keep everything running after launch." },
@@ -14,22 +15,23 @@ const faqs = [
 export default function FAQ() {
   const [open, setOpen] = useState(null)
   const ref = useFadeUp()
+  const isMobile = useIsMobile()
 
   return (
-    <section id="faq" ref={ref} style={{ padding: '96px 40px' }}>
+    <section id="faq" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow icon="❓">Common questions</Eyebrow>
-        <h2 className="fade-up d1" style={h2Style}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
 
-        <div className="fade-up d2" style={{ marginTop: 52, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="fade-up d2" style={{ marginTop: isMobile ? 36 : 52, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           {faqs.map((faq, i) => (
             <div key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 style={{
                   width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
-                  padding: '22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20,
-                  fontSize: 15, fontWeight: 500, color: open === i ? '#b8906a' : '#18181a',
+                  padding: isMobile ? '18px 0' : '22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20,
+                  fontSize: isMobile ? 14 : 15, fontWeight: 500, color: open === i ? '#b8906a' : '#18181a',
                   fontFamily: '"DM Sans", sans-serif', letterSpacing: '-0.2px', transition: 'color 0.18s',
                 }}
               >
@@ -49,7 +51,7 @@ export default function FAQ() {
                 overflow: 'hidden',
                 transition: 'max-height 0.4s cubic-bezier(0.22,1,0.36,1)',
               }}>
-                <p style={{ paddingBottom: 22, fontSize: 14.5, color: '#7a7888', lineHeight: 1.68, maxWidth: 580, fontWeight: 300, margin: 0 }}>
+                <p style={{ paddingBottom: 22, fontSize: isMobile ? 14 : 14.5, color: '#7a7888', lineHeight: 1.68, maxWidth: 580, fontWeight: 300, margin: 0 }}>
                   {faq.a}
                 </p>
               </div>

@@ -1,6 +1,10 @@
+import useIsMobile from '../useIsMobile'
+
 export default function PageHero({ eyebrow, title, sub }) {
+  const isMobile = useIsMobile()
+
   return (
-    <section style={{ padding: '42px 40px 24px' }}>
+    <section style={{ padding: isMobile ? '32px 18px 18px' : '42px 40px 24px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         {eyebrow && (
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', color: '#b8906a', marginBottom: 14 }}>
@@ -18,7 +22,7 @@ export default function PageHero({ eyebrow, title, sub }) {
           {title}
         </h1>
         {sub && (
-          <p style={{ fontSize: 17, color: '#7a7888', maxWidth: 760, marginTop: 16, fontWeight: 300, lineHeight: 1.68 }}>
+          <p style={{ fontSize: isMobile ? 15 : 17, color: '#7a7888', maxWidth: 760, marginTop: 16, fontWeight: 300, lineHeight: isMobile ? 1.58 : 1.68 }}>
             {sub}
           </p>
         )}

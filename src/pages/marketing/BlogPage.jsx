@@ -4,8 +4,10 @@ import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import { fetchPublishedPosts } from '../../lib/blog'
+import useIsMobile from '../../components/useIsMobile'
 
 export default function BlogPage() {
+  const isMobile = useIsMobile()
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -45,25 +47,25 @@ export default function BlogPage() {
         sub="Actionable strategies from VibefoxStudio for businesses trying to rank higher, convert better, and grow consistently."
       />
 
-      <section style={{ padding: '22px 40px 96px' }}>
+      <section style={{ padding: isMobile ? '16px 18px 80px' : '22px 40px 96px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           {loading ? (
             <div style={{ padding: '18px 0', color: '#7a7888', fontSize: 14 }}>Loading blogs…</div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
               {posts.map(post => (
                 <article key={post.slug} style={{
                   background: '#faf9f7',
                   border: '1px solid rgba(0,0,0,0.08)',
                   borderRadius: 16,
-                  padding: 18,
+                  padding: isMobile ? 16 : 18,
                   transition: 'all 0.2s ease',
                 }}>
                   {post.coverImageUrl && (
                     <div style={{
                       width: '100%',
                       aspectRatio: '16 / 10',
-                      borderRadius: 18,
+                      borderRadius: isMobile ? 14 : 18,
                       background: 'linear-gradient(135deg, #f6f1ea 0%, #eee6db 100%)',
                       border: '1px solid rgba(0,0,0,0.06)',
                       overflow: 'hidden',
@@ -82,10 +84,10 @@ export default function BlogPage() {
                     <span style={{ fontSize: 12, color: '#7a7888' }}>• {new Date(post.publishedAt).toLocaleDateString()}</span>
                     <span style={{ fontSize: 12, color: '#7a7888' }}>• {post.readTime}</span>
                   </div>
-                  <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 32, lineHeight: 1.1, letterSpacing: '-0.8px', color: '#18181a', margin: '0 0 10px' }}>
+                  <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 28 : 32, lineHeight: 1.1, letterSpacing: '-0.8px', color: '#18181a', margin: '0 0 10px' }}>
                     {post.title}
                   </h2>
-                  <p style={{ fontSize: 15, color: '#7a7888', lineHeight: 1.62, margin: '0 0 18px' }}>{post.excerpt}</p>
+                  <p style={{ fontSize: isMobile ? 14 : 15, color: '#7a7888', lineHeight: 1.62, margin: '0 0 18px' }}>{post.excerpt}</p>
                   <Link
                     to={`/blogs/${post.slug}`}
                     state={{ preloadedPost: post }}

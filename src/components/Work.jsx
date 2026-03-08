@@ -1,6 +1,7 @@
 import { useFadeUp } from './useFadeUp'
 import Eyebrow from './Eyebrow'
 import { h2Style, subStyle } from './sectionStyles'
+import useIsMobile from './useIsMobile'
 
 const projects = [
   { tag: 'Web App', title: 'Meridian Fitness Studio', desc: 'Class booking, membership management, and trainer dashboard with real-time availability.', emoji: '🗓', label: 'Booking System', sub: 'Meridian Fitness', bg: 'linear-gradient(135deg, #f0ebff 0%, #e2d8f8 100%)' },
@@ -10,15 +11,16 @@ const projects = [
 
 export default function Work() {
   const ref = useFadeUp()
+  const isMobile = useIsMobile()
 
   return (
-    <section id="work" ref={ref} style={{ padding: '96px 40px' }}>
+    <section id="work" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow icon="✦">Our work</Eyebrow>
-        <h2 className="fade-up d1" style={h2Style}>Recent <em style={{ fontStyle: 'italic', color: '#b8906a' }}>projects.</em></h2>
-        <p className="fade-up d2" style={subStyle}>A sample of what we've built — from landing pages to full custom apps.</p>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Recent <em style={{ fontStyle: 'italic', color: '#b8906a' }}>projects.</em></h2>
+        <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>A sample of what we've built — from landing pages to full custom apps.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, marginTop: 52 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 14, marginTop: isMobile ? 36 : 52 }}>
           {projects.map((p, i) => (
             <div
               key={p.title}

@@ -1,28 +1,30 @@
 import { useFadeUp } from './useFadeUp'
 import BrandLogo from './BrandLogo'
+import useIsMobile from './useIsMobile'
 
 export function CTA() {
   const ref = useFadeUp()
+  const isMobile = useIsMobile()
   return (
-    <div ref={ref} style={{ padding: '72px 40px' }}>
+    <div ref={ref} style={{ padding: isMobile ? '56px 18px' : '72px 40px' }}>
       <div className="fade-up" style={{
         maxWidth: 1040, margin: '0 auto',
         background: '#18181a', borderRadius: 28,
-        padding: '80px 60px', textAlign: 'center',
+        padding: isMobile ? '56px 20px' : '80px 60px', textAlign: 'center',
         position: 'relative', overflow: 'hidden',
       }}>
-        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 520, height: 260, background: 'radial-gradient(ellipse, rgba(200,169,126,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(36px, 5vw, 56px)', lineHeight: 1.04, color: 'white', letterSpacing: '-1.5px', margin: '0 0 18px', position: 'relative' }}>
-          Ready to build something <br />
+        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: isMobile ? 320 : 520, height: isMobile ? 220 : 260, background: 'radial-gradient(ellipse, rgba(200,169,126,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 'clamp(31px, 10vw, 42px)' : 'clamp(36px, 5vw, 56px)', lineHeight: 1.04, color: 'white', letterSpacing: isMobile ? '-1px' : '-1.5px', margin: '0 0 18px', position: 'relative' }}>
+          Ready to build something {isMobile ? ' ' : <br />}
           <em style={{ fontStyle: 'italic', color: '#c8a97e' }}>that works?</em>
         </h2>
-        <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.42)', maxWidth: 400, margin: '0 auto', fontWeight: 300, lineHeight: 1.68, position: 'relative' }}>
+        <p style={{ fontSize: isMobile ? 15 : 17, color: 'rgba(255,255,255,0.42)', maxWidth: 400, margin: '0 auto', fontWeight: 300, lineHeight: isMobile ? 1.58 : 1.68, position: 'relative' }}>
           No pressure, no sales pitch, just a real conversation with a Jacksonville SEO and digital marketing team.
         </p>
-        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap', position: 'relative' }}>
+        <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: isMobile ? 30 : 40, flexWrap: 'wrap', position: 'relative', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center' }}>
           <a
             href="/#contact"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#faf9f7', color: '#18181a', padding: '14px 28px', borderRadius: 100, fontSize: 15, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, justifyContent: 'center', background: '#faf9f7', color: '#18181a', padding: '14px 28px', borderRadius: 100, fontSize: 15, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s', width: isMobile ? 'min(320px, 100%)' : 'auto' }}
             onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(-2px)' }}
             onMouseLeave={e => { e.currentTarget.style.background = '#faf9f7'; e.currentTarget.style.transform = 'none' }}
           >
@@ -30,7 +32,7 @@ export function CTA() {
           </a>
           <a
             href="/pricing"
-            style={{ color: 'rgba(255,255,255,0.42)', padding: '14px 22px', borderRadius: 100, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s', fontWeight: 400 }}
+            style={{ color: 'rgba(255,255,255,0.42)', padding: '14px 22px', borderRadius: 100, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s', fontWeight: 400, textAlign: 'center', width: isMobile ? 'min(320px, 100%)' : 'auto' }}
             onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
             onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.42)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
           >
@@ -43,13 +45,15 @@ export function CTA() {
 }
 
 export function Footer() {
+  const isMobile = useIsMobile()
+
   return (
-    <footer style={{ padding: '56px 40px 36px', borderTop: '1px solid rgba(0,0,0,0.08)', background: '#faf9f7' }}>
+    <footer style={{ padding: isMobile ? '44px 18px 28px' : '56px 40px 36px', borderTop: '1px solid rgba(0,0,0,0.08)', background: '#faf9f7' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: 40, marginBottom: 44 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr 1fr 1fr', gap: isMobile ? 28 : 40, marginBottom: isMobile ? 30 : 44 }}>
           <div>
             <BrandLogo href="/" size="nav" />
-            <p style={{ fontSize: 13, color: '#7a7888', marginTop: 10, lineHeight: 1.6, maxWidth: 200, fontWeight: 300 }}>
+            <p style={{ fontSize: 13, color: '#7a7888', marginTop: 10, lineHeight: 1.6, maxWidth: isMobile ? 'none' : 200, fontWeight: 300 }}>
               VibefoxStudio is a Jacksonville digital marketing agency for businesses that want measurable growth.
             </p>
           </div>

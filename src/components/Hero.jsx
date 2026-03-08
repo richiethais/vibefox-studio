@@ -1,3 +1,5 @@
+import useIsMobile from './useIsMobile'
+
 const s = {
   section: {
     minHeight: '100svh',
@@ -69,28 +71,30 @@ const s = {
 }
 
 export default function Hero() {
+  const isMobile = useIsMobile()
+
   return (
-    <section style={s.section}>
-      <div className="anim-rise-1" style={s.pill}>
+    <section style={{ ...s.section, padding: isMobile ? '128px 18px 64px' : s.section.padding }}>
+      <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 12 : s.pill.fontSize, marginBottom: isMobile ? 24 : s.pill.marginBottom, padding: isMobile ? '6px 14px 6px 8px' : s.pill.padding }}>
         <span style={s.chip}>2026</span>
         Jacksonville, FL growth partner
       </div>
 
-      <h1 className="anim-rise-2" style={s.h1}>
+      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business{' '}
         <span className="anim-wiggle" style={s.icon}>🌐</span>
         {' '}deserves a site that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>
 
-      <p className="anim-rise-3" style={s.sub}>
+      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
         VibefoxStudio builds fast websites, SEO systems, and custom apps for Jacksonville businesses that want measurable growth.
       </p>
 
-      <div className="anim-rise-4" style={s.btns}>
+      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 30 : s.btns.marginTop, gap: isMobile ? 10 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
         <a
           href="#contact"
-          style={s.btnDark}
+          style={{ ...s.btnDark, width: isMobile ? 'min(320px, 100%)' : 'auto', justifyContent: 'center' }}
           onMouseEnter={e => { e.currentTarget.style.background = '#2a2830'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#18181a'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
         >
@@ -98,7 +102,7 @@ export default function Hero() {
         </a>
         <a
           href="#pricing"
-          style={s.btnGhost}
+          style={{ ...s.btnGhost, width: isMobile ? 'min(320px, 100%)' : 'auto', justifyContent: 'center' }}
           onMouseEnter={e => { e.currentTarget.style.background = '#edeae5' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'rgba(250,249,247,0.8)' }}
         >
@@ -106,7 +110,7 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="anim-rise-5" style={s.trust}>
+      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 30 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
         {['Fast turnaround', 'Jacksonville local SEO', 'Retainers available'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot}>✦</span> {t}
@@ -114,30 +118,30 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ marginTop: 72, width: '100%', maxWidth: 820 }}>
-        <DashboardMockup />
+      <div className="anim-rise-6" style={{ marginTop: isMobile ? 48 : 72, width: '100%', maxWidth: 820 }}>
+        <DashboardMockup isMobile={isMobile} />
       </div>
     </section>
   )
 }
 
-function DashboardMockup() {
+function DashboardMockup({ isMobile }) {
   return (
     <div style={{
       background: 'rgba(250,249,247,0.75)',
       border: '1px solid rgba(255,255,255,0.92)',
-      borderRadius: 22, overflow: 'hidden',
+      borderRadius: isMobile ? 18 : 22, overflow: 'hidden',
       boxShadow: '0 2px 4px rgba(0,0,0,0.04), 0 8px 28px rgba(0,0,0,0.07), 0 28px 64px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.85)',
       backdropFilter: 'blur(16px)',
     }}>
-      <div style={{ background: 'rgba(237,234,229,0.9)', padding: '12px 18px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ background: 'rgba(237,234,229,0.9)', padding: isMobile ? '10px 12px' : '12px 18px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         {['#ff5f57','#febc2e','#28c840'].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
-        <div style={{ flex: 1, textAlign: 'center', background: 'rgba(250,249,247,0.8)', borderRadius: 100, padding: '5px 16px', fontSize: 12, color: '#7a7888', maxWidth: 240, margin: '0 auto', border: '1px solid rgba(0,0,0,0.08)' }}>
+        <div style={{ flex: 1, textAlign: 'center', background: 'rgba(250,249,247,0.8)', borderRadius: 100, padding: '5px 16px', fontSize: isMobile ? 11 : 12, color: '#7a7888', maxWidth: isMobile ? 180 : 240, margin: '0 auto', border: '1px solid rgba(0,0,0,0.08)' }}>
           vibefoxstudio.com/dashboard
         </div>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '185px 1fr', minHeight: 250 }}>
-        <div style={{ background: '#18181a', padding: '18px 12px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '185px 1fr', minHeight: 250 }}>
+        <div style={{ background: '#18181a', padding: '18px 12px', display: isMobile ? 'none' : 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 13, color: 'rgba(255,255,255,0.88)', padding: '0 8px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: 6 }}>
             Vibefox Studio
           </div>
@@ -148,8 +152,8 @@ function DashboardMockup() {
             </div>
           ))}
         </div>
-        <div style={{ padding: 18, background: '#f8f6f2', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 9 }}>
+        <div style={{ padding: isMobile ? 12 : 18, background: '#f8f6f2', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 9 }}>
             {[['Load Time','0.8s','↑ 3× faster'],['SEO Score','96','↑ Top 5%'],['Uptime','99.9%','↑ All time']].map(([l,v,s]) => (
               <div key={l} style={{ background: 'white', borderRadius: 10, padding: 13, border: '1px solid rgba(0,0,0,0.08)' }}>
                 <div style={{ fontSize: 10, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{l}</div>
@@ -162,13 +166,13 @@ function DashboardMockup() {
             { name: 'New project inquiry', desc: 'Local restaurant — website + booking', status: 'Active', statusColor: '#dcfce7', statusText: '#16a34a', bg: 'linear-gradient(135deg,#c8a97e,#b8906a)' },
             { name: 'Retainer renewal', desc: 'Growth plan — month 4 of 12', status: 'Renewed', statusColor: '#fef3c7', statusText: '#d97706', bg: 'linear-gradient(135deg,#8b68d4,#6644b0)' },
           ].map(item => (
-            <div key={item.name} style={{ background: 'white', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div key={item.name} style={{ background: 'white', borderRadius: 10, padding: isMobile ? '11px 12px' : '12px 14px', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 10, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
               <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: item.bg }} />
               <div>
                 <div style={{ fontSize: 12, fontWeight: 500, color: '#18181a' }}>{item.name}</div>
                 <div style={{ fontSize: 11, color: '#7a7888', marginTop: 1 }}>{item.desc}</div>
               </div>
-              <div style={{ fontSize: 10, fontWeight: 600, padding: '3px 9px', borderRadius: 100, whiteSpace: 'nowrap', marginLeft: 'auto', background: item.statusColor, color: item.statusText }}>{item.status}</div>
+              <div style={{ fontSize: 10, fontWeight: 600, padding: '3px 9px', borderRadius: 100, whiteSpace: 'nowrap', marginLeft: isMobile ? 0 : 'auto', marginTop: isMobile ? 2 : 0, background: item.statusColor, color: item.statusText }}>{item.status}</div>
             </div>
           ))}
         </div>
