@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
 import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import { fetchPostBySlug, fetchPublishedPosts } from '../../lib/blog'
 
 export default function BlogPostPage() {
   const { slug } = useParams()
+  const location = useLocation()
   const [post, setPost] = useState(undefined)
   const [related, setRelated] = useState([])
+  const preloadedPost = location.state?.preloadedPost
+  const matchingPreloadedPost = preloadedPost?.slug === slug ? preloadedPost : null
+  const matchingFetchedPost = post?.slug === slug ? post : null
+  const activePost = matchingFetchedPost || matchingPreloadedPost
 
   useEffect(() => {
     let active = true
@@ -21,27 +26,37 @@ export default function BlogPostPage() {
     return () => { active = false }
   }, [slug])
 
-  if (post === undefined) {
+  if (!activePost && post === undefined) {
     return (
       <MarketingLayout>
-        <div style={{ padding: '140px 40px 100px', maxWidth: 840, margin: '0 auto', color: '#7a7888' }}>
-          Loading post…
+        <div style={{ padding: '130px 40px 80px' }}>
+          <div style={{ maxWidth: 840, margin: '0 auto', background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 22, padding: 22 }}>
+            <div style={{ width: 140, height: 14, borderRadius: 100, background: '#ece9e4', marginBottom: 18 }} />
+            <div style={{ width: '86%', height: 52, borderRadius: 14, background: '#ece9e4', marginBottom: 10 }} />
+            <div style={{ width: '68%', height: 22, borderRadius: 12, background: '#ece9e4', marginBottom: 18 }} />
+            <div style={{ width: '100%', aspectRatio: '16 / 10', borderRadius: 18, background: '#eee8de', marginBottom: 18 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ width: '100%', height: 14, borderRadius: 9, background: '#ece9e4' }} />
+              <div style={{ width: '100%', height: 14, borderRadius: 9, background: '#ece9e4' }} />
+              <div style={{ width: '90%', height: 14, borderRadius: 9, background: '#ece9e4' }} />
+            </div>
+          </div>
         </div>
       </MarketingLayout>
     )
   }
 
-  if (!post) {
-    return <Navigate to="/blog" replace />
+  if (!activePost && post === null) {
+    return <Navigate to="/blogs" replace />
   }
 
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
-    headline: post.title,
-    datePublished: post.publishedAt,
-    dateModified: post.publishedAt,
-    description: post.excerpt,
+    headline: activePost.title,
+    datePublished: activePost.publishedAt,
+    dateModified: activePost.publishedAt,
+    description: activePost.excerpt,
     author: {
       '@type': 'Organization',
       name: 'VibefoxStudio',
@@ -54,38 +69,38 @@ export default function BlogPostPage() {
         url: 'https://vibefoxstudio.com/image2vector.svg',
       },
     },
-    mainEntityOfPage: `https://vibefoxstudio.com/blog/${post.slug}`,
+    mainEntityOfPage: `https://vibefoxstudio.com/blogs/${activePost.slug}`,
   }
 
   return (
     <MarketingLayout>
       <SEOHead
-        title={post.title}
-        description={post.excerpt}
-        path={`/blog/${post.slug}`}
-        keywords={post.keywords}
+        title={activePost.title}
+        description={activePost.excerpt}
+        path={`/blogs/${activePost.slug}`}
+        keywords={activePost.keywords}
         type="article"
         structuredData={schema}
       />
 
       <article style={{ padding: '44px 40px 86px' }}>
         <div style={{ maxWidth: 840, margin: '0 auto' }}>
-          <Link to="/blog" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none' }}>← Back to blog</Link>
+          <Link to="/blogs" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none' }}>← Back to blogs</Link>
           <div style={{ marginTop: 18, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#b8906a' }}>{post.category}</span>
-            <span style={{ fontSize: 12, color: '#7a7888' }}>• {new Date(post.publishedAt).toLocaleDateString()}</span>
-            <span style={{ fontSize: 12, color: '#7a7888' }}>• {post.readTime}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#b8906a' }}>{activePost.category}</span>
+            <span style={{ fontSize: 12, color: '#7a7888' }}>• {new Date(activePost.publishedAt).toLocaleDateString()}</span>
+            <span style={{ fontSize: 12, color: '#7a7888' }}>• {activePost.readTime}</span>
           </div>
 
           <h1 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(36px, 6vw, 66px)', lineHeight: 1.03, color: '#18181a', letterSpacing: '-1.5px', margin: '12px 0 16px' }}>
-            {post.title}
+            {activePost.title}
           </h1>
 
           <p style={{ fontSize: 18, color: '#7a7888', lineHeight: 1.66, margin: '0 0 26px' }}>
-            {post.excerpt}
+            {activePost.excerpt}
           </p>
 
-          {post.coverImageUrl && (
+          {activePost.coverImageUrl && (
             <div
               style={{
                 width: '100%',
@@ -99,8 +114,8 @@ export default function BlogPostPage() {
               }}
             >
               <img
-                src={post.coverImageUrl}
-                alt={post.title}
+                src={activePost.coverImageUrl}
+                alt={activePost.title}
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
             </div>
@@ -109,7 +124,7 @@ export default function BlogPostPage() {
           <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 24 }} />
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {post.body.map(paragraph => (
+            {activePost.body.map(paragraph => (
               <p key={paragraph.slice(0, 24)} style={{ fontSize: 17, lineHeight: 1.78, color: '#3a3840', margin: 0 }}>
                 {paragraph}
               </p>
@@ -132,7 +147,7 @@ export default function BlogPostPage() {
                 <div style={{ fontSize: 12, color: '#7a7888', marginBottom: 8 }}>{new Date(item.publishedAt).toLocaleDateString()} · {item.readTime}</div>
                 <h3 style={{ fontSize: 18, lineHeight: 1.25, color: '#18181a', margin: '0 0 8px' }}>{item.title}</h3>
                 <p style={{ fontSize: 14, color: '#7a7888', lineHeight: 1.6, margin: '0 0 10px' }}>{item.excerpt}</p>
-                <Link to={`/blog/${item.slug}`} style={{ color: '#18181a', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Read →</Link>
+                <Link to={`/blogs/${item.slug}`} state={{ preloadedPost: item }} style={{ color: '#18181a', fontWeight: 600, fontSize: 13, textDecoration: 'none' }}>Read →</Link>
               </article>
             ))}
           </div>

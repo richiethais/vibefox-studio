@@ -40,7 +40,9 @@ createRoot(document.getElementById('root')).render(
           <Route path="/work" element={<WorkPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/faq" element={<FAQPage />} />
-          <Route path="/blog" element={<BlogPage />} />
+          <Route path="/blogs" element={<BlogPage />} />
+          <Route path="/blogs/:slug" element={<BlogPostPage />} />
+          <Route path="/blog" element={<Navigate to="/blogs" replace />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/join" element={<Join />} />
 

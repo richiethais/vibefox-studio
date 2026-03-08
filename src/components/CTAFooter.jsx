@@ -56,7 +56,7 @@ export function Footer() {
 
           {[
             { heading: 'Services', links: [['Landing Pages','/services'],['Business Websites','/services'],['Custom Web Apps','/services'],['SEO & Content','/services']] },
-            { heading: 'Plans', links: [['Starter — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blog','/blog']] },
+            { heading: 'Plans', links: [['Starter — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blogs','/blogs']] },
             { heading: 'Contact', links: [['richie@vibefoxstudio.com','mailto:richie@vibefoxstudio.com'],['Jacksonville, FL','/services'],['FAQ','/faq']] },
           ].map(col => (
             <div key={col.heading}>

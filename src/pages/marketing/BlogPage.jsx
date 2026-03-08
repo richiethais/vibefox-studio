@@ -19,36 +19,36 @@ export default function BlogPage() {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: 'VibefoxStudio Blog',
-    url: 'https://vibefoxstudio.com/blog',
+    name: 'VibefoxStudio Blogs',
+    url: 'https://vibefoxstudio.com/blogs',
     blogPost: posts.map(post => ({
       '@type': 'BlogPosting',
       headline: post.title,
       datePublished: post.publishedAt,
-      url: `https://vibefoxstudio.com/blog/${post.slug}`,
+      url: `https://vibefoxstudio.com/blogs/${post.slug}`,
     })),
   }
 
   return (
     <MarketingLayout>
       <SEOHead
-        title="VibefoxStudio Blog | Jacksonville SEO Tips & Digital Marketing Insights"
+        title="VibefoxStudio Blogs | Jacksonville SEO Tips & Digital Marketing Insights"
         description="Weekly blog posts on SEO, local search, conversion optimization, and digital growth for Jacksonville, Florida businesses."
-        path="/blog"
+        path="/blogs"
         keywords="jacksonville digital marketing blog, seo tips jacksonville florida, local seo blog, best digital marketing agency in jacksonville florida"
         structuredData={schema}
       />
 
       <PageHero
-        eyebrow="Blog"
+        eyebrow="Blogs"
         title="Weekly SEO and digital marketing insights."
-        sub="Actionable strategies from VibefoxStudio for businesses trying to rank higher, convert better, and find the best digital marketing agency in Jacksonville, Florida."
+        sub="Actionable strategies from VibefoxStudio for businesses trying to rank higher, convert better, and grow consistently."
       />
 
       <section style={{ padding: '22px 40px 96px' }}>
         <div style={{ maxWidth: 1040, margin: '0 auto' }}>
           {loading ? (
-            <div style={{ padding: '18px 0', color: '#7a7888', fontSize: 14 }}>Loading blog posts…</div>
+            <div style={{ padding: '18px 0', color: '#7a7888', fontSize: 14 }}>Loading blogs…</div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
               {posts.map(post => (
@@ -86,7 +86,11 @@ export default function BlogPage() {
                     {post.title}
                   </h2>
                   <p style={{ fontSize: 15, color: '#7a7888', lineHeight: 1.62, margin: '0 0 18px' }}>{post.excerpt}</p>
-                  <Link to={`/blog/${post.slug}`} style={{ color: '#18181a', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}>
+                  <Link
+                    to={`/blogs/${post.slug}`}
+                    state={{ preloadedPost: post }}
+                    style={{ color: '#18181a', fontWeight: 600, fontSize: 14, textDecoration: 'none' }}
+                  >
                     Read article →
                   </Link>
                 </article>

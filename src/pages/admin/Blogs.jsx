@@ -12,31 +12,10 @@ const emptyForm = {
   content: '',
   cover_image_url: '',
 }
-const LOCAL_POSTS_KEY = 'vibefox.blog_posts'
 
 function isMissingTableError(error) {
   const msg = String(error?.message || '').toLowerCase()
   return msg.includes('could not find the table') || msg.includes('blog_posts')
-}
-
-function readLocalPosts() {
-  if (typeof window === 'undefined') return []
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(LOCAL_POSTS_KEY) || '[]')
-    return Array.isArray(parsed) ? parsed : []
-  } catch {
-    return []
-  }
-}
-
-function writeLocalPosts(posts) {
-  if (typeof window === 'undefined') return
-  window.localStorage.setItem(LOCAL_POSTS_KEY, JSON.stringify(posts))
-}
-
-function nextLocalId(posts) {
-  const maxId = posts.reduce((max, post) => Math.max(max, Number(post.id) || 0), 0)
-  return maxId + 1
 }
 
 function slugify(value) {
@@ -123,27 +102,18 @@ async function createProcessedCoverBlob(file) {
   return blob
 }
 
-function blobToDataUrl(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result)
-    reader.onerror = reject
-    reader.readAsDataURL(blob)
-  })
-}
-
 export default function AdminBlogs() {
   const [params] = useSearchParams()
   const previewId = params.get('preview')
 
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [setupRequired, setSetupRequired] = useState(false)
   const [form, setForm] = useState(emptyForm)
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
-  const [storageMode, setStorageMode] = useState('supabase')
 
   const draftPosts = useMemo(() => posts.filter(p => p.status === 'draft'), [posts])
   const publishedPosts = useMemo(() => posts.filter(p => p.status === 'published'), [posts])
@@ -154,14 +124,7 @@ export default function AdminBlogs() {
     return editing
   }, [posts, previewId, editing])
 
-  const load = async (mode = storageMode) => {
-    if (mode === 'local') {
-      const localPosts = readLocalPosts().sort((a, b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime())
-      setPosts(localPosts)
-      setLoading(false)
-      return
-    }
-
+  const load = async () => {
     const { data, error } = await supabase
       .from('blog_posts')
       .select('*')
@@ -169,19 +132,17 @@ export default function AdminBlogs() {
 
     if (error) {
       if (isMissingTableError(error)) {
-        setStorageMode('local')
-        const localPosts = readLocalPosts().sort((a, b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime())
-        setPosts(localPosts)
-        setNotice('Using local blog storage because Supabase blog table is missing.')
-        setLoading(false)
-        return
+        setSetupRequired(true)
+        setNotice('Blog setup is incomplete. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+      } else {
+        setNotice(`Load failed: ${error.message}`)
       }
-      setNotice(`Load failed: ${error.message}`)
       setPosts([])
       setLoading(false)
       return
     }
 
+    setSetupRequired(false)
     setPosts(data ?? [])
     setLoading(false)
   }
@@ -194,18 +155,17 @@ export default function AdminBlogs() {
       .then(({ data, error }) => {
         if (error) {
           if (isMissingTableError(error)) {
-            setStorageMode('local')
-            const localPosts = readLocalPosts().sort((a, b) => new Date(b.updated_at || 0).getTime() - new Date(a.updated_at || 0).getTime())
-            setPosts(localPosts)
-            setNotice('Using local blog storage because Supabase blog table is missing.')
-            setLoading(false)
-            return
+            setSetupRequired(true)
+            setNotice('Blog setup is incomplete. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+          } else {
+            setNotice(`Load failed: ${error.message}`)
           }
-          setNotice(`Load failed: ${error.message}`)
           setPosts([])
           setLoading(false)
           return
         }
+
+        setSetupRequired(false)
         setPosts(data ?? [])
         setLoading(false)
       })
@@ -217,27 +177,13 @@ export default function AdminBlogs() {
     let bump = 1
 
     while (true) {
-      if (storageMode === 'local') {
-        const localPosts = readLocalPosts()
-        const exists = localPosts.some(post => post.slug === candidate && String(post.id) !== String(ignoreId))
-        if (!exists) return candidate
-        candidate = `${cleanBase}-${bump}`
-        bump += 1
-        continue
-      }
-
       let query = supabase.from('blog_posts').select('id').eq('slug', candidate).limit(1)
       if (ignoreId) query = query.neq('id', ignoreId)
       const { data, error } = await query
 
       if (error) {
-        if (isMissingTableError(error)) {
-          setStorageMode('local')
-          continue
-        }
-        return candidate
+        throw new Error(error.message)
       }
-
       if (!data || data.length === 0) return candidate
       candidate = `${cleanBase}-${bump}`
       bump += 1
@@ -276,23 +222,13 @@ export default function AdminBlogs() {
       const fileStem = slugify(file.name.replace(/\.[^.]+$/, '')) || 'cover-image'
       const path = `${Date.now()}-${fileStem}.png`
 
-      if (storageMode === 'local') {
-        const dataUrl = await blobToDataUrl(processedBlob)
-        setForm(f => ({ ...f, cover_image_url: dataUrl }))
-        setUploading(false)
-        setNotice('Image pasted and styled for local blog storage.')
-        return
-      }
-
       const { error } = await supabase.storage
         .from('blog-images')
         .upload(path, processedBlob, { upsert: true, contentType: 'image/png' })
 
       if (error) {
-        const dataUrl = await blobToDataUrl(processedBlob)
-        setForm(f => ({ ...f, cover_image_url: dataUrl }))
         setUploading(false)
-        setNotice(`Image stored locally: ${error.message}`)
+        setNotice(`Image upload failed: ${error.message}`)
         return
       }
 
@@ -317,6 +253,10 @@ export default function AdminBlogs() {
 
   async function saveDraft(e) {
     e.preventDefault()
+    if (setupRequired) {
+      setNotice('Cannot save yet. Run docs/sql/blog_setup.sql in Supabase first.')
+      return
+    }
     if (!form.title || !form.excerpt || !form.content) {
       setNotice('Title, excerpt, and content are required to save draft.')
       return
@@ -325,64 +265,53 @@ export default function AdminBlogs() {
     setSaving(true)
     setNotice('')
 
-    const nowIso = new Date().toISOString()
-    const baseSlug = form.slug || form.title
-    const ignoreId = editing?.status === 'draft' ? editing.id : null
-    const slug = await ensureUniqueSlug(baseSlug, ignoreId)
+    try {
+      const nowIso = new Date().toISOString()
+      const baseSlug = form.slug || form.title
+      const ignoreId = editing?.status === 'draft' ? editing.id : null
+      const slug = await ensureUniqueSlug(baseSlug, ignoreId)
 
-    const payload = {
-      ...form,
-      slug,
-      status: 'draft',
-      updated_at: nowIso,
-      published_at: null,
-    }
-
-    let error = null
-    if (storageMode === 'local') {
-      const localPosts = readLocalPosts()
-      if (editing?.id && editing.status === 'draft') {
-        const nextPosts = localPosts.map(post => (String(post.id) === String(editing.id) ? { ...post, ...payload } : post))
-        writeLocalPosts(nextPosts)
-      } else {
-        const created = { id: nextLocalId(localPosts), created_at: nowIso, ...payload }
-        writeLocalPosts([created, ...localPosts])
+      const payload = {
+        ...form,
+        slug,
+        status: 'draft',
+        updated_at: nowIso,
+        published_at: null,
       }
-    } else if (editing?.id && editing.status === 'draft') {
-      ;({ error } = await supabase.from('blog_posts').update(payload).eq('id', editing.id))
-    } else {
-      ;({ error } = await supabase.from('blog_posts').insert({ ...payload, created_at: nowIso }))
-    }
 
-    setSaving(false)
-    if (error) {
-      if (isMissingTableError(error)) {
-        setStorageMode('local')
-        const localPosts = readLocalPosts()
-        if (editing?.id && editing.status === 'draft') {
-          const nextPosts = localPosts.map(post => (String(post.id) === String(editing.id) ? { ...post, ...payload } : post))
-          writeLocalPosts(nextPosts)
-        } else {
-          const created = { id: nextLocalId(localPosts), created_at: nowIso, ...payload }
-          writeLocalPosts([created, ...localPosts])
+      let error
+      if (editing?.id && editing.status === 'draft') {
+        ;({ error } = await supabase.from('blog_posts').update(payload).eq('id', editing.id))
+      } else {
+        ;({ error } = await supabase.from('blog_posts').insert({ ...payload, created_at: nowIso }))
+      }
+
+      setSaving(false)
+      if (error) {
+        if (isMissingTableError(error)) {
+          setSetupRequired(true)
+          setNotice('Blog table missing. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+          return
         }
-        setNotice('Draft saved to Saved Drafts (local mode).')
-        setEditing(null)
-        setForm(emptyForm)
-        await load('local')
+        setNotice(`Save failed: ${error.message}`)
         return
       }
-      setNotice(`Save failed: ${error.message}`)
-      return
-    }
 
-    setNotice('Draft saved to Saved Drafts.')
-    setEditing(null)
-    setForm(emptyForm)
-    await load()
+      setNotice('Draft saved to Saved Drafts.')
+      setEditing(null)
+      setForm(emptyForm)
+      await load()
+    } catch (error) {
+      setSaving(false)
+      setNotice(`Save failed: ${error.message}`)
+    }
   }
 
   async function publishCurrent() {
+    if (setupRequired) {
+      setNotice('Cannot post yet. Run docs/sql/blog_setup.sql in Supabase first.')
+      return
+    }
     if (!form.title || !form.excerpt || !form.content) {
       setNotice('Title, excerpt, and content are required before posting.')
       return
@@ -391,60 +320,45 @@ export default function AdminBlogs() {
     setSaving(true)
     setNotice('')
 
-    const nowIso = new Date().toISOString()
-    const baseSlug = form.slug || form.title
-    const slug = await ensureUniqueSlug(baseSlug, editing?.id)
+    try {
+      const nowIso = new Date().toISOString()
+      const baseSlug = form.slug || form.title
+      const slug = await ensureUniqueSlug(baseSlug, editing?.id)
 
-    const payload = {
-      ...form,
-      slug,
-      status: 'published',
-      published_at: editing?.published_at || nowIso,
-      updated_at: nowIso,
-    }
-
-    let error = null
-    if (storageMode === 'local') {
-      const localPosts = readLocalPosts()
-      if (editing?.id) {
-        const nextPosts = localPosts.map(post => (String(post.id) === String(editing.id) ? { ...post, ...payload } : post))
-        writeLocalPosts(nextPosts)
-      } else {
-        const created = { id: nextLocalId(localPosts), created_at: nowIso, ...payload }
-        writeLocalPosts([created, ...localPosts])
+      const payload = {
+        ...form,
+        slug,
+        status: 'published',
+        published_at: editing?.published_at || nowIso,
+        updated_at: nowIso,
       }
-    } else if (editing?.id) {
-      ;({ error } = await supabase.from('blog_posts').update(payload).eq('id', editing.id))
-    } else {
-      ;({ error } = await supabase.from('blog_posts').insert({ ...payload, created_at: nowIso }))
-    }
 
-    setSaving(false)
-    if (error) {
-      if (isMissingTableError(error)) {
-        setStorageMode('local')
-        const localPosts = readLocalPosts()
-        if (editing?.id) {
-          const nextPosts = localPosts.map(post => (String(post.id) === String(editing.id) ? { ...post, ...payload } : post))
-          writeLocalPosts(nextPosts)
-        } else {
-          const created = { id: nextLocalId(localPosts), created_at: nowIso, ...payload }
-          writeLocalPosts([created, ...localPosts])
+      let error
+      if (editing?.id) {
+        ;({ error } = await supabase.from('blog_posts').update(payload).eq('id', editing.id))
+      } else {
+        ;({ error } = await supabase.from('blog_posts').insert({ ...payload, created_at: nowIso }))
+      }
+
+      setSaving(false)
+      if (error) {
+        if (isMissingTableError(error)) {
+          setSetupRequired(true)
+          setNotice('Blog table missing. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
+          return
         }
-        setNotice('Blog posted successfully in local mode and is visible on the blog page.')
-        setEditing(null)
-        setForm(emptyForm)
-        await load('local')
+        setNotice(`Publish failed: ${error.message}`)
         return
       }
-      setNotice(`Publish failed: ${error.message}`)
-      return
-    }
 
-    setNotice('Blog posted successfully and is now live on the public blog page.')
-    setEditing(null)
-    setForm(emptyForm)
-    await load()
+      setNotice('Blog posted successfully and is now live on the public Blogs page.')
+      setEditing(null)
+      setForm(emptyForm)
+      await load()
+    } catch (error) {
+      setSaving(false)
+      setNotice(`Publish failed: ${error.message}`)
+    }
   }
 
   async function publishFromRow(post) {
@@ -453,41 +367,16 @@ export default function AdminBlogs() {
       return
     }
 
-    let error = null
-    if (storageMode === 'local') {
-      const now = new Date().toISOString()
-      const localPosts = readLocalPosts()
-      const nextPosts = localPosts.map(row => (
-        String(row.id) === String(post.id)
-          ? { ...row, status: 'published', published_at: now, updated_at: now }
-          : row
-      ))
-      writeLocalPosts(nextPosts)
-    } else {
-      ;({ error } = await supabase.from('blog_posts').update({
-        status: 'published',
-        published_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }).eq('id', post.id))
-    }
+    const { error } = await supabase.from('blog_posts').update({
+      status: 'published',
+      published_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }).eq('id', post.id)
 
     if (error) {
       if (isMissingTableError(error)) {
-        setStorageMode('local')
-        const now = new Date().toISOString()
-        const localPosts = readLocalPosts()
-        const nextPosts = localPosts.map(row => (
-          String(row.id) === String(post.id)
-            ? { ...row, status: 'published', published_at: now, updated_at: now }
-            : row
-        ))
-        writeLocalPosts(nextPosts)
-        setNotice(`Posted: ${post.title} (local mode)`)
-        if (editing?.id === post.id) {
-          setEditing(null)
-          setForm(emptyForm)
-        }
-        await load('local')
+        setSetupRequired(true)
+        setNotice('Blog table missing. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
         return
       }
       setNotice(`Publish failed: ${error.message}`)
@@ -505,30 +394,19 @@ export default function AdminBlogs() {
   async function remove(id) {
     const ok = window.confirm('Delete this blog post?')
     if (!ok) return
-    let error = null
-    if (storageMode === 'local') {
-      const localPosts = readLocalPosts()
-      writeLocalPosts(localPosts.filter(post => String(post.id) !== String(id)))
-    } else {
-      ;({ error } = await supabase.from('blog_posts').delete().eq('id', id))
-    }
+
+    const { error } = await supabase.from('blog_posts').delete().eq('id', id)
 
     if (error) {
       if (isMissingTableError(error)) {
-        setStorageMode('local')
-        const localPosts = readLocalPosts()
-        writeLocalPosts(localPosts.filter(post => String(post.id) !== String(id)))
-        if (editing?.id === id) {
-          setEditing(null)
-          setForm(emptyForm)
-        }
-        setNotice('Blog deleted (local mode).')
-        await load('local')
+        setSetupRequired(true)
+        setNotice('Blog table missing. Run docs/sql/blog_setup.sql in Supabase SQL Editor.')
         return
       }
       setNotice(`Delete failed: ${error.message}`)
       return
     }
+
     if (editing?.id === id) {
       setEditing(null)
       setForm(emptyForm)
@@ -543,6 +421,12 @@ export default function AdminBlogs() {
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', margin: 0, letterSpacing: '-0.4px' }}>Blogs</h1>
         <button onClick={beginCreate} style={darkBtn}>+ New blog</button>
       </div>
+
+      {setupRequired && (
+        <div style={{ background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 10, padding: '10px 14px', marginBottom: 14, color: '#9a3412', fontSize: 13 }}>
+          Blog table is missing in Supabase. Run `docs/sql/blog_setup.sql` once, then refresh.
+        </div>
+      )}
 
       {notice && (
         <div style={{ background: '#f8f6f2', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, padding: '10px 14px', marginBottom: 14, color: '#3a3840', fontSize: 13 }}>

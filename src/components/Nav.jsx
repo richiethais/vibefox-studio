@@ -7,7 +7,7 @@ const links = [
   ['Work', '/work'],
   ['Pricing', '/pricing'],
   ['FAQ', '/faq'],
-  ['Blog', '/blog'],
+  ['Blogs', '/blogs'],
 ]
 
 export default function Nav() {
