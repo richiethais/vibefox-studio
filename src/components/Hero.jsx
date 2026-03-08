@@ -72,8 +72,8 @@ export default function Hero() {
   return (
     <section style={s.section}>
       <div className="anim-rise-1" style={s.pill}>
-        <span style={s.chip}>2025</span>
-        Now accepting new clients
+        <span style={s.chip}>2026</span>
+        Jacksonville, FL growth partner
       </div>
 
       <h1 className="anim-rise-2" style={s.h1}>
@@ -84,7 +84,7 @@ export default function Hero() {
       </h1>
 
       <p className="anim-rise-3" style={s.sub}>
-        Fast, modern websites and custom apps for small businesses — built in days, not months, and kept running long after launch.
+        VibefoxStudio builds fast websites, SEO systems, and custom apps for Jacksonville businesses that want measurable growth.
       </p>
 
       <div className="anim-rise-4" style={s.btns}>
@@ -107,7 +107,7 @@ export default function Hero() {
       </div>
 
       <div className="anim-rise-5" style={s.trust}>
-        {['Fast turnaround', 'No agency markup', 'Retainers available'].map(t => (
+        {['Fast turnaround', 'Jacksonville local SEO', 'Retainers available'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot}>✦</span> {t}
           </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/auth'
+import { useAuth } from '../../lib/useAuth'
 
 const STATUS_COLORS = {
   proposal: { bg: '#f3f4f6', text: '#6b7280' },

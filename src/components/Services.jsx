@@ -1,4 +1,6 @@
 import { useFadeUp } from './useFadeUp'
+import Eyebrow from './Eyebrow'
+import { h2Style, subStyle } from './sectionStyles'
 
 const services = [
   { icon: '🌐', title: 'Landing Pages', desc: 'High-converting single pages built for speed. Perfect for campaigns, launches, and service businesses that need results fast.' },
@@ -61,23 +63,4 @@ function ServiceCard({ icon, title, desc, delay }) {
       <div style={{ fontSize: 14, color: '#7a7888', lineHeight: 1.58, fontWeight: 300 }}>{desc}</div>
     </div>
   )
-}
-
-export function Eyebrow({ icon, children }) {
-  return (
-    <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 500, color: '#b8906a', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 18 }}>
-      <span style={{ width: 20, height: 20, background: 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>{icon}</span>
-      {children}
-    </div>
-  )
-}
-
-export const h2Style = {
-  fontFamily: '"DM Serif Display", serif',
-  fontSize: 'clamp(36px, 5vw, 56px)',
-  lineHeight: 1.04, color: '#18181a', letterSpacing: '-1.5px', margin: 0,
-}
-
-export const subStyle = {
-  fontSize: 17, color: '#7a7888', maxWidth: 450, marginTop: 14, fontWeight: 300, lineHeight: 1.68,
 }

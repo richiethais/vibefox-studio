@@ -9,10 +9,10 @@ export default function PricingPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="Digital Marketing Pricing in Jacksonville, Florida"
-        description="Transparent monthly digital marketing and SEO pricing for Jacksonville businesses. Flexible plans for websites, content, and ongoing growth."
+        title="VibefoxStudio Pricing | Jacksonville SEO & Digital Marketing Plans"
+        description="Transparent monthly digital marketing and SEO pricing for Jacksonville businesses. Flexible plans for websites, content, and ongoing growth from VibefoxStudio."
         path="/pricing"
-        keywords="digital marketing pricing jacksonville florida, seo packages jacksonville, website maintenance plans"
+        keywords="digital marketing pricing jacksonville florida, seo packages jacksonville, website maintenance plans, jacksonville digital marketing retainer"
       />
 
       <PageHero

@@ -17,7 +17,7 @@ export function CTA() {
           <em style={{ fontStyle: 'italic', color: '#c8a97e' }}>that works?</em>
         </h2>
         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.42)', maxWidth: 400, margin: '0 auto', fontWeight: 300, lineHeight: 1.68, position: 'relative' }}>
-          No pressure, no sales pitch — just a real conversation about what your business needs.
+          No pressure, no sales pitch, just a real conversation with a Jacksonville SEO and digital marketing team.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 40, flexWrap: 'wrap', position: 'relative' }}>
           <a
@@ -50,7 +50,7 @@ export function Footer() {
           <div>
             <BrandLogo href="/" size="nav" />
             <p style={{ fontSize: 13, color: '#7a7888', marginTop: 10, lineHeight: 1.6, maxWidth: 200, fontWeight: 300 }}>
-              Websites and custom apps for small businesses that want to grow.
+              VibefoxStudio is a Jacksonville digital marketing agency for businesses that want measurable growth.
             </p>
           </div>
 
@@ -76,7 +76,7 @@ export function Footer() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', flexWrap: 'wrap', gap: 12 }}>
-          <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 300 }}>© 2025 Vibefox Studio. All rights reserved.</span>
+          <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 300 }}>© 2026 VibefoxStudio. All rights reserved.</span>
           <a href="mailto:richie@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s' }}
             onMouseEnter={e => e.target.style.color = '#18181a'}
             onMouseLeave={e => e.target.style.color = '#7a7888'}

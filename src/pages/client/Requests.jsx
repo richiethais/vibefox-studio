@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/auth'
+import { useAuth } from '../../lib/useAuth'
 
 const STATUS_COLORS = {
   open: { bg: '#dbeafe', text: '#1d4ed8' },
@@ -15,17 +15,19 @@ export default function ClientRequests() {
   const [form, setForm] = useState({ title: '', description: '' })
   const [submitted, setSubmitted] = useState(false)
 
+  const load = useCallback(async (id) => {
+    const targetClientId = id ?? clientId
+    if (!targetClientId) return
+    const { data } = await supabase.from('requests').select('*').eq('client_id', targetClientId).order('created_at', { ascending: false })
+    setRequests(data ?? [])
+  }, [clientId])
+
   useEffect(() => {
     if (!session) return
     supabase.from('clients').select('id').eq('user_id', session.user.id).single().then(({ data }) => {
       if (data) { setClientId(data.id); load(data.id) }
     })
-  }, [session])
-
-  async function load(id) {
-    const { data } = await supabase.from('requests').select('*').eq('client_id', id ?? clientId).order('created_at', { ascending: false })
-    setRequests(data ?? [])
-  }
+  }, [session, load])
 
   async function submit(e) {
     e.preventDefault()

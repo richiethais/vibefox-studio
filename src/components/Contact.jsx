@@ -33,7 +33,7 @@ export default function Contact() {
           Start a project
         </h2>
         <p className="fade-up d3" style={{ fontSize: 16, color: '#7a7888', marginBottom: 40, fontWeight: 300, lineHeight: 1.6 }}>
-          Tell us what you need and we'll be in touch within 24 hours.
+          Tell us what you need and our Jacksonville digital marketing team will be in touch within 24 hours.
         </p>
 
         {done ? (

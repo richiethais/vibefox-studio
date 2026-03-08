@@ -28,7 +28,7 @@ export default function BrandLogo({
     >
       <img
         src="/image2vector.svg"
-        alt="Vibefox Studio logo"
+        alt="VibefoxStudio logo"
         style={{
           height: ui.mark,
           width: 'auto',

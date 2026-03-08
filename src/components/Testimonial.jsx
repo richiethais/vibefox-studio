@@ -1,5 +1,6 @@
 import { useFadeUp } from './useFadeUp'
-import { Eyebrow, h2Style } from './Services'
+import Eyebrow from './Eyebrow'
+import { h2Style } from './sectionStyles'
 
 export default function Testimonial() {
   const ref = useFadeUp()

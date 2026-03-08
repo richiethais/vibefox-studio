@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/auth'
+import { useAuth } from '../../lib/useAuth'
 
 export default function ClientMessages() {
   const session = useAuth()
@@ -9,17 +9,19 @@ export default function ClientMessages() {
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
 
+  const loadMessages = useCallback(async (id) => {
+    const targetClientId = id ?? clientId
+    if (!targetClientId) return
+    const { data } = await supabase.from('messages').select('*').eq('client_id', targetClientId).order('created_at')
+    setMessages(data ?? [])
+  }, [clientId])
+
   useEffect(() => {
     if (!session) return
     supabase.from('clients').select('id').eq('user_id', session.user.id).single().then(({ data }) => {
       if (data) { setClientId(data.id); loadMessages(data.id) }
     })
-  }, [session])
-
-  async function loadMessages(id) {
-    const { data } = await supabase.from('messages').select('*').eq('client_id', id ?? clientId).order('created_at')
-    setMessages(data ?? [])
-  }
+  }, [session, loadMessages])
 
   async function send() {
     if (!body.trim() || !clientId) return

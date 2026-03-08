@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useFadeUp } from './useFadeUp'
-import { Eyebrow, h2Style } from './Services'
+import Eyebrow from './Eyebrow'
+import { h2Style } from './sectionStyles'
 
 const faqs = [
   { q: "What's included in a typical project?", a: "Every project includes design, development, launch, and two rounds of revisions. We handle domain connection, SSL, and hosting setup. Retainer plans are optional but recommended to keep everything running after launch." },

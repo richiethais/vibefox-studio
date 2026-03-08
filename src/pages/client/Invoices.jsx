@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/auth'
+import { useAuth } from '../../lib/useAuth'
 
 const STATUS_COLORS = {
   unpaid: { bg: '#fef3c7', text: '#d97706' },

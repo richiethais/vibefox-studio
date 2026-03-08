@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminMessages() {
@@ -12,22 +12,30 @@ export default function AdminMessages() {
     supabase.from('clients').select('id, name, email').order('name').then(({ data }) => setClients(data ?? []))
   }, [])
 
+  const loadMessages = useCallback(async (clientId) => {
+    if (!clientId) return
+    const { data } = await supabase.from('messages').select('*').eq('client_id', clientId).order('created_at')
+    setMessages(data ?? [])
+  }, [])
+
   useEffect(() => {
     if (!selected) return
-    loadMessages()
+    let active = true
+    supabase.from('messages').select('*').eq('client_id', selected.id).order('created_at').then(({ data }) => {
+      if (!active) return
+      setMessages(data ?? [])
+    })
+    return () => {
+      active = false
+    }
   }, [selected])
-
-  async function loadMessages() {
-    const { data } = await supabase.from('messages').select('*').eq('client_id', selected.id).order('created_at')
-    setMessages(data ?? [])
-  }
 
   async function send() {
     if (!body.trim()) return
     setSending(true)
     await supabase.from('messages').insert({ client_id: selected.id, body, from_admin: true })
     setBody('')
-    await loadMessages()
+    await loadMessages(selected.id)
     setSending(false)
   }
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminNotes() {
@@ -8,27 +8,29 @@ export default function AdminNotes() {
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState({ related_type: 'client', related_id: '', body: '' })
 
+  const load = useCallback(async () => {
+    const { data } = await supabase.from('notes').select('*').order('created_at', { ascending: false })
+    setNotes(data ?? [])
+  }, [])
+
   useEffect(() => {
-    load()
+    supabase.from('notes').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+      setNotes(data ?? [])
+    })
     supabase.from('clients').select('id, name').then(({ data }) => setClients(data ?? []))
     supabase.from('projects').select('id, title').then(({ data }) => setProjects(data ?? []))
   }, [])
-
-  async function load() {
-    const { data } = await supabase.from('notes').select('*').order('created_at', { ascending: false })
-    setNotes(data ?? [])
-  }
 
   async function save() {
     await supabase.from('notes').insert(form)
     setModal(false)
     setForm({ related_type: 'client', related_id: '', body: '' })
-    load()
+    await load()
   }
 
   async function del(id) {
     await supabase.from('notes').delete().eq('id', id)
-    load()
+    await load()
   }
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))

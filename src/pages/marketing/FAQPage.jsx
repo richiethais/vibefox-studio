@@ -31,17 +31,17 @@ export default function FAQPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="Digital Marketing FAQ | Jacksonville, Florida"
+        title="VibefoxStudio FAQ | Jacksonville Digital Marketing Questions"
         description="Answers to common SEO, website, and digital marketing questions for Jacksonville businesses evaluating agency partners."
         path="/faq"
-        keywords="digital marketing faq jacksonville florida, seo agency questions, jacksonville marketing support"
+        keywords="digital marketing faq jacksonville florida, seo agency questions, jacksonville marketing support, best digital marketing agency in jacksonville florida"
         structuredData={faqSchema}
       />
 
       <PageHero
         eyebrow="FAQ"
         title="Questions business owners ask before they invest in growth."
-        sub="Clear answers about SEO, web strategy, timelines, and support from a Jacksonville-focused digital marketing team."
+        sub="Clear answers about SEO, web strategy, timelines, and support from a Jacksonville-focused VibefoxStudio digital marketing team."
       />
 
       <FAQ />

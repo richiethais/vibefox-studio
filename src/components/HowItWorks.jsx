@@ -1,5 +1,6 @@
 import { useFadeUp } from './useFadeUp'
-import { Eyebrow, h2Style, subStyle } from './Services'
+import Eyebrow from './Eyebrow'
+import { h2Style, subStyle } from './sectionStyles'
 
 const steps = [
   { num: '01', title: 'Discovery call', desc: 'We talk through your goals, audience, and what you need. Takes 30 minutes. No obligation.' },

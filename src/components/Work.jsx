@@ -1,5 +1,6 @@
 import { useFadeUp } from './useFadeUp'
-import { Eyebrow, h2Style, subStyle } from './Services'
+import Eyebrow from './Eyebrow'
+import { h2Style, subStyle } from './sectionStyles'
 
 const projects = [
   { tag: 'Web App', title: 'Meridian Fitness Studio', desc: 'Class booking, membership management, and trainer dashboard with real-time availability.', emoji: '🗓', label: 'Booking System', sub: 'Meridian Fitness', bg: 'linear-gradient(135deg, #f0ebff 0%, #e2d8f8 100%)' },

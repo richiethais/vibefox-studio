@@ -14,7 +14,8 @@ export default function ServicesPage() {
     serviceType: 'Digital Marketing and Web Development',
     provider: {
       '@type': 'LocalBusiness',
-      name: 'Vibefox Studio',
+      name: 'VibefoxStudio',
+      alternateName: 'Vibefox Studio',
       areaServed: 'Jacksonville, Florida',
       url: 'https://vibefoxstudio.com/services',
     },
@@ -27,17 +28,17 @@ export default function ServicesPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="Digital Marketing Services in Jacksonville, Florida"
-        description="SEO, websites, content strategy, and conversion-focused digital marketing services for Jacksonville, Florida businesses."
+        title="VibefoxStudio Services | Jacksonville SEO, Web Design & Growth"
+        description="Jacksonville-focused SEO, websites, content strategy, and conversion-focused digital marketing services from VibefoxStudio."
         path="/services"
-        keywords="digital marketing services jacksonville florida, seo services jacksonville, web design and seo agency jacksonville"
+        keywords="digital marketing services jacksonville florida, seo services jacksonville, web design and seo agency jacksonville, best digital marketing agency in jacksonville florida, local marketing company jacksonville"
         structuredData={schema}
       />
 
       <PageHero
         eyebrow="Services"
         title="Digital marketing services built for Jacksonville growth."
-        sub="From local SEO to high-converting websites, Vibefox Studio helps businesses searching for the best digital marketing agency in Jacksonville, Florida turn traffic into revenue."
+        sub="From local SEO to high-converting websites, VibefoxStudio (Vibefox Studio) helps businesses searching for the best digital marketing agency in Jacksonville, Florida turn traffic into revenue."
       />
 
       <LogoStrip />

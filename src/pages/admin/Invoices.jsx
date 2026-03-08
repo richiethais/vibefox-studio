@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const STATUSES = ['unpaid', 'paid', 'overdue']
@@ -14,15 +14,17 @@ export default function AdminInvoices() {
   const [modal, setModal] = useState(null)
   const [form, setForm] = useState({ client_id: '', description: '', amount: '', status: 'unpaid', due_date: '' })
 
-  useEffect(() => {
-    load()
-    supabase.from('clients').select('id, name').then(({ data }) => setClients(data ?? []))
-  }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     const { data } = await supabase.from('invoices').select('*, clients(name)').order('created_at', { ascending: false })
     setInvoices(data ?? [])
-  }
+  }, [])
+
+  useEffect(() => {
+    supabase.from('invoices').select('*, clients(name)').order('created_at', { ascending: false }).then(({ data }) => {
+      setInvoices(data ?? [])
+    })
+    supabase.from('clients').select('id, name').then(({ data }) => setClients(data ?? []))
+  }, [])
 
   function openCreate() {
     setForm({ client_id: '', description: '', amount: '', status: 'unpaid', due_date: '' })
@@ -39,7 +41,7 @@ export default function AdminInvoices() {
     if (modal === 'create') await supabase.from('invoices').insert(payload)
     else await supabase.from('invoices').update(payload).eq('id', modal.id)
     setModal(null)
-    load()
+    await load()
   }
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))

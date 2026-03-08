@@ -44,11 +44,11 @@ export default function BlogPostPage() {
     description: post.excerpt,
     author: {
       '@type': 'Organization',
-      name: 'Vibefox Studio',
+      name: 'VibefoxStudio',
     },
     publisher: {
       '@type': 'Organization',
-      name: 'Vibefox Studio',
+      name: 'VibefoxStudio',
       logo: {
         '@type': 'ImageObject',
         url: 'https://vibefoxstudio.com/image2vector.svg',
@@ -86,11 +86,27 @@ export default function BlogPostPage() {
           </p>
 
           {post.coverImageUrl && (
-            <img
-              src={post.coverImageUrl}
-              alt={post.title}
-              style={{ width: '100%', borderRadius: 16, marginBottom: 26, border: '1px solid rgba(0,0,0,0.07)' }}
-            />
+            <div
+              style={{
+                width: '100%',
+                minHeight: 360,
+                maxHeight: 640,
+                borderRadius: 16,
+                marginBottom: 26,
+                border: '1px solid rgba(0,0,0,0.07)',
+                background: '#f3eee8',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 16,
+              }}
+            >
+              <img
+                src={post.coverImageUrl}
+                alt={post.title}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }}
+              />
+            </div>
           )}
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 24 }} />
@@ -111,6 +127,11 @@ export default function BlogPostPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 14 }}>
             {related.map(item => (
               <article key={item.slug} style={{ background: '#faf9f7', borderRadius: 14, border: '1px solid rgba(0,0,0,0.08)', padding: 18 }}>
+                {item.coverImageUrl && (
+                  <div style={{ width: '100%', aspectRatio: '16 / 10', borderRadius: 10, overflow: 'hidden', background: '#f3eee8', border: '1px solid rgba(0,0,0,0.06)', marginBottom: 10, padding: 8 }}>
+                    <img src={item.coverImageUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }} />
+                  </div>
+                )}
                 <div style={{ fontSize: 12, color: '#7a7888', marginBottom: 8 }}>{new Date(item.publishedAt).toLocaleDateString()} · {item.readTime}</div>
                 <h3 style={{ fontSize: 18, lineHeight: 1.25, color: '#18181a', margin: '0 0 8px' }}>{item.title}</h3>
                 <p style={{ fontSize: 14, color: '#7a7888', lineHeight: 1.6, margin: '0 0 10px' }}>{item.excerpt}</p>

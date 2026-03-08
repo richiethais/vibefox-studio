@@ -19,7 +19,7 @@ export default function BlogPage() {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    name: 'Vibefox Studio Blog',
+    name: 'VibefoxStudio Blog',
     url: 'https://vibefoxstudio.com/blog',
     blogPost: posts.map(post => ({
       '@type': 'BlogPosting',
@@ -32,17 +32,17 @@ export default function BlogPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="Jacksonville Digital Marketing Blog | SEO Tips & Growth Insights"
+        title="VibefoxStudio Blog | Jacksonville SEO Tips & Digital Marketing Insights"
         description="Weekly blog posts on SEO, local search, conversion optimization, and digital growth for Jacksonville, Florida businesses."
         path="/blog"
-        keywords="jacksonville digital marketing blog, seo tips jacksonville florida, local seo blog"
+        keywords="jacksonville digital marketing blog, seo tips jacksonville florida, local seo blog, best digital marketing agency in jacksonville florida"
         structuredData={schema}
       />
 
       <PageHero
         eyebrow="Blog"
         title="Weekly SEO and digital marketing insights."
-        sub="Actionable strategies for businesses trying to rank higher, convert better, and find the best digital marketing agency in Jacksonville, Florida."
+        sub="Actionable strategies from VibefoxStudio for businesses trying to rank higher, convert better, and find the best digital marketing agency in Jacksonville, Florida."
       />
 
       <section style={{ padding: '22px 40px 96px' }}>
@@ -56,9 +56,30 @@ export default function BlogPage() {
                   background: '#faf9f7',
                   border: '1px solid rgba(0,0,0,0.08)',
                   borderRadius: 16,
-                  padding: 22,
+                  padding: 18,
                   transition: 'all 0.2s ease',
                 }}>
+                  {post.coverImageUrl && (
+                    <div style={{
+                      width: '100%',
+                      aspectRatio: '16 / 10',
+                      borderRadius: 12,
+                      background: '#f3eee8',
+                      border: '1px solid rgba(0,0,0,0.06)',
+                      overflow: 'hidden',
+                      marginBottom: 14,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 12,
+                    }}>
+                      <img
+                        src={post.coverImageUrl}
+                        alt={post.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 10 }}
+                      />
+                    </div>
+                  )}
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
                     <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.7px', textTransform: 'uppercase', color: '#b8906a' }}>{post.category}</span>
                     <span style={{ fontSize: 12, color: '#7a7888' }}>• {new Date(post.publishedAt).toLocaleDateString()}</span>

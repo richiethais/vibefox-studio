@@ -1,7 +1,17 @@
 import { useEffect } from 'react'
 
-const DEFAULT_SITE_NAME = 'Vibefox Studio'
+const DEFAULT_SITE_NAME = 'VibefoxStudio'
+const DEFAULT_DISPLAY_NAME = 'Vibefox Studio'
 const DEFAULT_IMAGE = 'https://vibefoxstudio.com/image2vector.svg'
+const GLOBAL_KEYWORDS = [
+  'vibefoxstudio',
+  'vibefox studio',
+  'best digital marketing agency in jacksonville florida',
+  'jacksonville digital marketing agency',
+  'seo agency jacksonville fl',
+  'website design jacksonville florida',
+  'local seo jacksonville',
+]
 
 function upsertMeta(selector, attrs, content) {
   let tag = document.head.querySelector(selector)
@@ -23,6 +33,11 @@ function upsertLink(selector, attrs, href) {
   tag.setAttribute('href', href)
 }
 
+function mergeKeywords(customKeywords) {
+  const all = [...GLOBAL_KEYWORDS, ...(customKeywords ? customKeywords.split(',') : [])]
+  return [...new Set(all.map(item => item.trim().toLowerCase()).filter(Boolean))].join(', ')
+}
+
 export default function SEOHead({
   title,
   description,
@@ -34,14 +49,35 @@ export default function SEOHead({
   structuredData,
 }) {
   useEffect(() => {
+    const pageTitle = title || DEFAULT_SITE_NAME
     const canonicalUrl = `https://vibefoxstudio.com${path}`
-    const fullTitle = title.includes(DEFAULT_SITE_NAME) ? title : `${title} | ${DEFAULT_SITE_NAME}`
+    const titleHasBrand = [DEFAULT_SITE_NAME, DEFAULT_DISPLAY_NAME].some(brand => pageTitle.includes(brand))
+    const fullTitle = titleHasBrand ? pageTitle : `${pageTitle} | ${DEFAULT_SITE_NAME}`
+
+    const defaultOrganizationSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      '@id': 'https://vibefoxstudio.com/#organization',
+      name: DEFAULT_DISPLAY_NAME,
+      alternateName: DEFAULT_SITE_NAME,
+      url: 'https://vibefoxstudio.com',
+      logo: DEFAULT_IMAGE,
+      areaServed: 'Jacksonville, Florida',
+      description: 'VibefoxStudio is a Jacksonville, Florida digital marketing agency focused on SEO, high-converting websites, and growth systems.',
+    }
+    const providedSchemas = Array.isArray(structuredData) ? structuredData : (structuredData ? [structuredData] : [])
+    const schemas = noindex ? providedSchemas : [defaultOrganizationSchema, ...providedSchemas]
 
     document.title = fullTitle
 
     upsertMeta('meta[name="description"]', { name: 'description' }, description)
     upsertMeta('meta[name="robots"]', { name: 'robots' }, noindex ? 'noindex,nofollow' : 'index,follow,max-image-preview:large')
-    upsertMeta('meta[name="keywords"]', { name: 'keywords' }, keywords || '')
+    upsertMeta('meta[name="keywords"]', { name: 'keywords' }, mergeKeywords(keywords))
+    upsertMeta('meta[name="author"]', { name: 'author' }, DEFAULT_SITE_NAME)
+    upsertMeta('meta[name="application-name"]', { name: 'application-name' }, DEFAULT_SITE_NAME)
+    upsertMeta('meta[name="apple-mobile-web-app-title"]', { name: 'apple-mobile-web-app-title' }, DEFAULT_SITE_NAME)
+    upsertMeta('meta[name="geo.region"]', { name: 'geo.region' }, 'US-FL')
+    upsertMeta('meta[name="geo.placename"]', { name: 'geo.placename' }, 'Jacksonville')
 
     upsertMeta('meta[property="og:type"]', { property: 'og:type' }, type)
     upsertMeta('meta[property="og:title"]', { property: 'og:title' }, fullTitle)
@@ -58,14 +94,14 @@ export default function SEOHead({
     upsertLink('link[rel="canonical"]', { rel: 'canonical' }, canonicalUrl)
 
     let schemaScript = document.head.querySelector('script[data-seo-schema="true"]')
-    if (structuredData) {
+    if (schemas.length > 0) {
       if (!schemaScript) {
         schemaScript = document.createElement('script')
         schemaScript.type = 'application/ld+json'
         schemaScript.setAttribute('data-seo-schema', 'true')
         document.head.appendChild(schemaScript)
       }
-      schemaScript.textContent = JSON.stringify(structuredData)
+      schemaScript.textContent = JSON.stringify(schemas.length === 1 ? schemas[0] : schemas)
     } else if (schemaScript) {
       schemaScript.remove()
     }

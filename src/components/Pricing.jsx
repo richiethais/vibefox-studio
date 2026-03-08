@@ -1,5 +1,6 @@
 import { useFadeUp } from './useFadeUp'
-import { Eyebrow, h2Style, subStyle } from './Services'
+import Eyebrow from './Eyebrow'
+import { h2Style, subStyle } from './sectionStyles'
 
 const plans = [
   {

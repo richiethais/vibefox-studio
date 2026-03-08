@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const STATUS_COLORS = {
@@ -11,12 +11,16 @@ export default function AdminInquiries() {
   const [rows, setRows] = useState([])
   const [selected, setSelected] = useState(null)
 
-  useEffect(() => { load() }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     const { data } = await supabase.from('inquiries').select('*').order('created_at', { ascending: false })
     setRows(data ?? [])
-  }
+  }, [])
+
+  useEffect(() => {
+    supabase.from('inquiries').select('*').order('created_at', { ascending: false }).then(({ data }) => {
+      setRows(data ?? [])
+    })
+  }, [])
 
   async function setStatus(id, status) {
     await supabase.from('inquiries').update({ status }).eq('id', id)

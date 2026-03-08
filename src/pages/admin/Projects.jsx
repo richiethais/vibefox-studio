@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 const STATUSES = ['proposal', 'active', 'complete']
@@ -14,15 +14,17 @@ export default function AdminProjects() {
   const [modal, setModal] = useState(null)
   const [form, setForm] = useState({ client_id: '', title: '', description: '', status: 'proposal', start_date: '', due_date: '' })
 
-  useEffect(() => {
-    load()
-    supabase.from('clients').select('id, name').then(({ data }) => setClients(data ?? []))
-  }, [])
-
-  async function load() {
+  const load = useCallback(async () => {
     const { data } = await supabase.from('projects').select('*, clients(name)').order('created_at', { ascending: false })
     setProjects(data ?? [])
-  }
+  }, [])
+
+  useEffect(() => {
+    supabase.from('projects').select('*, clients(name)').order('created_at', { ascending: false }).then(({ data }) => {
+      setProjects(data ?? [])
+    })
+    supabase.from('clients').select('id, name').then(({ data }) => setClients(data ?? []))
+  }, [])
 
   function openCreate() {
     setForm({ client_id: '', title: '', description: '', status: 'proposal', start_date: '', due_date: '' })
@@ -39,7 +41,7 @@ export default function AdminProjects() {
     if (modal === 'create') await supabase.from('projects').insert(payload)
     else await supabase.from('projects').update(payload).eq('id', modal.id)
     setModal(null)
-    load()
+    await load()
   }
 
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))

@@ -11,7 +11,6 @@ const emptyForm = {
   keywords: '',
   content: '',
   cover_image_url: '',
-  status: 'draft',
 }
 
 function slugify(value) {
@@ -39,6 +38,10 @@ export default function AdminBlogs() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
+
+  const isSavedEditing = Boolean(editing?.id)
+  const isPublishedEditing = editing?.status === 'published'
+  const isLockedEditing = isSavedEditing
 
   const selectedPreview = useMemo(() => {
     if (previewId) return posts.find(p => String(p.id) === String(previewId)) || null
@@ -79,13 +82,16 @@ export default function AdminBlogs() {
       keywords: post.keywords || '',
       content: post.content || '',
       cover_image_url: post.cover_image_url || '',
-      status: post.status || 'draft',
     })
-    setNotice('')
+    if (post.status === 'published') {
+      setNotice('This blog is already published and locked from editing.')
+      return
+    }
+    setNotice('Saved drafts are locked from editing. You can publish or delete this draft.')
   }
 
   async function uploadImage(file) {
-    if (!file) return
+    if (!file || isLockedEditing) return
     setUploading(true)
     setNotice('')
 
@@ -103,8 +109,13 @@ export default function AdminBlogs() {
     setNotice('Image uploaded.')
   }
 
-  async function save(e) {
+  async function saveDraft(e) {
     e.preventDefault()
+    if (isLockedEditing) {
+      setNotice('Saved blogs are locked from editing. Create a new blog if you need changes.')
+      return
+    }
+
     setSaving(true)
     setNotice('')
 
@@ -113,8 +124,9 @@ export default function AdminBlogs() {
     const payload = {
       ...form,
       slug,
-      published_at: form.status === 'published' ? (editing?.published_at || nowIso) : null,
+      status: 'draft',
       updated_at: nowIso,
+      published_at: null,
     }
 
     let error
@@ -130,9 +142,73 @@ export default function AdminBlogs() {
       return
     }
 
-    setNotice('Blog saved successfully.')
+    setNotice('Draft saved.')
     setEditing(null)
     setForm(emptyForm)
+    await load()
+  }
+
+  async function publishCurrent() {
+    if (isPublishedEditing) {
+      setNotice('This blog is already published.')
+      return
+    }
+
+    if (!form.title || !form.excerpt || !form.content) {
+      setNotice('Title, excerpt, and content are required before posting.')
+      return
+    }
+
+    setSaving(true)
+    setNotice('')
+
+    const nowIso = new Date().toISOString()
+    const slug = form.slug || slugify(form.title)
+    const payload = {
+      ...form,
+      slug,
+      status: 'published',
+      published_at: nowIso,
+      updated_at: nowIso,
+    }
+
+    let error
+    if (editing?.id) {
+      ;({ error } = await supabase.from('blog_posts').update(payload).eq('id', editing.id))
+    } else {
+      ;({ error } = await supabase.from('blog_posts').insert({ ...payload, created_at: nowIso }))
+    }
+
+    setSaving(false)
+    if (error) {
+      setNotice(`Publish failed: ${error.message}`)
+      return
+    }
+
+    setNotice('Blog posted successfully.')
+    setEditing(null)
+    setForm(emptyForm)
+    await load()
+  }
+
+  async function publishFromRow(post) {
+    if (post.status === 'published') {
+      setNotice('This blog is already published.')
+      return
+    }
+
+    const { error } = await supabase.from('blog_posts').update({
+      status: 'published',
+      published_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    }).eq('id', post.id)
+
+    if (error) {
+      setNotice(`Publish failed: ${error.message}`)
+      return
+    }
+
+    setNotice(`Posted: ${post.title}`)
     await load()
   }
 
@@ -185,8 +261,15 @@ export default function AdminBlogs() {
                       </span>
                     </td>
                     <td style={{ padding: '10px 12px', color: '#7a7888' }}>{formatDate(post.updated_at)}</td>
-                    <td style={{ padding: '10px 12px', display: 'flex', gap: 8 }}>
-                      <button style={ghostBtn} onClick={() => beginEdit(post)}>Edit</button>
+                    <td style={{ padding: '10px 12px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button style={ghostBtn} onClick={() => beginEdit(post)}>View</button>
+                      <button
+                        style={{ ...ghostBtn, opacity: post.status === 'published' ? 0.5 : 1, cursor: post.status === 'published' ? 'default' : 'pointer' }}
+                        onClick={() => publishFromRow(post)}
+                        disabled={post.status === 'published'}
+                      >
+                        {post.status === 'published' ? 'Published' : 'Post blog'}
+                      </button>
                       <button style={ghostBtn} onClick={() => remove(post.id)}>Delete</button>
                     </td>
                   </tr>
@@ -203,28 +286,28 @@ export default function AdminBlogs() {
 
         <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, overflow: 'hidden' }}>
           <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(0,0,0,0.07)', fontSize: 14, fontWeight: 600, color: '#18181a' }}>
-            {editing ? 'Edit blog' : 'Create blog'}
+            {editing ? `${isPublishedEditing ? 'Published' : 'Saved draft'} (locked)` : 'Create blog'}
           </div>
-          <form onSubmit={save} style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <input placeholder="Title *" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: slugify(e.target.value) }))} required style={inp} />
-            <input placeholder="Slug *" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: slugify(e.target.value) }))} required style={inp} />
-            <input placeholder="Excerpt *" value={form.excerpt} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} required style={inp} />
+          <form onSubmit={saveDraft} style={{ padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <input placeholder="Title *" value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value, slug: slugify(e.target.value) }))} required style={inp} readOnly={isLockedEditing} />
+            <input placeholder="Slug *" value={form.slug} onChange={e => setForm(f => ({ ...f, slug: slugify(e.target.value) }))} required style={inp} readOnly={isLockedEditing} />
+            <input placeholder="Excerpt *" value={form.excerpt} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} required style={inp} readOnly={isLockedEditing} />
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <input placeholder="Category" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} style={inp} />
-              <input placeholder="Read time (e.g. 6 min read)" value={form.read_time} onChange={e => setForm(f => ({ ...f, read_time: e.target.value }))} style={inp} />
+              <input placeholder="Category" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} style={inp} readOnly={isLockedEditing} />
+              <input placeholder="Read time (e.g. 6 min read)" value={form.read_time} onChange={e => setForm(f => ({ ...f, read_time: e.target.value }))} style={inp} readOnly={isLockedEditing} />
             </div>
-            <input placeholder="Keywords" value={form.keywords} onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))} style={inp} />
+            <input placeholder="Keywords" value={form.keywords} onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))} style={inp} readOnly={isLockedEditing} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center' }}>
-              <input placeholder="Cover image URL" value={form.cover_image_url} onChange={e => setForm(f => ({ ...f, cover_image_url: e.target.value }))} style={inp} />
-              <label style={{ ...ghostBtn, padding: '9px 12px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
+              <input placeholder="Cover image URL" value={form.cover_image_url} onChange={e => setForm(f => ({ ...f, cover_image_url: e.target.value }))} style={inp} readOnly={isLockedEditing} />
+              <label style={{ ...ghostBtn, padding: '9px 12px', display: 'inline-flex', alignItems: 'center', cursor: isLockedEditing ? 'default' : 'pointer', opacity: isLockedEditing ? 0.5 : 1 }}>
                 {uploading ? 'Uploading…' : 'Upload image'}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={e => uploadImage(e.target.files?.[0])}
                   style={{ display: 'none' }}
-                  disabled={uploading}
+                  disabled={uploading || isLockedEditing}
                 />
               </label>
             </div>
@@ -235,16 +318,20 @@ export default function AdminBlogs() {
               onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
               rows={12}
               style={{ ...inp, resize: 'vertical' }}
+              readOnly={isLockedEditing}
             />
 
-            <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} style={inp}>
-              <option value="draft">Draft</option>
-              <option value="published">Published</option>
-            </select>
-
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button type="button" style={ghostBtn} onClick={beginCreate}>Reset</button>
-              <button type="submit" style={darkBtn} disabled={saving}>{saving ? 'Saving…' : 'Save blog'}</button>
+              <button type="submit" style={darkBtn} disabled={saving || isLockedEditing}>{saving ? 'Saving…' : 'Save Draft'}</button>
+              <button
+                type="button"
+                style={{ ...darkBtn, background: '#b45309', opacity: isPublishedEditing ? 0.5 : 1, cursor: isPublishedEditing ? 'default' : 'pointer' }}
+                onClick={publishCurrent}
+                disabled={saving || isPublishedEditing}
+              >
+                {isPublishedEditing ? 'Already Published' : 'Post Blog'}
+              </button>
             </div>
           </form>
         </div>
@@ -257,11 +344,25 @@ export default function AdminBlogs() {
         ) : (
           <div style={{ padding: 14 }}>
             {(form.cover_image_url || selectedPreview?.cover_image_url) && (
-              <img
-                src={form.cover_image_url || selectedPreview?.cover_image_url}
-                alt="Blog cover"
-                style={{ width: '100%', maxHeight: 260, objectFit: 'cover', borderRadius: 12, marginBottom: 12, border: '1px solid rgba(0,0,0,0.08)' }}
-              />
+              <div style={{
+                width: '100%',
+                minHeight: 380,
+                maxHeight: 620,
+                background: '#f8f6f2',
+                borderRadius: 12,
+                marginBottom: 12,
+                border: '1px solid rgba(0,0,0,0.08)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 18,
+              }}>
+                <img
+                  src={form.cover_image_url || selectedPreview?.cover_image_url}
+                  alt="Blog cover"
+                  style={{ width: '100%', height: '100%', maxHeight: 580, objectFit: 'contain', borderRadius: 10 }}
+                />
+              </div>
             )}
             <div style={{ fontSize: 12, color: '#b8906a', textTransform: 'uppercase', letterSpacing: '0.7px', fontWeight: 700 }}>
               {form.category || selectedPreview?.category || 'Digital Marketing'}
