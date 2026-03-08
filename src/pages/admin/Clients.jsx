@@ -16,6 +16,7 @@ export default function AdminClients() {
   const [linkForm, setLinkForm] = useState({ name: '', email: '' })
   const [generatedLink, setGeneratedLink] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -137,7 +138,7 @@ export default function AdminClients() {
                 </div>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                   <button onClick={() => setLinkModal(false)} style={ghostBtn}>Close</button>
-                  <button onClick={() => navigator.clipboard.writeText(generatedLink)} style={darkBtn}>Copy link</button>
+                  <button onClick={() => { navigator.clipboard.writeText(generatedLink); setCopied(true); setTimeout(() => setCopied(false), 2000) }} style={darkBtn}>{copied ? 'Link copied!' : 'Copy link'}</button>
                 </div>
               </div>
             )}
