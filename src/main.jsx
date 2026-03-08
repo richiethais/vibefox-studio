@@ -1,10 +1,57 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
+import { AuthProvider } from './lib/auth'
 import App from './App.jsx'
+import AdminLogin from './pages/admin/Login.jsx'
+import AdminDashboard from './pages/admin/Dashboard.jsx'
+import AdminInquiries from './pages/admin/Inquiries.jsx'
+import AdminClients from './pages/admin/Clients.jsx'
+import AdminProjects from './pages/admin/Projects.jsx'
+import AdminInvoices from './pages/admin/Invoices.jsx'
+import AdminMessages from './pages/admin/Messages.jsx'
+import AdminNotes from './pages/admin/Notes.jsx'
+import ClientLogin from './pages/client/Login.jsx'
+import ClientDashboard from './pages/client/Dashboard.jsx'
+import ClientProjects from './pages/client/Projects.jsx'
+import ClientInvoices from './pages/client/Invoices.jsx'
+import ClientMessages from './pages/client/Messages.jsx'
+import ClientRequests from './pages/client/Requests.jsx'
+import AdminLayout from './components/admin/AdminLayout.jsx'
+import ClientLayout from './components/client/ClientLayout.jsx'
+import { AdminRoute, ClientRoute } from './components/ProtectedRoute.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
-  </StrictMode>,
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<App />} />
+
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="inquiries" element={<AdminInquiries />} />
+            <Route path="clients" element={<AdminClients />} />
+            <Route path="projects" element={<AdminProjects />} />
+            <Route path="invoices" element={<AdminInvoices />} />
+            <Route path="messages" element={<AdminMessages />} />
+            <Route path="notes" element={<AdminNotes />} />
+          </Route>
+
+          <Route path="/client/login" element={<ClientLogin />} />
+          <Route path="/client" element={<ClientRoute><ClientLayout /></ClientRoute>}>
+            <Route index element={<Navigate to="dashboard" replace />} />
+            <Route path="dashboard" element={<ClientDashboard />} />
+            <Route path="projects" element={<ClientProjects />} />
+            <Route path="invoices" element={<ClientInvoices />} />
+            <Route path="messages" element={<ClientMessages />} />
+            <Route path="requests" element={<ClientRequests />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  </StrictMode>
 )
