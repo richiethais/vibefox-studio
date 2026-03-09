@@ -1,8 +1,8 @@
 const SIZE_MAP = {
-  xs: { mark: 22, font: 17, gap: 9 },
-  sm: { mark: 20, font: 15, gap: 8 },
-  md: { mark: 34, font: 24, gap: 12 },
-  nav: { mark: 28, font: 19, gap: 10 },
+  xs: { mark: 24, font: 17, gap: 9 },
+  sm: { mark: 22, font: 15, gap: 8 },
+  md: { mark: 36, font: 24, gap: 12 },
+  nav: { mark: 32, font: 19, gap: 10 },
 }
 
 export default function BrandLogo({
@@ -20,20 +20,21 @@ export default function BrandLogo({
       href={href}
       style={{
         display: 'inline-flex',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         gap: ui.gap,
         textDecoration: 'none',
         ...style,
       }}
     >
       <img
-        src="/image2vector.svg"
+        src="/logo-mark.png"
         alt="VibefoxStudio logo"
         style={{
           height: ui.mark,
           width: 'auto',
           display: 'block',
           flexShrink: 0,
+          transform: 'translateY(3px)',
         }}
       />
       <span
