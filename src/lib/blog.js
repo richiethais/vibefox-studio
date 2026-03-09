@@ -1,6 +1,14 @@
 import { supabase } from './supabase'
 import { getAllBlogPosts } from '../content/blogPosts'
 
+export async function publishDueScheduledPosts() {
+  try {
+    await supabase.rpc('publish_due_blog_posts')
+  } catch {
+    // Scheduling RPC is optional until the Supabase upgrade SQL has been run.
+  }
+}
+
 function normalizeRow(row) {
   return {
     id: row.id,
@@ -31,6 +39,8 @@ function fallbackPosts() {
 }
 
 export async function fetchPublishedPosts() {
+  await publishDueScheduledPosts()
+
   const { data, error } = await supabase
     .from('blog_posts')
     .select('*')
@@ -47,6 +57,8 @@ export async function fetchPublishedPosts() {
 }
 
 export async function fetchPostBySlug(slug) {
+  await publishDueScheduledPosts()
+
   const { data, error } = await supabase
     .from('blog_posts')
     .select('*')

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { publishDueScheduledPosts } from '../../lib/blog'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
 
@@ -19,9 +20,22 @@ const NEW_YORK_TZ = 'America/New_York'
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 const MINUTE_OPTIONS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'))
 
+function getErrorMessage(error) {
+  return String(error?.message || '').toLowerCase()
+}
+
 function isMissingTableError(error) {
-  const msg = String(error?.message || '').toLowerCase()
-  return msg.includes('could not find the table') || msg.includes('blog_posts')
+  const msg = getErrorMessage(error)
+  return msg.includes("could not find the table 'public.blog_posts'") || msg.includes('relation "blog_posts" does not exist')
+}
+
+function isSchedulingSchemaError(error) {
+  const msg = getErrorMessage(error)
+  return (
+    (msg.includes('could not find the') && msg.includes('column') && (msg.includes('publish_at') || msg.includes('status'))) ||
+    (msg.includes('violates check constraint') && msg.includes('status')) ||
+    msg.includes('blog_posts_status_check')
+  )
 }
 
 function slugify(value) {
@@ -263,6 +277,7 @@ export default function AdminBlogs() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [setupRequired, setSetupRequired] = useState(false)
+  const [schedulingReady, setSchedulingReady] = useState(true)
   const [form, setForm] = useState(emptyForm)
   const [editing, setEditing] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -292,7 +307,18 @@ export default function AdminBlogs() {
     return editing
   }, [posts, previewId, editing])
 
-  const load = async () => {
+  async function checkSchedulingSchema() {
+    const { error } = await supabase
+      .from('blog_posts')
+      .select('id, status, publish_at')
+      .limit(1)
+
+    return error || null
+  }
+
+  const load = useCallback(async () => {
+    await publishDueScheduledPosts()
+
     const { data, error } = await supabase
       .from('blog_posts')
       .select('*')
@@ -311,33 +337,23 @@ export default function AdminBlogs() {
     }
 
     setSetupRequired(false)
+    const schemaError = await checkSchedulingSchema()
+    if (schemaError && isSchedulingSchemaError(schemaError)) {
+      setSchedulingReady(false)
+      setNotice('Blog scheduling needs a Supabase schema upgrade. Run `docs/sql/blog_setup.sql` once, then refresh.')
+    } else {
+      setSchedulingReady(true)
+    }
     setPosts(data ?? [])
     setLoading(false)
-  }
+  }, [])
 
   useEffect(() => {
-    supabase
-      .from('blog_posts')
-      .select('*')
-      .order('updated_at', { ascending: false })
-      .then(({ data, error }) => {
-        if (error) {
-          if (isMissingTableError(error)) {
-            setSetupRequired(true)
-            setNotice(`Blog setup error: ${error.message}`)
-          } else {
-            setNotice(`Load failed: ${error.message}`)
-          }
-          setPosts([])
-          setLoading(false)
-          return
-        }
-
-        setSetupRequired(false)
-        setPosts(data ?? [])
-        setLoading(false)
-      })
-  }, [])
+    const run = async () => {
+      await load()
+    }
+    run()
+  }, [load])
 
   async function ensureUniqueSlug(base, ignoreId = null) {
     const cleanBase = slugify(base) || `blog-${Date.now()}`
@@ -475,6 +491,10 @@ export default function AdminBlogs() {
       setNotice('Cannot post yet. Run docs/sql/blog_setup.sql in Supabase first.')
       return
     }
+    if (form.scheduleMode === 'schedule' && !schedulingReady) {
+      setNotice('Scheduled publishing is not installed in Supabase yet. Run `docs/sql/blog_setup.sql`, refresh, then schedule the post again.')
+      return
+    }
     if (!form.title || !form.excerpt || !form.content) {
       setNotice('Title, excerpt, and content are required before posting.')
       return
@@ -511,7 +531,6 @@ export default function AdminBlogs() {
             ...basePost,
             slug,
             status: 'published',
-            publish_at: null,
             published_at: editing?.published_at || nowIso,
             updated_at: nowIso,
           }
@@ -528,6 +547,11 @@ export default function AdminBlogs() {
         if (isMissingTableError(error)) {
           setSetupRequired(true)
           setNotice(`Supabase error: ${error.message} (code: ${error.code})`)
+          return
+        }
+        if (isSchedulingSchemaError(error)) {
+          setSchedulingReady(false)
+          setNotice('Scheduled publishing needs a schema upgrade. Run `docs/sql/blog_setup.sql` in Supabase, refresh, then try again.')
           return
         }
         setNotice(`Publish failed: ${error.message}`)
@@ -611,6 +635,12 @@ export default function AdminBlogs() {
       {setupRequired && (
         <div style={{ background: '#fff7ed', border: '1px solid #fdba74', borderRadius: 10, padding: '10px 14px', marginBottom: 14, color: '#9a3412', fontSize: 13 }}>
           Blog table is missing in Supabase. Run `docs/sql/blog_setup.sql` once, then refresh.
+        </div>
+      )}
+
+      {!setupRequired && !schedulingReady && (
+        <div style={{ background: '#fffbeb', border: '1px solid #f59e0b', borderRadius: 10, padding: '10px 14px', marginBottom: 14, color: '#92400e', fontSize: 13 }}>
+          Scheduling is not installed in Supabase yet. Publish now works, but scheduled blogs require the updated `docs/sql/blog_setup.sql`.
         </div>
       )}
 
@@ -731,6 +761,7 @@ export default function AdminBlogs() {
                     name="scheduleMode"
                     value="schedule"
                     checked={form.scheduleMode === 'schedule'}
+                    disabled={!schedulingReady}
                     onChange={() => {
                       setForm(f => ({ ...f, scheduleMode: 'schedule' }))
                       setScheduleDraft(prev => prev || getDefaultScheduleDraft())
@@ -759,7 +790,7 @@ export default function AdminBlogs() {
                 onClick={publishCurrent}
                 disabled={postActionDisabled}
               >
-                {saving ? 'Posting…' : (isEditingPublished ? 'Post as New Blog' : 'Post Blog')}
+                {saving ? 'Posting…' : form.scheduleMode === 'schedule' ? 'Schedule Blog' : (isEditingPublished ? 'Post as New Blog' : 'Post Blog')}
               </button>
             </div>
           </form>
