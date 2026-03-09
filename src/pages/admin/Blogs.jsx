@@ -153,7 +153,7 @@ function buildIsoFromNyDraft(draft) {
 
 function formatDateEST(isoValue, includeZone = true) {
   if (!isoValue) return '—'
-  const opts = {
+  const formatted = new Intl.DateTimeFormat('en-US', {
     timeZone: NEW_YORK_TZ,
     year: 'numeric',
     month: 'short',
@@ -161,9 +161,8 @@ function formatDateEST(isoValue, includeZone = true) {
     hour: 'numeric',
     minute: '2-digit',
     hour12: true,
-  }
-  if (includeZone) opts.timeZoneName = 'short'
-  return new Intl.DateTimeFormat('en-US', opts).format(new Date(isoValue))
+  }).format(new Date(isoValue))
+  return includeZone ? `${formatted} EST` : formatted
 }
 
 function formatCountdown(isoValue) {
@@ -373,7 +372,7 @@ export default function AdminBlogs() {
     if (post.status === 'published') {
       setNotice('Viewing a published blog. Posting from here creates a new blog and keeps existing blogs intact.')
     } else if (post.status === 'scheduled') {
-      setNotice(`Editing scheduled blog. All times are shown in New York (ET).`)
+      setNotice('Editing scheduled blog. All times are shown in EST.')
     } else {
       setNotice('Editing saved draft.')
     }
@@ -536,7 +535,7 @@ export default function AdminBlogs() {
       }
 
       setNotice(isScheduled
-        ? `Blog scheduled for ${formatDateEST(scheduleResult.iso)} (New York time).`
+        ? `Blog scheduled for ${formatDateEST(scheduleResult.iso)}.`
         : 'Blog posted successfully and is now live on the public Blogs page.')
       setEditing(null)
       setForm(emptyForm)
@@ -866,7 +865,7 @@ function ScheduledPostsPanel({ posts, loading, onEdit, onDelete, onPublishNow })
           Scheduled Blogs ({posts.length})
         </div>
         <div style={{ marginTop: 4, fontSize: 12, color: '#7a7888' }}>
-          All schedule times are set and displayed in New York time (ET).
+          All schedule times are set and displayed in EST.
         </div>
       </div>
 
@@ -964,7 +963,7 @@ function ScheduleComposer({ value, onChange, error }) {
   return (
     <div style={{ border: '1px solid rgba(184,144,106,0.28)', borderRadius: 12, background: 'rgba(255,255,255,0.76)', padding: 12 }}>
       <div style={{ fontSize: 12, color: '#7a7888', marginBottom: 10 }}>
-        Schedule in <strong style={{ color: '#18181a' }}>America/New_York</strong> timezone
+        Schedule in <strong style={{ color: '#18181a' }}>EST</strong>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 0.9fr', gap: 8 }}>
