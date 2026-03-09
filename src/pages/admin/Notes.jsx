@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import useIsMobile from '../../components/useIsMobile'
 
 export default function AdminNotes() {
   const [notes, setNotes] = useState([])
@@ -7,6 +8,7 @@ export default function AdminNotes() {
   const [projects, setProjects] = useState([])
   const [modal, setModal] = useState(false)
   const [form, setForm] = useState({ related_type: 'client', related_id: '', body: '' })
+  const isMobile = useIsMobile(768)
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('notes').select('*').order('created_at', { ascending: false })
@@ -37,7 +39,7 @@ export default function AdminNotes() {
   const relatedOptions = form.related_type === 'client' ? clients : projects
 
   return (
-    <div style={{ padding: '36px 40px' }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', letterSpacing: '-0.4px' }}>Notes</h1>
         <button onClick={() => setModal(true)} style={darkBtn}>+ New note</button>
@@ -59,7 +61,7 @@ export default function AdminNotes() {
 
       {modal && (
         <div style={overlay}>
-          <div style={modalBox}>
+          <div style={{ ...modalBox, padding: isMobile ? 20 : 32, margin: isMobile ? 16 : 0 }}>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 20 }}>New note</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <select value={form.related_type} onChange={e => setForm(f => ({ ...f, related_type: e.target.value, related_id: '' }))} style={inp}>

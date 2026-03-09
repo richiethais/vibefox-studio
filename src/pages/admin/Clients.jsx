@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/useAuth'
+import useIsMobile from '../../components/useIsMobile'
 
 const PLANS = ['starter', 'growth', 'pro']
 const STATUSES = ['active', 'inactive']
@@ -19,6 +20,7 @@ export default function AdminClients() {
   const [generating, setGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
   const [copiedToken, setCopiedToken] = useState('')
+  const isMobile = useIsMobile(768)
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://vibefoxstudio.com'
   const registeredEmails = useMemo(
@@ -134,8 +136,8 @@ export default function AdminClients() {
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
   return (
-    <div style={{ padding: '36px 40px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', letterSpacing: '-0.4px' }}>Clients</h1>
         <div style={{ display: 'flex', gap: 10 }}>
           <button onClick={() => { setLinkModal(true); setGeneratedLink(''); setLinkForm({ name: '', email: '' }) }} style={ghostBtn}>Generate invite link</button>
@@ -158,36 +160,38 @@ export default function AdminClients() {
       )}
 
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-              {['Name', 'Email', 'Company', 'Plan', 'Status', 'Actions'].map(h => (
-                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map(c => (
-              <tr key={c.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{c.name}</td>
-                <td style={{ padding: '12px 16px', color: '#7a7888' }}>{c.email}</td>
-                <td style={{ padding: '12px 16px', color: '#7a7888' }}>{c.company || '—'}</td>
-                <td style={{ padding: '12px 16px' }}>
-                  <span style={{ ...badge, background: '#f3f4f6', color: '#374151' }}>{c.plan}</span>
-                </td>
-                <td style={{ padding: '12px 16px' }}>
-                  <span style={{ ...badge, background: c.status === 'active' ? '#dcfce7' : '#f3f4f6', color: c.status === 'active' ? '#16a34a' : '#6b7280' }}>{c.status}</span>
-                </td>
-                <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
-                  <button onClick={() => openEdit(c)} style={ghostBtn}>Edit</button>
-                  <button onClick={() => sendInvite(c)} disabled={inviting} style={ghostBtn}>
-                    {inviting ? '…' : 'Invite'}
-                  </button>
-                </td>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+                {['Name', 'Email', 'Company', 'Plan', 'Status', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {clients.map(c => (
+                <tr key={c.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{c.name}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{c.email}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{c.company || '—'}</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <span style={{ ...badge, background: '#f3f4f6', color: '#374151' }}>{c.plan}</span>
+                  </td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <span style={{ ...badge, background: c.status === 'active' ? '#dcfce7' : '#f3f4f6', color: c.status === 'active' ? '#16a34a' : '#6b7280' }}>{c.status}</span>
+                  </td>
+                  <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
+                    <button onClick={() => openEdit(c)} style={ghostBtn}>Edit</button>
+                    <button onClick={() => sendInvite(c)} disabled={inviting} style={ghostBtn}>
+                      {inviting ? '…' : 'Invite'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div style={{ marginTop: 24, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
@@ -195,59 +199,61 @@ export default function AdminClients() {
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#18181a' }}>Invite links</h2>
           <span style={{ fontSize: 12, color: '#7a7888' }}>{inviteLinks.length} total</span>
         </div>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-              {['Name', 'Email', 'Created', 'Status', 'Link', 'Actions'].map(h => (
-                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {inviteLinks.map(link => {
-              const status = getLinkStatus(link)
-              const url = buildInviteLink(link.token)
-              return (
-                <tr key={link.token} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{link.name || '—'}</td>
-                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{link.email}</td>
-                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{link.created_at ? new Date(link.created_at).toLocaleString() : '—'}</td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <span style={{ ...badge, background: status.bg, color: status.text, textTransform: 'none' }}>{status.label}</span>
-                  </td>
-                  <td style={{ padding: '12px 16px', color: '#7a7888', maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={url}>
-                    {url}
-                  </td>
-                  <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(url)
-                        setCopiedToken(link.token)
-                        setTimeout(() => setCopiedToken(''), 2000)
-                      }}
-                      style={ghostBtn}
-                    >
-                      {copiedToken === link.token ? 'Copied' : 'Copy'}
-                    </button>
-                    <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Open</a>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+                {['Name', 'Email', 'Created', 'Status', 'Link', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {inviteLinks.map(link => {
+                const status = getLinkStatus(link)
+                const url = buildInviteLink(link.token)
+                return (
+                  <tr key={link.token} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                    <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{link.name || '—'}</td>
+                    <td style={{ padding: '12px 16px', color: '#7a7888' }}>{link.email}</td>
+                    <td style={{ padding: '12px 16px', color: '#7a7888' }}>{link.created_at ? new Date(link.created_at).toLocaleString() : '—'}</td>
+                    <td style={{ padding: '12px 16px' }}>
+                      <span style={{ ...badge, background: status.bg, color: status.text, textTransform: 'none' }}>{status.label}</span>
+                    </td>
+                    <td style={{ padding: '12px 16px', color: '#7a7888', maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={url}>
+                      {url}
+                    </td>
+                    <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(url)
+                          setCopiedToken(link.token)
+                          setTimeout(() => setCopiedToken(''), 2000)
+                        }}
+                        style={ghostBtn}
+                      >
+                        {copiedToken === link.token ? 'Copied' : 'Copy'}
+                      </button>
+                      <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Open</a>
+                    </td>
+                  </tr>
+                )
+              })}
+              {inviteLinks.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '18px 16px', color: '#7a7888', fontSize: 13 }}>
+                    No invite links generated yet.
                   </td>
                 </tr>
-              )
-            })}
-            {inviteLinks.length === 0 && (
-              <tr>
-                <td colSpan={6} style={{ padding: '18px 16px', color: '#7a7888', fontSize: 13 }}>
-                  No invite links generated yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {linkModal && (
         <div style={overlay}>
-          <div style={modalBox}>
+          <div style={getModalBox(isMobile)}>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 6 }}>Generate invite link</h2>
             <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 20 }}>Pre-fill the client's details. The link is single-use.</p>
             {!generatedLink ? (
@@ -287,7 +293,7 @@ export default function AdminClients() {
 
       {modal && (
         <div style={overlay}>
-          <div style={modalBox}>
+          <div style={getModalBox(isMobile)}>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 20 }}>
               {modal === 'create' ? 'New client' : 'Edit client'}
             </h2>
@@ -319,4 +325,4 @@ const inp = { padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(0,
 const darkBtn = { padding: '9px 18px', borderRadius: 100, border: 'none', background: '#18181a', color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer' }
 const ghostBtn = { padding: '8px 14px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', color: '#18181a', fontSize: 12, cursor: 'pointer' }
 const overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }
-const modalBox = { background: 'white', borderRadius: 18, padding: 32, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }
+const getModalBox = (isMobile) => ({ background: 'white', borderRadius: 18, padding: isMobile ? 20 : 32, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', margin: isMobile ? 16 : 0 })

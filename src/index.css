@@ -5,13 +5,23 @@
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
     font-family: 'DM Sans', sans-serif;
     background: #f5f3f0;
     color: #3a3840;
     overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
   }
+  /* Prevent iOS zoom on input focus by ensuring min 16px font */
+  @media (max-width: 768px) {
+    input, select, textarea { font-size: 16px !important; }
+    /* Hide scrollbars on horizontal scroll containers */
+    .mobile-scroll::-webkit-scrollbar { display: none; }
+    .mobile-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+  }
+  /* Touch-friendly button/link targets */
+  button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 @keyframes rise {

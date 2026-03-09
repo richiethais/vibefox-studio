@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import useIsMobile from '../../components/useIsMobile'
 
 const STATUSES = ['unpaid', 'paid', 'overdue']
 const STATUS_COLORS = {
@@ -13,6 +14,7 @@ export default function AdminInvoices() {
   const [clients, setClients] = useState([])
   const [modal, setModal] = useState(null)
   const [form, setForm] = useState({ client_id: '', description: '', amount: '', status: 'unpaid', due_date: '' })
+  const isMobile = useIsMobile(768)
 
   const load = useCallback(async () => {
     const { data } = await supabase.from('invoices').select('*, clients(name)').order('created_at', { ascending: false })
@@ -47,13 +49,14 @@ export default function AdminInvoices() {
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
 
   return (
-    <div style={{ padding: '36px 40px' }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', letterSpacing: '-0.4px' }}>Invoices</h1>
         <button onClick={openCreate} style={darkBtn}>+ New invoice</button>
       </div>
 
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
@@ -79,11 +82,12 @@ export default function AdminInvoices() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {modal && (
         <div style={overlay}>
-          <div style={modalBox}>
+          <div style={{ background: 'white', borderRadius: 18, padding: isMobile ? 20 : 32, margin: isMobile ? 16 : 0, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 20 }}>
               {modal === 'create' ? 'New invoice' : 'Edit invoice'}
             </h2>
@@ -118,4 +122,3 @@ const inp = { padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(0,
 const darkBtn = { padding: '9px 18px', borderRadius: 100, border: 'none', background: '#18181a', color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer' }
 const ghostBtn = { padding: '8px 14px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', color: '#18181a', fontSize: 12, cursor: 'pointer' }
 const overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }
-const modalBox = { background: 'white', borderRadius: 18, padding: 32, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }

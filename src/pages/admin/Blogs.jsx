@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import useIsMobile from '../../components/useIsMobile'
 
 const emptyForm = {
   title: '',
@@ -114,6 +115,7 @@ export default function AdminBlogs() {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
+  const isMobile = useIsMobile(768)
 
   const draftPosts = useMemo(() => posts.filter(p => p.status === 'draft'), [posts])
   const publishedPosts = useMemo(() => posts.filter(p => p.status === 'published'), [posts])
@@ -408,7 +410,7 @@ export default function AdminBlogs() {
   }
 
   return (
-    <div style={{ padding: '36px 40px' }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, gap: 10, flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', margin: 0, letterSpacing: '-0.4px' }}>Blogs</h1>
         <button onClick={beginCreate} style={darkBtn}>+ New blog</button>
@@ -426,7 +428,7 @@ export default function AdminBlogs() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.25fr 1fr', gap: 16 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <PostTable
             title={`Saved Drafts (${draftPosts.length})`}
@@ -483,13 +485,13 @@ export default function AdminBlogs() {
               required
               style={inp}
             />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
               <input placeholder="Category" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} style={inp} />
               <input placeholder="Read time (e.g. 6 min read)" value={form.read_time} onChange={e => setForm(f => ({ ...f, read_time: e.target.value }))} style={inp} />
             </div>
             <input placeholder="Keywords" value={form.keywords} onChange={e => setForm(f => ({ ...f, keywords: e.target.value }))} style={inp} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr auto', gap: 10, alignItems: 'center' }}>
               <input placeholder="Cover image URL" value={form.cover_image_url} onChange={e => setForm(f => ({ ...f, cover_image_url: e.target.value }))} style={inp} />
               <label style={{ ...ghostBtn, padding: '9px 12px', display: 'inline-flex', alignItems: 'center', cursor: 'pointer' }}>
                 {uploading ? 'Uploading…' : 'Upload image'}
@@ -555,7 +557,7 @@ export default function AdminBlogs() {
             <div style={{ fontSize: 12, color: '#b8906a', textTransform: 'uppercase', letterSpacing: '0.7px', fontWeight: 700 }}>
               {form.category || selectedPreview?.category || 'Digital Marketing'}
             </div>
-            <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: 34, lineHeight: 1.08, color: '#18181a', margin: '8px 0 10px' }}>
+            <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 22 : 34, lineHeight: 1.08, color: '#18181a', margin: '8px 0 10px' }}>
               {form.title || selectedPreview?.title || 'Untitled draft'}
             </h2>
             <p style={{ color: '#7a7888', fontSize: 16, lineHeight: 1.6, marginTop: 0 }}>
@@ -585,31 +587,33 @@ function PostTable({ title, posts, loading, emptyText, renderActions, showPublis
       {loading ? (
         <div style={{ padding: 14, color: '#7a7888', fontSize: 13 }}>Loading…</div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-              {['Title', showPublishedDate ? 'Published' : 'Updated', 'Actions'].map(h => (
-                <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: 11, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+                {['Title', showPublishedDate ? 'Published' : 'Updated', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: 11, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {posts.map(post => (
+                <tr key={post.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <td style={{ padding: '10px 12px', color: '#18181a', fontWeight: 500 }}>{post.title}</td>
+                  <td style={{ padding: '10px 12px', color: '#7a7888' }}>{formatDate(showPublishedDate ? post.published_at : post.updated_at)}</td>
+                  <td style={{ padding: '10px 12px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {renderActions(post)}
+                  </td>
+                </tr>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map(post => (
-              <tr key={post.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                <td style={{ padding: '10px 12px', color: '#18181a', fontWeight: 500 }}>{post.title}</td>
-                <td style={{ padding: '10px 12px', color: '#7a7888' }}>{formatDate(showPublishedDate ? post.published_at : post.updated_at)}</td>
-                <td style={{ padding: '10px 12px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  {renderActions(post)}
-                </td>
-              </tr>
-            ))}
-            {posts.length === 0 && (
-              <tr>
-                <td colSpan={3} style={{ padding: 14, color: '#7a7888' }}>{emptyText}</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              {posts.length === 0 && (
+                <tr>
+                  <td colSpan={3} style={{ padding: 14, color: '#7a7888' }}>{emptyText}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   )

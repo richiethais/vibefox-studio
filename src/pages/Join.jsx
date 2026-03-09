@@ -3,8 +3,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import BrandLogo from '../components/BrandLogo'
 import SEOHead from '../components/SEOHead'
+import useIsMobile from '../components/useIsMobile'
 
 export default function Join() {
+  const isMobile = useIsMobile(768)
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const token = params.get('token')
@@ -149,7 +151,7 @@ export default function Join() {
     return (
       <div style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3f0' }}>
         <SEOHead title="Invite Link Status" description="Invite-only signup" path="/join" noindex />
-        <div style={{ background: 'white', borderRadius: 20, padding: '48px 40px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
+        <div style={{ background: 'white', borderRadius: 20, padding: isMobile ? '32px 24px' : '48px 40px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
           <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
           <div style={{ fontSize: 16, fontWeight: 600, color: '#18181a', marginBottom: 8 }}>{message.title}</div>
           <div style={{ fontSize: 13, color: '#7a7888' }}>{message.detail}</div>
@@ -161,12 +163,12 @@ export default function Join() {
   return (
     <div style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3f0', padding: '40px 20px' }}>
       <SEOHead title="Create Client Account" description="Invite-only signup" path="/join" noindex />
-      <div style={{ background: 'white', borderRadius: 20, padding: '48px 40px', width: '100%', maxWidth: 460, boxShadow: '0 8px 40px rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
+      <div style={{ background: 'white', borderRadius: 20, padding: isMobile ? '32px 24px' : '48px 40px', width: '100%', maxWidth: 460, boxShadow: '0 8px 40px rgba(0,0,0,0.08)', border: '1px solid rgba(0,0,0,0.06)' }}>
         <BrandLogo size="md" style={{ marginBottom: 6 }} />
         <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 32 }}>Create your client account</p>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 14 }}>
             <input placeholder="Full name *" value={form.name} onChange={set('name')} required style={inp} />
             <input placeholder="Email *" type="email" value={form.email} onChange={set('email')} required style={inp} />
           </div>

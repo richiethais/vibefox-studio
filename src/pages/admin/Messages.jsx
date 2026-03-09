@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import useIsMobile from '../../components/useIsMobile'
 
 export default function AdminMessages() {
   const [clients, setClients] = useState([])
@@ -7,6 +8,7 @@ export default function AdminMessages() {
   const [messages, setMessages] = useState([])
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
+  const isMobile = useIsMobile(768)
 
   useEffect(() => {
     supabase.from('clients').select('id, name, email').order('name').then(({ data }) => setClients(data ?? []))
@@ -40,10 +42,10 @@ export default function AdminMessages() {
   }
 
   return (
-    <div style={{ padding: '36px 40px', height: 'calc(100vh - 0px)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '36px 40px', height: isMobile ? 'auto' : 'calc(100vh - 0px)', display: 'flex', flexDirection: 'column' }}>
       <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', marginBottom: 24, letterSpacing: '-0.4px' }}>Messages</h1>
-      <div style={{ display: 'flex', gap: 16, flex: 1, overflow: 'hidden' }}>
-        <div style={{ width: 220, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'auto', flexShrink: 0 }}>
+      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 16, flex: 1, overflow: 'hidden' }}>
+        <div style={{ width: isMobile ? '100%' : 220, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'auto', flexShrink: isMobile ? undefined : 0, maxHeight: isMobile && selected ? 150 : undefined }}>
           {clients.map(c => (
             <div
               key={c.id}
@@ -56,7 +58,7 @@ export default function AdminMessages() {
           ))}
         </div>
 
-        <div style={{ flex: 1, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: isMobile ? 400 : undefined }}>
           {!selected ? (
             <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#7a7888', fontSize: 14 }}>
               Select a client to view messages

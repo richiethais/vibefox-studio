@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import useIsMobile from '../../components/useIsMobile'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
+  const isMobile = useIsMobile(768)
   const [stats, setStats] = useState({ inquiries: 0, clients: 0, projects: 0, invoices: 0, drafts: 0 })
   const [recent, setRecent] = useState({ inquiries: [], invoices: [], invites: [], draft: null })
 
@@ -59,7 +61,7 @@ export default function AdminDashboard() {
   ]), [stats])
 
   return (
-    <div style={{ padding: '36px 40px' }}>
+    <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
       <div className="anim-rise-1" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 22, gap: 14, flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', margin: 0, letterSpacing: '-0.4px' }}>Dashboard</h1>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -72,12 +74,12 @@ export default function AdminDashboard() {
               key={action.label}
               onClick={() => navigate(action.route)}
               style={{
-                padding: '8px 14px',
+                padding: isMobile ? '8px 12px' : '8px 14px',
                 borderRadius: 100,
                 border: '1px solid rgba(0,0,0,0.1)',
                 background: 'white',
                 color: '#18181a',
-                fontSize: 12,
+                fontSize: isMobile ? 11 : 12,
                 cursor: 'pointer',
                 transition: 'transform 0.18s ease, box-shadow 0.18s ease',
               }}
@@ -96,7 +98,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 16, marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)', gap: 16, marginBottom: 18 }}>
         {cards.map((card, idx) => (
           <button
             key={card.label}
@@ -129,7 +131,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr 1fr 1.1fr', gap: 16 }}>
+      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 1fr 1fr 1.1fr', gap: 16 }}>
         <Panel title="New inquiries" actionLabel="Open CRM" onAction={() => navigate('/admin/inquiries')}>
           {recent.inquiries.length === 0 ? (
             <EmptyRow text="No new inquiries." />
