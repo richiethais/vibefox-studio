@@ -12,6 +12,8 @@ const emptyForm = {
   keywords: '',
   content: '',
   cover_image_url: '',
+  scheduleMode: 'now',   // 'now' | 'schedule'
+  publish_at: '',        // ISO datetime string when scheduleMode === 'schedule'
 }
 
 function isMissingTableError(error) {
@@ -43,7 +45,14 @@ function postToForm(post) {
     keywords: post.keywords || '',
     content: post.content || '',
     cover_image_url: post.cover_image_url || '',
+    scheduleMode: post.status === 'scheduled' ? 'schedule' : 'now',
+    publish_at: post.publish_at ? post.publish_at.slice(0, 16) : '',
   }
+}
+
+function formToPost(f) {
+  const { scheduleMode, publish_at, ...rest } = f
+  return rest
 }
 
 function drawRoundedRectPath(ctx, x, y, width, height, radius) {
@@ -118,7 +127,8 @@ export default function AdminBlogs() {
   const isMobile = useIsMobile(768)
 
   const draftPosts = useMemo(() => posts.filter(p => p.status === 'draft'), [posts])
-  const publishedPosts = useMemo(() => posts.filter(p => p.status === 'published'), [posts])
+  const publishedPosts = useMemo(() => posts.filter(p => p.status === 'published' || (!p.status && p.published_at)), [posts])
+  const scheduledPosts = useMemo(() => posts.filter(p => p.status === 'scheduled'), [posts])
   const isEditingPublished = editing?.status === 'published'
 
   const selectedPreview = useMemo(() => {
@@ -265,7 +275,7 @@ export default function AdminBlogs() {
       const slug = await ensureUniqueSlug(baseSlug, ignoreId)
 
       const payload = {
-        ...form,
+        ...formToPost(form),
         slug,
         status: 'draft',
         updated_at: nowIso,
@@ -319,13 +329,26 @@ export default function AdminBlogs() {
       const updateExistingDraft = Boolean(editing?.id && editing.status === 'draft')
       const slug = await ensureUniqueSlug(baseSlug, updateExistingDraft ? editing.id : null)
 
-      const payload = {
-        ...form,
-        slug,
-        status: 'published',
-        published_at: editing?.published_at || nowIso,
-        updated_at: nowIso,
-      }
+      const isScheduled = form.scheduleMode === 'schedule' && form.publish_at
+      const basePost = formToPost(form)
+
+      const payload = isScheduled
+        ? {
+            ...basePost,
+            slug,
+            status: 'scheduled',
+            publish_at: new Date(form.publish_at).toISOString(),
+            published_at: null,
+            updated_at: nowIso,
+          }
+        : {
+            ...basePost,
+            slug,
+            status: 'published',
+            publish_at: null,
+            published_at: editing?.published_at || nowIso,
+            updated_at: nowIso,
+          }
 
       let error
       if (updateExistingDraft) {
@@ -345,7 +368,9 @@ export default function AdminBlogs() {
         return
       }
 
-      setNotice('Blog posted successfully and is now live on the public Blogs page.')
+      setNotice(isScheduled
+        ? `Blog scheduled for ${new Date(form.publish_at).toLocaleString()}.`
+        : 'Blog posted successfully and is now live on the public Blogs page.')
       setEditing(null)
       setForm(emptyForm)
       await load()
@@ -457,6 +482,22 @@ export default function AdminBlogs() {
             )}
             showPublishedDate
           />
+
+          <PostTable
+            title="Scheduled"
+            posts={scheduledPosts}
+            loading={loading}
+            emptyText="No scheduled posts."
+            renderActions={post => (
+              <>
+                <span style={{ fontSize: 11, color: '#b45309', background: '#fef3c7', padding: '2px 8px', borderRadius: 100 }}>
+                  {post.publish_at ? new Date(post.publish_at).toLocaleString() : 'Scheduled'}
+                </span>
+                <button style={ghostBtn} onClick={() => beginEdit(post)}>Edit</button>
+                <button style={ghostBtn} onClick={() => remove(post.id)}>Delete</button>
+              </>
+            )}
+          />
         </div>
 
         <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, overflow: 'hidden' }}>
@@ -511,6 +552,41 @@ export default function AdminBlogs() {
               rows={12}
               style={{ ...inp, resize: 'vertical' }}
             />
+
+            {/* Scheduling toggle */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 14px', background: '#f5f3f0', borderRadius: 10 }}>
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="scheduleMode"
+                    value="now"
+                    checked={form.scheduleMode === 'now'}
+                    onChange={() => setForm(f => ({ ...f, scheduleMode: 'now', publish_at: '' }))}
+                  />
+                  Publish now
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="scheduleMode"
+                    value="schedule"
+                    checked={form.scheduleMode === 'schedule'}
+                    onChange={() => setForm(f => ({ ...f, scheduleMode: 'schedule' }))}
+                  />
+                  Schedule for later
+                </label>
+              </div>
+              {form.scheduleMode === 'schedule' && (
+                <input
+                  type="datetime-local"
+                  value={form.publish_at}
+                  onChange={e => setForm(f => ({ ...f, publish_at: e.target.value }))}
+                  min={new Date().toISOString().slice(0, 16)}
+                  style={inp}
+                />
+              )}
+            </div>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button type="button" style={ghostBtn} onClick={beginCreate}>Reset</button>
