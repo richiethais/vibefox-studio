@@ -36,8 +36,8 @@ export default function App() {
   return (
     <>
       <SEOHead
-        title="Best Digital Marketing Agency in Jacksonville"
-        description="VibefoxStudio helps Jacksonville businesses grow with SEO, conversion-focused websites, and weekly content strategy from a local Florida team."
+        title="Best Digital Marketing Agency Jacksonville FL | VibefoxStudio"
+        description="VibefoxStudio is Jacksonville's top-rated digital marketing agency. SEO, website design, and lead generation that drives real business growth."
         path="/"
         appendBrand={false}
         keywords="best digital marketing agency in jacksonville florida, jacksonville seo agency, website design jacksonville fl, local seo jacksonville, digital marketing jacksonville beach, lead generation agency jacksonville"
