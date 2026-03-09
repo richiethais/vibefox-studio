@@ -34,7 +34,7 @@ export default function BrandLogo({
           width: 'auto',
           display: 'block',
           flexShrink: 0,
-          transform: 'translateY(-5px)',
+          transform: 'translateY(-3px)',
         }}
       />
       <span
