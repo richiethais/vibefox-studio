@@ -78,7 +78,7 @@ export default function Hero() {
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
-        VibefoxStudio builds fast websites, SEO systems, and custom apps for Jacksonville businesses that want measurable growth.
+        Jacksonville web design and SEO services built for measurable growth. Vibefox Studio delivers fast, high-converting websites and SEO systems for local businesses ready to scale.
       </p>
 
       <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 30 : s.btns.marginTop, gap: isMobile ? 10 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>

@@ -19,27 +19,28 @@ export default function App() {
     '@id': 'https://vibefoxstudio.com/#localbusiness',
     name: 'VibefoxStudio',
     alternateName: 'Vibefox Studio',
-    image: 'https://vibefoxstudio.com/favicon-512x512.png',
+    image: 'https://vibefoxstudio.com/seo-preview.png',
     url: 'https://vibefoxstudio.com',
     areaServed: 'Jacksonville, Florida',
     email: 'richie@vibefoxstudio.com',
-    slogan: 'Best Digital Marketing Agency in Jacksonville',
+    slogan: 'Jacksonville Web Design & SEO Services',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Jacksonville',
       addressRegion: 'FL',
       addressCountry: 'US',
     },
-    description: 'VibefoxStudio is a Jacksonville, Florida digital marketing agency focused on SEO, website design, and lead generation for small businesses.',
+    description: 'Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth.',
   }
 
   return (
     <>
       <SEOHead
-        title="Best Digital Marketing Agency in Jacksonville"
-        description="VibefoxStudio helps Jacksonville businesses grow with SEO, conversion-focused websites, and weekly content strategy from a local Florida team."
+        title="Jacksonville Web Design & SEO Services | Vibefox Studio"
+        description="Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth."
         path="/"
         appendBrand={false}
+        image="https://vibefoxstudio.com/seo-preview.png"
         keywords="best digital marketing agency in jacksonville florida, jacksonville seo agency, website design jacksonville fl, local seo jacksonville, digital marketing jacksonville beach, lead generation agency jacksonville"
         structuredData={localBusinessSchema}
       />

@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 
 const DEFAULT_SITE_NAME = 'VibefoxStudio'
 const DEFAULT_DISPLAY_NAME = 'Vibefox Studio'
-const DEFAULT_IMAGE = 'https://vibefoxstudio.com/favicon-512x512.png'
+const DEFAULT_IMAGE = 'https://vibefoxstudio.com/seo-preview.png'
+const DEFAULT_LOGO = 'https://vibefoxstudio.com/logo-mark.png'
 const GLOBAL_KEYWORDS = [
   'vibefoxstudio',
   'vibefox studio',
@@ -69,9 +70,9 @@ export default function SEOHead({
       name: DEFAULT_DISPLAY_NAME,
       alternateName: DEFAULT_SITE_NAME,
       url: 'https://vibefoxstudio.com',
-      logo: DEFAULT_IMAGE,
+      logo: DEFAULT_LOGO,
       areaServed: 'Jacksonville, Florida',
-      description: 'VibefoxStudio is a Jacksonville, Florida digital marketing agency focused on SEO, high-converting websites, and growth systems.',
+      description: 'Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth.',
     }
     const providedSchemas = Array.isArray(structuredData) ? structuredData : (structuredData ? [structuredData] : [])
     const schemas = noindex ? providedSchemas : [defaultOrganizationSchema, ...providedSchemas]
@@ -92,7 +93,7 @@ export default function SEOHead({
     upsertMeta('meta[property="og:description"]', { property: 'og:description' }, description)
     upsertMeta('meta[property="og:url"]', { property: 'og:url' }, canonicalUrl)
     upsertMeta('meta[property="og:image"]', { property: 'og:image' }, image)
-    upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, `${DEFAULT_DISPLAY_NAME} logo`)
+    upsertMeta('meta[property="og:image:alt"]', { property: 'og:image:alt' }, `${DEFAULT_DISPLAY_NAME} web design and SEO preview`)
     upsertMeta('meta[property="og:site_name"]', { property: 'og:site_name' }, DEFAULT_SITE_NAME)
     upsertMeta('meta[property="og:locale"]', { property: 'og:locale' }, 'en_US')
 
