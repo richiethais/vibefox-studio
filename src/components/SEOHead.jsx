@@ -51,6 +51,7 @@ export default function SEOHead({
   image = DEFAULT_IMAGE,
   type = 'website',
   noindex = false,
+  appendBrand = true,
   publishedTime,
   modifiedTime,
   structuredData,
@@ -59,7 +60,7 @@ export default function SEOHead({
     const pageTitle = title || DEFAULT_SITE_NAME
     const canonicalUrl = `https://vibefoxstudio.com${path}`
     const titleHasBrand = [DEFAULT_SITE_NAME, DEFAULT_DISPLAY_NAME].some(brand => pageTitle.includes(brand))
-    const fullTitle = titleHasBrand ? pageTitle : `${pageTitle} | ${DEFAULT_SITE_NAME}`
+    const fullTitle = appendBrand && !titleHasBrand ? `${pageTitle} | ${DEFAULT_SITE_NAME}` : pageTitle
 
     const defaultOrganizationSchema = {
       '@context': 'https://schema.org',
@@ -127,7 +128,7 @@ export default function SEOHead({
     } else if (schemaScript) {
       schemaScript.remove()
     }
-  }, [title, description, path, keywords, image, type, noindex, publishedTime, modifiedTime, structuredData])
+  }, [title, description, path, keywords, image, type, noindex, appendBrand, publishedTime, modifiedTime, structuredData])
 
   return null
 }

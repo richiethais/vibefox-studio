@@ -23,7 +23,7 @@ export default function App() {
     url: 'https://vibefoxstudio.com',
     areaServed: 'Jacksonville, Florida',
     email: 'richie@vibefoxstudio.com',
-    slogan: 'Best digital marketing agency in Jacksonville, Florida',
+    slogan: 'Best Digital Marketing Agency in Jacksonville',
     address: {
       '@type': 'PostalAddress',
       addressLocality: 'Jacksonville',
@@ -36,9 +36,10 @@ export default function App() {
   return (
     <>
       <SEOHead
-        title="VibefoxStudio | Best Digital Marketing Agency in Jacksonville, Florida"
+        title="Best Digital Marketing Agency in Jacksonville"
         description="VibefoxStudio helps Jacksonville businesses grow with SEO, conversion-focused websites, and weekly content strategy from a local Florida team."
         path="/"
+        appendBrand={false}
         keywords="best digital marketing agency in jacksonville florida, jacksonville seo agency, website design jacksonville fl, local seo jacksonville, digital marketing jacksonville beach, lead generation agency jacksonville"
         structuredData={localBusinessSchema}
       />
