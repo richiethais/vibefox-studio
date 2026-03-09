@@ -1,15 +1,14 @@
 import { useFadeUp } from './useFadeUp'
-import Eyebrow from './Eyebrow'
 import { h2Style, subStyle } from './sectionStyles'
 import useIsMobile from './useIsMobile'
 
 const rows = [
-  ['Project timeline', '6–12 weeks', '1–2 weeks'],
-  ['Pricing transparency', '✗ Hidden fees', '✓ Flat rates'],
-  ['Post-launch support', '✗ Extra cost', '✓ Included'],
-  ['SEO & content', '✗ Separate vendor', '✓ All in one'],
-  ['Custom web apps', '$20,000+', '✓ From $4,000'],
-  ['Who you talk to', 'Account manager', '✓ Direct to builder'],
+  { feature: 'Project timeline', agency: '6-12 weeks', us: '1-2 weeks', usStrong: false },
+  { feature: 'Pricing transparency', agency: 'Hidden fees', us: 'Flat rates', usStrong: true },
+  { feature: 'Post-launch support', agency: 'Extra cost', us: 'Included', usStrong: true },
+  { feature: 'SEO & content', agency: 'Separate vendor', us: 'All in one', usStrong: true },
+  { feature: 'Custom web apps', agency: '$20,000+', us: 'From $4,000', usStrong: true },
+  { feature: 'Who you talk to', agency: 'Account manager', us: 'Direct to builder', usStrong: true },
 ]
 
 export default function Comparison() {
@@ -30,7 +29,9 @@ export default function Comparison() {
     <section ref={ref} style={{ background: '#18181a', padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 500, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 18 }}>
-          <span style={{ width: 20, height: 20, background: 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}>🏆</span>
+          <span style={{ width: 20, height: 20, background: 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid #c8a97e' }} />
+          </span>
           Why VibefoxStudio
         </div>
         <h2 className="fade-up d1" style={{ ...h2Style, color: 'white', fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
@@ -51,15 +52,15 @@ export default function Comparison() {
                 VibefoxStudio
               </div>
             </div>
-            {rows.map(([feat, agency, us]) => (
-              <div key={feat} style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.05)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            {rows.map(row => (
+              <div key={row.feature} style={{ display: 'grid', gridTemplateColumns: '1.3fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.05)' }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               >
-                <div style={{ ...mobileTdStyle, color: 'rgba(255,255,255,0.62)', fontWeight: 500 }}>{feat}</div>
-                <div style={{ ...mobileTdStyle, color: agency.startsWith('✗') ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.37)' }}>{agency}</div>
-                <div style={{ ...mobileTdStyle, background: 'rgba(200,169,126,0.06)', color: us.startsWith('✓') ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.37)' }}>
-                  <span style={{ color: us.startsWith('✓') ? '#4ade80' : 'inherit' }}>{us}</span>
+                <div style={{ ...mobileTdStyle, color: 'rgba(255,255,255,0.62)', fontWeight: 500 }}>{row.feature}</div>
+                <div style={{ ...mobileTdStyle, color: 'rgba(255,255,255,0.28)' }}>{row.agency}</div>
+                <div style={{ ...mobileTdStyle, background: 'rgba(200,169,126,0.06)', color: row.usStrong ? 'rgba(255,255,255,0.72)' : 'rgba(255,255,255,0.37)' }}>
+                  <span style={{ color: row.usStrong ? '#4ade80' : 'inherit' }}>{row.us}</span>
                 </div>
               </div>
             ))}

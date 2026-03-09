@@ -1,52 +1,73 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/useAuth'
 import useIsMobile from '../../components/useIsMobile'
 
 const PLANS = ['starter', 'growth', 'pro']
 const STATUSES = ['active', 'inactive']
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default function AdminClients() {
   const session = useAuth()
   const [clients, setClients] = useState([])
   const [inviteLinks, setInviteLinks] = useState([])
+  const [loading, setLoading] = useState(true)
+
   const [modal, setModal] = useState(null)
   const [form, setForm] = useState({ name: '', email: '', company: '', phone: '', plan: 'starter', status: 'active' })
-  const [inviting, setInviting] = useState(false)
-  const [notice, setNotice] = useState(null)
+  const [savingClient, setSavingClient] = useState(false)
+
   const [linkModal, setLinkModal] = useState(false)
   const [linkForm, setLinkForm] = useState({ name: '', email: '' })
   const [generatedLink, setGeneratedLink] = useState('')
   const [generating, setGenerating] = useState(false)
+
+  const [invitingClientId, setInvitingClientId] = useState('')
+  const [notice, setNotice] = useState(null)
   const [copied, setCopied] = useState(false)
   const [copiedToken, setCopiedToken] = useState('')
   const isMobile = useIsMobile(768)
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://vibefoxstudio.com'
+
   const registeredEmails = useMemo(
-    () => new Set(clients.filter(c => c.user_id).map(c => (c.email || '').trim().toLowerCase())),
+    () => new Set(clients.filter(client => client.user_id).map(client => (client.email || '').trim().toLowerCase())),
     [clients]
   )
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const [clientsRes, linksRes] = await Promise.all([
       supabase.from('clients').select('*').order('created_at', { ascending: false }),
       supabase.from('invite_tokens').select('*').order('created_at', { ascending: false }),
     ])
 
+    if (clientsRes.error || linksRes.error) {
+      setNotice({
+        type: 'error',
+        text: clientsRes.error?.message || linksRes.error?.message || 'Failed to load clients.',
+      })
+      setLoading(false)
+      return
+    }
+
     setClients(clientsRes.data ?? [])
     setInviteLinks(linksRes.data ?? [])
-  }
+    setLoading(false)
+  }, [])
 
   useEffect(() => {
-    Promise.all([
-      supabase.from('clients').select('*').order('created_at', { ascending: false }),
-      supabase.from('invite_tokens').select('*').order('created_at', { ascending: false }),
-    ]).then(([clientsRes, linksRes]) => {
-      setClients(clientsRes.data ?? [])
-      setInviteLinks(linksRes.data ?? [])
-    })
-  }, [])
+    const timer = window.setTimeout(() => {
+      load()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [load])
+
+  useEffect(() => {
+    if (!notice) return undefined
+    const timer = window.setTimeout(() => setNotice(null), 3200)
+    return () => window.clearTimeout(timer)
+  }, [notice])
 
   function buildInviteLink(token) {
     return `${baseUrl}/join?token=${token}`
@@ -58,22 +79,63 @@ export default function AdminClients() {
   }
 
   function openEdit(client) {
-    setForm({ name: client.name, email: client.email, company: client.company ?? '', phone: client.phone ?? '', plan: client.plan, status: client.status })
+    setForm({
+      name: client.name,
+      email: client.email,
+      company: client.company ?? '',
+      phone: client.phone ?? '',
+      plan: client.plan,
+      status: client.status,
+    })
     setModal(client)
   }
 
+  function validateClientForm() {
+    if (!form.name.trim()) return 'Client name is required.'
+    if (!form.email.trim()) return 'Email is required.'
+    if (!EMAIL_PATTERN.test(form.email.trim())) return 'Enter a valid email address.'
+    return ''
+  }
+
+  const clientValidationError = validateClientForm()
+
   async function save() {
-    if (modal === 'create') {
-      await supabase.from('clients').insert(form)
-    } else {
-      await supabase.from('clients').update(form).eq('id', modal.id)
+    if (savingClient || clientValidationError) return
+
+    setSavingClient(true)
+    setNotice(null)
+
+    const payload = {
+      ...form,
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      company: form.company.trim(),
+      phone: form.phone.trim(),
     }
+
+    const result = modal === 'create'
+      ? await supabase.from('clients').insert(payload)
+      : await supabase.from('clients').update(payload).eq('id', modal.id)
+
+    if (result.error) {
+      setNotice({ type: 'error', text: `Error: ${result.error.message}` })
+      setSavingClient(false)
+      return
+    }
+
+    setNotice({ type: 'success', text: modal === 'create' ? 'Client created.' : 'Client updated.' })
     setModal(null)
-    load()
+    setSavingClient(false)
+    await load()
   }
 
   async function sendInvite(client) {
-    setInviting(true)
+    if (!session) {
+      setNotice({ type: 'error', text: 'Admin session expired. Please sign in again.' })
+      return
+    }
+
+    setInvitingClientId(client.id)
     setNotice(null)
 
     const { error } = await supabase.functions.invoke('invite-client', {
@@ -81,7 +143,7 @@ export default function AdminClients() {
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
 
-    setInviting(false)
+    setInvitingClientId('')
     setNotice(error
       ? { type: 'error', text: `Error: ${error.message}` }
       : { type: 'success', text: `Invite sent to ${client.email}` }
@@ -91,18 +153,27 @@ export default function AdminClients() {
   async function generateLink() {
     const cleanName = linkForm.name.trim()
     const cleanEmail = linkForm.email.trim().toLowerCase()
-    if (!cleanName || !cleanEmail) return
+
+    if (!cleanName || !cleanEmail) {
+      setNotice({ type: 'error', text: 'Name and email are required.' })
+      return
+    }
+
+    if (!EMAIL_PATTERN.test(cleanEmail)) {
+      setNotice({ type: 'error', text: 'Enter a valid invite email.' })
+      return
+    }
 
     setGenerating(true)
     setNotice(null)
 
-    const { data: existing } = await supabase
+    const { data: existingClient } = await supabase
       .from('clients')
       .select('id, user_id')
       .eq('email', cleanEmail)
       .maybeSingle()
 
-    if (existing?.user_id) {
+    if (existingClient?.user_id) {
       setGenerating(false)
       setNotice({ type: 'error', text: `${cleanEmail} already has a registered account. No new invite link was created.` })
       return
@@ -133,7 +204,7 @@ export default function AdminClients() {
     return { label: 'Pending', bg: '#fef3c7', text: '#d97706' }
   }
 
-  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+  const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }))
 
   return (
     <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
@@ -164,27 +235,39 @@ export default function AdminClients() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-                {['Name', 'Email', 'Company', 'Plan', 'Status', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                {['Name', 'Email', 'Company', 'Plan', 'Status', 'Actions'].map(header => (
+                  <th key={header} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{header}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {clients.map(c => (
-                <tr key={c.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                  <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{c.name}</td>
-                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{c.email}</td>
-                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{c.company || '—'}</td>
+              {loading && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>Loading clients…</td>
+                </tr>
+              )}
+
+              {!loading && clients.length === 0 && (
+                <tr>
+                  <td colSpan={6} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>No clients yet.</td>
+                </tr>
+              )}
+
+              {!loading && clients.map(client => (
+                <tr key={client.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{client.name}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{client.email}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{client.company || '—'}</td>
                   <td style={{ padding: '12px 16px' }}>
-                    <span style={{ ...badge, background: '#f3f4f6', color: '#374151' }}>{c.plan}</span>
+                    <span style={{ ...badge, background: '#f3f4f6', color: '#374151' }}>{client.plan}</span>
                   </td>
                   <td style={{ padding: '12px 16px' }}>
-                    <span style={{ ...badge, background: c.status === 'active' ? '#dcfce7' : '#f3f4f6', color: c.status === 'active' ? '#16a34a' : '#6b7280' }}>{c.status}</span>
+                    <span style={{ ...badge, background: client.status === 'active' ? '#dcfce7' : '#f3f4f6', color: client.status === 'active' ? '#16a34a' : '#6b7280' }}>{client.status}</span>
                   </td>
                   <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
-                    <button onClick={() => openEdit(c)} style={ghostBtn}>Edit</button>
-                    <button onClick={() => sendInvite(c)} disabled={inviting} style={ghostBtn}>
-                      {inviting ? '…' : 'Invite'}
+                    <button onClick={() => openEdit(client)} style={ghostBtn}>Edit</button>
+                    <button onClick={() => sendInvite(client)} disabled={invitingClientId === client.id} style={ghostBtn}>
+                      {invitingClientId === client.id ? 'Sending…' : 'Invite'}
                     </button>
                   </td>
                 </tr>
@@ -203,8 +286,8 @@ export default function AdminClients() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-                {['Name', 'Email', 'Created', 'Status', 'Link', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
+                {['Name', 'Email', 'Created', 'Status', 'Link', 'Actions'].map(header => (
+                  <th key={header} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{header}</th>
                 ))}
               </tr>
             </thead>
@@ -228,17 +311,20 @@ export default function AdminClients() {
                         onClick={() => {
                           navigator.clipboard.writeText(url)
                           setCopiedToken(link.token)
-                          setTimeout(() => setCopiedToken(''), 2000)
+                          setTimeout(() => setCopiedToken(''), 1800)
                         }}
                         style={ghostBtn}
                       >
                         {copiedToken === link.token ? 'Copied' : 'Copy'}
                       </button>
-                      <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>Open</a>
+                      <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                        Open
+                      </a>
                     </td>
                   </tr>
                 )
               })}
+
               {inviteLinks.length === 0 && (
                 <tr>
                   <td colSpan={6} style={{ padding: '18px 16px', color: '#7a7888', fontSize: 13 }}>
@@ -256,13 +342,14 @@ export default function AdminClients() {
           <div style={getModalBox(isMobile)}>
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 6 }}>Generate invite link</h2>
             <p style={{ fontSize: 13, color: '#7a7888', marginBottom: 20 }}>Pre-fill the client's details. The link is single-use.</p>
+
             {!generatedLink ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                <input placeholder="Client name *" value={linkForm.name} onChange={e => setLinkForm(f => ({ ...f, name: e.target.value }))} style={inp} />
-                <input placeholder="Client email *" type="email" value={linkForm.email} onChange={e => setLinkForm(f => ({ ...f, email: e.target.value }))} style={inp} />
+                <input placeholder="Client name *" value={linkForm.name} onChange={event => setLinkForm(current => ({ ...current, name: event.target.value }))} style={inp} />
+                <input placeholder="Client email *" type="email" value={linkForm.email} onChange={event => setLinkForm(current => ({ ...current, email: event.target.value }))} style={inp} />
                 <div style={{ display: 'flex', gap: 10, marginTop: 12, justifyContent: 'flex-end' }}>
                   <button onClick={() => setLinkModal(false)} style={ghostBtn}>Cancel</button>
-                  <button onClick={generateLink} disabled={generating || !linkForm.name || !linkForm.email} style={darkBtn}>
+                  <button onClick={generateLink} disabled={generating} style={darkBtn}>
                     {generating ? 'Generating…' : 'Generate link'}
                   </button>
                 </div>
@@ -278,7 +365,7 @@ export default function AdminClients() {
                     onClick={() => {
                       navigator.clipboard.writeText(generatedLink)
                       setCopied(true)
-                      setTimeout(() => setCopied(false), 2000)
+                      setTimeout(() => setCopied(false), 1800)
                     }}
                     style={darkBtn}
                   >
@@ -303,15 +390,23 @@ export default function AdminClients() {
               <input placeholder="Company" value={form.company} onChange={set('company')} style={inp} />
               <input placeholder="Phone" value={form.phone} onChange={set('phone')} style={inp} />
               <select value={form.plan} onChange={set('plan')} style={inp}>
-                {PLANS.map(p => <option key={p}>{p}</option>)}
+                {PLANS.map(plan => <option key={plan}>{plan}</option>)}
               </select>
               <select value={form.status} onChange={set('status')} style={inp}>
-                {STATUSES.map(s => <option key={s}>{s}</option>)}
+                {STATUSES.map(status => <option key={status}>{status}</option>)}
               </select>
+
+              {clientValidationError && (
+                <div style={{ fontSize: 12, color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '8px 10px' }}>
+                  {clientValidationError}
+                </div>
+              )}
             </div>
             <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
               <button onClick={() => setModal(null)} style={ghostBtn}>Cancel</button>
-              <button onClick={save} style={darkBtn}>Save</button>
+              <button onClick={save} style={darkBtn} disabled={savingClient || Boolean(clientValidationError)}>
+                {savingClient ? 'Saving…' : 'Save'}
+              </button>
             </div>
           </div>
         </div>
@@ -325,4 +420,4 @@ const inp = { padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(0,
 const darkBtn = { padding: '9px 18px', borderRadius: 100, border: 'none', background: '#18181a', color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer' }
 const ghostBtn = { padding: '8px 14px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', color: '#18181a', fontSize: 12, cursor: 'pointer' }
 const overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }
-const getModalBox = (isMobile) => ({ background: 'white', borderRadius: 18, padding: isMobile ? 20 : 32, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', margin: isMobile ? 16 : 0 })
+const getModalBox = isMobile => ({ background: 'white', borderRadius: 18, padding: isMobile ? 20 : 32, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', margin: isMobile ? 16 : 0 })

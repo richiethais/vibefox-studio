@@ -30,14 +30,6 @@ const s = {
     lineHeight: 1.00, color: '#18181a', letterSpacing: '-2.5px',
     maxWidth: 860, margin: '0 auto',
   },
-  icon: {
-    display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-    width: '0.75em', height: '0.75em',
-    background: 'rgba(250,249,247,0.9)', border: '1px solid rgba(0,0,0,0.08)',
-    borderRadius: '0.16em', fontSize: '0.60em',
-    verticalAlign: 'middle', margin: '0 0.05em -0.04em',
-    boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
-  },
   sub: {
     fontSize: 17, color: '#7a7888', maxWidth: 500,
     margin: '24px auto 0', fontWeight: 300, lineHeight: 1.68,
@@ -67,7 +59,7 @@ const s = {
     fontSize: 13, color: '#7a7888', flexWrap: 'wrap', justifyContent: 'center',
   },
   trustItem: { display: 'flex', alignItems: 'center', gap: 7 },
-  dot: { color: '#b8906a', fontSize: 11 },
+  dot: { width: 6, height: 6, borderRadius: '50%', background: '#b8906a', opacity: 0.8 },
 }
 
 export default function Hero() {
@@ -81,9 +73,7 @@ export default function Hero() {
       </div>
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
-        Your business{' '}
-        <span className="anim-wiggle" style={s.icon}>🌐</span>
-        {' '}deserves a site that{' '}
+        Your business deserves a site that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>
 
@@ -113,7 +103,7 @@ export default function Hero() {
       <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 30 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
         {['Fast turnaround', 'Jacksonville local SEO', 'Retainers available'].map(t => (
           <div key={t} style={s.trustItem}>
-            <span style={s.dot}>✦</span> {t}
+            <span style={s.dot} /> {t}
           </div>
         ))}
       </div>

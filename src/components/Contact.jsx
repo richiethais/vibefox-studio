@@ -13,14 +13,29 @@ export default function Contact() {
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const [error, setError] = useState('')
+  const canSubmit = Boolean(
+    form.name.trim() &&
+    form.email.trim() &&
+    form.service_type &&
+    form.budget &&
+    form.message.trim()
+  )
 
   function set(k) { return e => setForm(f => ({ ...f, [k]: e.target.value })) }
 
   async function handleSubmit(e) {
     e.preventDefault()
+    if (!canSubmit || loading) return
     setLoading(true)
     setError('')
-    const { error } = await supabase.from('inquiries').insert(form)
+    const payload = {
+      ...form,
+      name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      company: form.company.trim(),
+      message: form.message.trim(),
+    }
+    const { error } = await supabase.from('inquiries').insert(payload)
     if (error) { setError('Something went wrong. Please email us directly.'); setLoading(false) }
     else { setDone(true); setLoading(false) }
   }
@@ -40,7 +55,9 @@ export default function Contact() {
 
         {done ? (
           <div className="fade-up" style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: '32px', textAlign: 'center' }}>
-            <div style={{ fontSize: 28, marginBottom: 12 }}>✓</div>
+            <div style={{ width: 30, height: 30, borderRadius: '50%', border: '1.5px solid #16a34a', margin: '0 auto 12px', position: 'relative' }}>
+              <span style={{ position: 'absolute', inset: 6, borderRadius: '50%', background: '#16a34a' }} />
+            </div>
             <div style={{ fontSize: 16, fontWeight: 500, color: '#15803d', marginBottom: 6 }}>Message sent!</div>
             <div style={{ fontSize: 14, color: '#16a34a' }}>We'll get back to you within 24 hours.</div>
           </div>
@@ -70,7 +87,7 @@ export default function Contact() {
               style={{ ...inp, resize: 'vertical' }}
             />
             {error && <p style={{ fontSize: 13, color: '#dc2626', margin: 0 }}>{error}</p>}
-            <button type="submit" disabled={loading} style={{
+            <button type="submit" disabled={loading || !canSubmit} style={{
               padding: '14px 28px', borderRadius: 100, border: 'none',
               background: '#18181a', color: 'white', fontSize: 15, fontWeight: 500,
               cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,

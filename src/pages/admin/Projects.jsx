@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
 
@@ -9,44 +9,109 @@ const STATUS_COLORS = {
   complete: { bg: '#dbeafe', text: '#1d4ed8' },
 }
 
+const emptyForm = {
+  client_id: '',
+  title: '',
+  description: '',
+  status: 'proposal',
+  start_date: '',
+  due_date: '',
+}
+
 export default function AdminProjects() {
   const [projects, setProjects] = useState([])
   const [clients, setClients] = useState([])
   const [modal, setModal] = useState(null)
-  const [form, setForm] = useState({ client_id: '', title: '', description: '', status: 'proposal', start_date: '', due_date: '' })
+  const [form, setForm] = useState(emptyForm)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [notice, setNotice] = useState(null)
   const isMobile = useIsMobile(768)
 
   const load = useCallback(async () => {
-    const { data } = await supabase.from('projects').select('*, clients(name)').order('created_at', { ascending: false })
-    setProjects(data ?? [])
+    setNotice(null)
+
+    const [projectsRes, clientsRes] = await Promise.all([
+      supabase.from('projects').select('*, clients(name)').order('created_at', { ascending: false }),
+      supabase.from('clients').select('id, name').order('name', { ascending: true }),
+    ])
+
+    if (projectsRes.error || clientsRes.error) {
+      setNotice({ type: 'error', text: projectsRes.error?.message || clientsRes.error?.message || 'Failed to load projects.' })
+      setLoading(false)
+      return
+    }
+
+    setProjects(projectsRes.data ?? [])
+    setClients(clientsRes.data ?? [])
+    setLoading(false)
   }, [])
 
   useEffect(() => {
-    supabase.from('projects').select('*, clients(name)').order('created_at', { ascending: false }).then(({ data }) => {
-      setProjects(data ?? [])
-    })
-    supabase.from('clients').select('id, name').then(({ data }) => setClients(data ?? []))
-  }, [])
+    const timer = window.setTimeout(() => {
+      load()
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [load])
 
   function openCreate() {
-    setForm({ client_id: '', title: '', description: '', status: 'proposal', start_date: '', due_date: '' })
+    setForm(emptyForm)
     setModal('create')
   }
 
-  function openEdit(p) {
-    setForm({ client_id: p.client_id, title: p.title, description: p.description ?? '', status: p.status, start_date: p.start_date ?? '', due_date: p.due_date ?? '' })
-    setModal(p)
+  function openEdit(project) {
+    setForm({
+      client_id: project.client_id,
+      title: project.title,
+      description: project.description ?? '',
+      status: project.status,
+      start_date: project.start_date ?? '',
+      due_date: project.due_date ?? '',
+    })
+    setModal(project)
   }
 
+  const validationError = useMemo(() => {
+    if (!form.client_id) return 'Select a client.'
+    if (!form.title.trim()) return 'Project title is required.'
+    if (form.start_date && form.due_date && form.due_date < form.start_date) {
+      return 'Due date cannot be earlier than start date.'
+    }
+    return ''
+  }, [form.client_id, form.due_date, form.start_date, form.title])
+
   async function save() {
-    const payload = { ...form, start_date: form.start_date || null, due_date: form.due_date || null }
-    if (modal === 'create') await supabase.from('projects').insert(payload)
-    else await supabase.from('projects').update(payload).eq('id', modal.id)
+    if (saving || validationError) return
+
+    setSaving(true)
+    setNotice(null)
+
+    const payload = {
+      ...form,
+      title: form.title.trim(),
+      description: form.description.trim(),
+      start_date: form.start_date || null,
+      due_date: form.due_date || null,
+    }
+
+    const result = modal === 'create'
+      ? await supabase.from('projects').insert(payload)
+      : await supabase.from('projects').update(payload).eq('id', modal.id)
+
+    if (result.error) {
+      setNotice({ type: 'error', text: result.error.message || 'Could not save project.' })
+      setSaving(false)
+      return
+    }
+
+    setNotice({ type: 'success', text: modal === 'create' ? 'Project created.' : 'Project updated.' })
     setModal(null)
+    setSaving(false)
     await load()
   }
 
-  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+  const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }))
 
   return (
     <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
@@ -55,32 +120,60 @@ export default function AdminProjects() {
         <button onClick={openCreate} style={darkBtn}>+ New project</button>
       </div>
 
+      {notice && (
+        <div style={{
+          background: notice.type === 'error' ? '#fef2f2' : '#f0fdf4',
+          border: `1px solid ${notice.type === 'error' ? '#fecaca' : '#bbf7d0'}`,
+          borderRadius: 10,
+          padding: '10px 16px',
+          fontSize: 13,
+          color: notice.type === 'error' ? '#dc2626' : '#16a34a',
+          marginBottom: 16,
+        }}>
+          {notice.text}
+        </div>
+      )}
+
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-              {['Title', 'Client', 'Status', 'Due', 'Actions'].map(h => (
-                <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map(p => (
-              <tr key={p.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{p.title}</td>
-                <td style={{ padding: '12px 16px', color: '#7a7888' }}>{p.clients?.name ?? '—'}</td>
-                <td style={{ padding: '12px 16px' }}>
-                  <span style={{ ...badge, background: STATUS_COLORS[p.status]?.bg, color: STATUS_COLORS[p.status]?.text }}>{p.status}</span>
-                </td>
-                <td style={{ padding: '12px 16px', color: '#7a7888' }}>{p.due_date ?? '—'}</td>
-                <td style={{ padding: '12px 16px' }}>
-                  <button onClick={() => openEdit(p)} style={ghostBtn}>Edit</button>
-                </td>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+                {['Title', 'Client', 'Status', 'Due', 'Actions'].map(header => (
+                  <th key={header} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    {header}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {loading && (
+                <tr>
+                  <td colSpan={5} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>Loading projects…</td>
+                </tr>
+              )}
+
+              {!loading && projects.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>No projects yet.</td>
+                </tr>
+              )}
+
+              {!loading && projects.map(project => (
+                <tr key={project.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+                  <td style={{ padding: '12px 16px', fontWeight: 500, color: '#18181a' }}>{project.title}</td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{project.clients?.name ?? '—'}</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <span style={{ ...badge, background: STATUS_COLORS[project.status]?.bg, color: STATUS_COLORS[project.status]?.text }}>{project.status}</span>
+                  </td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>{project.due_date ?? '—'}</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <button onClick={() => openEdit(project)} style={ghostBtn}>Edit</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -90,16 +183,18 @@ export default function AdminProjects() {
             <h2 style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginBottom: 20 }}>
               {modal === 'create' ? 'New project' : 'Edit project'}
             </h2>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <select value={form.client_id} onChange={set('client_id')} style={inp}>
                 <option value="">Select client *</option>
-                {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
               </select>
               <input placeholder="Title *" value={form.title} onChange={set('title')} style={inp} />
               <textarea placeholder="Description" value={form.description} onChange={set('description')} rows={3} style={{ ...inp, resize: 'vertical' }} />
               <select value={form.status} onChange={set('status')} style={inp}>
-                {STATUSES.map(s => <option key={s}>{s}</option>)}
+                {STATUSES.map(status => <option key={status}>{status}</option>)}
               </select>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div>
                   <label style={{ fontSize: 11, color: '#7a7888', display: 'block', marginBottom: 4 }}>Start date</label>
@@ -110,10 +205,19 @@ export default function AdminProjects() {
                   <input type="date" value={form.due_date} onChange={set('due_date')} style={inp} />
                 </div>
               </div>
+
+              {validationError && (
+                <div style={{ fontSize: 12, color: '#b91c1c', background: '#fef2f2', borderRadius: 8, padding: '8px 10px', border: '1px solid #fecaca' }}>
+                  {validationError}
+                </div>
+              )}
             </div>
+
             <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
               <button onClick={() => setModal(null)} style={ghostBtn}>Cancel</button>
-              <button onClick={save} style={darkBtn}>Save</button>
+              <button onClick={save} style={darkBtn} disabled={saving || Boolean(validationError)}>
+                {saving ? 'Saving…' : 'Save'}
+              </button>
             </div>
           </div>
         </div>

@@ -28,7 +28,7 @@ export default function Pricing() {
   return (
     <section id="pricing" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow icon="💳">Retainer plans</Eyebrow>
+        <Eyebrow>Retainer plans</Eyebrow>
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>monthly pricing.</em></h2>
         <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>Month-to-month. No contracts. Cancel anytime. Project quotes separate.</p>
 
@@ -82,7 +82,9 @@ function PricingCard({ plan, delay, isMobile }) {
       <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 26px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {features.map(f => (
           <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
-            <span style={{ width: 16, height: 16, background: featured ? 'rgba(200,169,126,0.2)' : 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: featured ? '#c8a97e' : '#b8906a', flexShrink: 0, marginTop: 1 }}>✓</span>
+            <span style={{ width: 16, height: 16, background: featured ? 'rgba(200,169,126,0.2)' : 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: featured ? '#c8a97e' : '#b8906a' }} />
+            </span>
             {f}
           </li>
         ))}

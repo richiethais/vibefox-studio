@@ -10,7 +10,7 @@ export default function Testimonial() {
   return (
     <section ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px', background: '#faf9f7' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow icon="⭐">Client results</Eyebrow>
+        <Eyebrow>Client results</Eyebrow>
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What clients are <em style={{ fontStyle: 'italic', color: '#b8906a' }}>saying.</em></h2>
 
         <div className="fade-up d2" style={{
@@ -21,7 +21,11 @@ export default function Testimonial() {
           boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
         }}>
           <div style={{ position: 'absolute', top: -20, left: isMobile ? 12 : 36, fontSize: isMobile ? 120 : 180, lineHeight: 1, color: 'rgba(200,169,126,0.10)', fontFamily: '"DM Serif Display", serif', pointerEvents: 'none', userSelect: 'none' }}>"</div>
-          <div style={{ color: '#f59e0b', fontSize: 16, letterSpacing: 3, marginBottom: 18, position: 'relative' }}>★★★★★</div>
+          <div style={{ display: 'inline-flex', gap: 5, marginBottom: 18, position: 'relative' }}>
+            {Array.from({ length: 5 }, (_, idx) => (
+              <span key={idx} style={{ width: 9, height: 9, borderRadius: '50%', background: '#f59e0b', opacity: idx === 4 ? 0.9 : 1 }} />
+            ))}
+          </div>
           <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 19 : 22, color: '#18181a', lineHeight: 1.5, letterSpacing: '-0.5px', marginBottom: 28, position: 'relative' }}>
             "We went from zero online presence to ranking on the first page of Google in three months. Our booking requests doubled and we finally have a site we're proud to send people to."
           </div>

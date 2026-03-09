@@ -34,6 +34,11 @@ export default function Join() {
 
   async function handleSubmit(e) {
     e.preventDefault()
+    if (loading) return
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.')
+      return
+    }
     setLoading(true)
     setError('')
 
@@ -61,7 +66,7 @@ export default function Join() {
 
     // Create auth account
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email: form.email,
+      email: form.email.trim().toLowerCase(),
       password: form.password,
     })
     if (signUpError) {
@@ -83,7 +88,7 @@ export default function Join() {
     const { data: existingClient } = await supabase
       .from('clients')
       .select('id')
-      .eq('email', form.email)
+      .eq('email', form.email.trim().toLowerCase())
       .maybeSingle()
 
     let clientError = null
@@ -92,9 +97,9 @@ export default function Join() {
         .from('clients')
         .update({
           user_id: userId,
-          name: form.name,
-          company: form.company,
-          phone: form.phone,
+          name: form.name.trim(),
+          company: form.company.trim(),
+          phone: form.phone.trim(),
           status: 'active',
         })
         .eq('id', existingClient.id)
@@ -102,10 +107,10 @@ export default function Join() {
     } else {
       const { error } = await supabase.from('clients').insert({
         user_id: userId,
-        name: form.name,
-        email: form.email,
-        company: form.company,
-        phone: form.phone,
+        name: form.name.trim(),
+        email: form.email.trim().toLowerCase(),
+        company: form.company.trim(),
+        phone: form.phone.trim(),
         plan: 'starter',
         status: 'active',
       })
@@ -152,7 +157,10 @@ export default function Join() {
       <div style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3f0' }}>
         <SEOHead title="Invite Link Status" description="Invite-only signup" path="/join" noindex />
         <div style={{ background: 'white', borderRadius: 20, padding: isMobile ? '32px 24px' : '48px 40px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
-          <div style={{ fontSize: 32, marginBottom: 16 }}>⚠️</div>
+          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #d97706', margin: '0 auto 16px', position: 'relative' }}>
+            <span style={{ position: 'absolute', width: 3, height: 10, borderRadius: 2, background: '#d97706', top: 7, left: 14 }} />
+            <span style={{ position: 'absolute', width: 3, height: 3, borderRadius: '50%', background: '#d97706', bottom: 6, left: 14 }} />
+          </div>
           <div style={{ fontSize: 16, fontWeight: 600, color: '#18181a', marginBottom: 8 }}>{message.title}</div>
           <div style={{ fontSize: 13, color: '#7a7888' }}>{message.detail}</div>
         </div>
@@ -176,7 +184,7 @@ export default function Join() {
           <input placeholder="Phone" value={form.phone} onChange={set('phone')} style={inp} />
           <input placeholder="Password *" type="password" value={form.password} onChange={set('password')} required style={inp} />
           {error && <p style={{ fontSize: 13, color: '#dc2626', margin: 0 }}>{error}</p>}
-          <button type="submit" disabled={loading} style={{
+          <button type="submit" disabled={loading || form.password.length < 8} style={{
             padding: '13px', borderRadius: 10, border: 'none', background: '#18181a',
             color: 'white', fontSize: 14, fontWeight: 500, cursor: loading ? 'not-allowed' : 'pointer',
             opacity: loading ? 0.7 : 1, marginTop: 4,

@@ -3,6 +3,14 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --vf-ink: #18181a;
+  --vf-muted: #7a7888;
+  --vf-bg-soft: #faf9f7;
+  --vf-outline: rgba(184, 144, 106, 0.24);
+  --vf-outline-strong: rgba(184, 144, 106, 0.54);
+}
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
@@ -22,6 +30,65 @@
   }
   /* Touch-friendly button/link targets */
   button, a { -webkit-tap-highlight-color: transparent; }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  button {
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.18s ease,
+      border-color 0.18s ease,
+      background-color 0.18s ease,
+      color 0.18s ease,
+      opacity 0.18s ease;
+  }
+
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  button:disabled {
+    opacity: 0.58;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  input,
+  select,
+  textarea {
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+  }
+
+  input:hover,
+  select:hover,
+  textarea:hover {
+    border-color: rgba(0, 0, 0, 0.17);
+  }
+
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--vf-outline);
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    border-color: var(--vf-outline-strong);
+    background: #fff;
+  }
 }
 
 @keyframes rise {

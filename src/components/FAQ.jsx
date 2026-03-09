@@ -20,7 +20,7 @@ export default function FAQ() {
   return (
     <section id="faq" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow icon="❓">Common questions</Eyebrow>
+        <Eyebrow>Common questions</Eyebrow>
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
 
         <div className="fade-up d2" style={{ marginTop: isMobile ? 36 : 52, borderTop: '1px solid rgba(0,0,0,0.08)' }}>

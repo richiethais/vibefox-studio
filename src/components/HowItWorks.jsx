@@ -16,7 +16,7 @@ export default function HowItWorks() {
   return (
     <section id="how" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px', background: '#faf9f7' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow icon="🗺">How it works</Eyebrow>
+        <Eyebrow>How it works</Eyebrow>
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>3 simple steps to <em style={{ fontStyle: 'italic', color: '#b8906a' }}>effortless delivery.</em></h2>
         <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>Clear process, no surprises, fast turnaround every time.</p>
 
