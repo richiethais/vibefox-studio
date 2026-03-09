@@ -19,7 +19,7 @@ export default function App() {
     '@id': 'https://vibefoxstudio.com/#localbusiness',
     name: 'VibefoxStudio',
     alternateName: 'Vibefox Studio',
-    image: 'https://vibefoxstudio.com/image2vector.svg',
+    image: 'https://vibefoxstudio.com/favicon-512x512.png',
     url: 'https://vibefoxstudio.com',
     areaServed: 'Jacksonville, Florida',
     email: 'richie@vibefoxstudio.com',

@@ -68,7 +68,7 @@ export default function BlogPostPage() {
       name: 'VibefoxStudio',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://vibefoxstudio.com/image2vector.svg',
+        url: 'https://vibefoxstudio.com/favicon-512x512.png',
       },
     },
     mainEntityOfPage: `https://vibefoxstudio.com/blogs/${activePost.slug}`,

@@ -38,7 +38,7 @@ export default function ServicesPage() {
       <PageHero
         eyebrow="Services"
         title="Digital marketing services built for Jacksonville growth."
-        sub="From local SEO to high-converting websites, VibefoxStudio (Vibefox Studio) helps businesses searching for the best digital marketing agency in Jacksonville, Florida turn traffic into revenue."
+        sub="From local SEO to high-converting websites, VibefoxStudio helps businesses searching for the best digital marketing agency in Jacksonville, Florida turn traffic into revenue."
       />
 
       <LogoStrip />

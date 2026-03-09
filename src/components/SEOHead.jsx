@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 
 const DEFAULT_SITE_NAME = 'VibefoxStudio'
 const DEFAULT_DISPLAY_NAME = 'Vibefox Studio'
-const DEFAULT_IMAGE = 'https://vibefoxstudio.com/image2vector.svg'
+const DEFAULT_IMAGE = 'https://vibefoxstudio.com/favicon-512x512.png'
 const GLOBAL_KEYWORDS = [
   'vibefoxstudio',
   'vibefox studio',
