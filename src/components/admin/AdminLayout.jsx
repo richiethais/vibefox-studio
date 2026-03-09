@@ -14,6 +14,7 @@ const navItems = [
   { to: '/admin/messages', label: 'Messages' },
   { to: '/admin/notes', label: 'Client Notes' },
   { to: '/admin/seo-notes', label: 'SEO Notes' },
+  { to: '/admin/calendar', label: 'Calendar' },
   { to: '/admin/blogs', label: 'Blogs' },
 ]
 
