@@ -15,6 +15,9 @@ const emptyForm = {
   scheduleMode: 'now',   // 'now' | 'schedule'
   publish_at: '',        // ISO datetime string when scheduleMode === 'schedule'
 }
+const NEW_YORK_TZ = 'America/New_York'
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const MINUTE_OPTIONS = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'))
 
 function isMissingTableError(error) {
   const msg = String(error?.message || '').toLowerCase()
@@ -35,6 +38,148 @@ function formatDate(value) {
   return new Date(value).toLocaleString()
 }
 
+function getDatePartsInTimeZone(date, timeZone = NEW_YORK_TZ) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+
+  const map = {}
+  for (const part of parts) {
+    if (part.type !== 'literal') map[part.type] = Number(part.value)
+  }
+  return {
+    year: map.year,
+    month: map.month,
+    day: map.day,
+    hour24: map.hour,
+    minute: map.minute,
+    second: map.second,
+  }
+}
+
+function getTimeZoneOffsetMinutes(date, timeZone = NEW_YORK_TZ) {
+  const parts = getDatePartsInTimeZone(date, timeZone)
+  const asUtc = Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour24, parts.minute, parts.second)
+  return (asUtc - date.getTime()) / 60000
+}
+
+function getDaysInMonth(year, month) {
+  return new Date(year, month, 0).getDate()
+}
+
+function toHour12(hour24) {
+  const ampm = hour24 >= 12 ? 'PM' : 'AM'
+  const hour = hour24 % 12 || 12
+  return { hour, ampm }
+}
+
+function toHour24(hour12, ampm) {
+  const raw = Number(hour12) % 12
+  return ampm === 'PM' ? raw + 12 : raw
+}
+
+function isoToScheduleDraft(isoValue) {
+  const baseDate = isoValue ? new Date(isoValue) : new Date(Date.now() + 60 * 60 * 1000)
+  const parts = getDatePartsInTimeZone(baseDate, NEW_YORK_TZ)
+  const time = toHour12(parts.hour24)
+
+  return {
+    year: parts.year,
+    month: parts.month,
+    day: parts.day,
+    hour: time.hour,
+    minute: String(parts.minute).padStart(2, '0'),
+    ampm: time.ampm,
+  }
+}
+
+function getDefaultScheduleDraft() {
+  const seed = new Date(Date.now() + 60 * 60 * 1000)
+  const parts = getDatePartsInTimeZone(seed, NEW_YORK_TZ)
+  const roundedMinute = Math.ceil(parts.minute / 5) * 5
+  const bumped = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour24, roundedMinute, 0))
+  return isoToScheduleDraft(bumped.toISOString())
+}
+
+function buildIsoFromNyDraft(draft) {
+  const year = Number(draft.year)
+  const month = Number(draft.month)
+  const day = Number(draft.day)
+  const hour = Number(draft.hour)
+  const minute = Number(draft.minute)
+  const ampm = draft.ampm
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day) || !Number.isInteger(hour) || !Number.isInteger(minute)) {
+    return { iso: null, error: 'Choose a complete schedule date and time.' }
+  }
+  if (month < 1 || month > 12) return { iso: null, error: 'Month is invalid.' }
+  if (day < 1 || day > getDaysInMonth(year, month)) return { iso: null, error: 'That date does not exist.' }
+  if (hour < 1 || hour > 12) return { iso: null, error: 'Hour is invalid.' }
+  if (minute < 0 || minute > 59) return { iso: null, error: 'Minute is invalid.' }
+  if (!['AM', 'PM'].includes(ampm)) return { iso: null, error: 'AM/PM is invalid.' }
+
+  const hour24 = toHour24(hour, ampm)
+  const localAsUtcMs = Date.UTC(year, month - 1, day, hour24, minute, 0)
+  let targetMs = localAsUtcMs
+  for (let i = 0; i < 4; i += 1) {
+    const offset = getTimeZoneOffsetMinutes(new Date(targetMs), NEW_YORK_TZ)
+    targetMs = localAsUtcMs - offset * 60 * 1000
+  }
+
+  const check = getDatePartsInTimeZone(new Date(targetMs), NEW_YORK_TZ)
+  const matches =
+    check.year === year &&
+    check.month === month &&
+    check.day === day &&
+    check.hour24 === hour24 &&
+    check.minute === minute
+
+  if (!matches) {
+    return { iso: null, error: 'That exact New York time does not exist (DST transition).' }
+  }
+
+  const iso = new Date(targetMs).toISOString()
+  if (targetMs <= Date.now()) return { iso: null, error: 'Scheduled time must be in the future.' }
+
+  return { iso, error: null }
+}
+
+function formatDateEST(isoValue, includeZone = true) {
+  if (!isoValue) return '—'
+  const opts = {
+    timeZone: NEW_YORK_TZ,
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }
+  if (includeZone) opts.timeZoneName = 'short'
+  return new Intl.DateTimeFormat('en-US', opts).format(new Date(isoValue))
+}
+
+function formatCountdown(isoValue) {
+  if (!isoValue) return 'No schedule set'
+  const diff = new Date(isoValue).getTime() - Date.now()
+  if (diff <= 0) return 'Publishing soon'
+  const totalMinutes = Math.floor(diff / 60000)
+  const days = Math.floor(totalMinutes / (60 * 24))
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60)
+  const minutes = totalMinutes % 60
+
+  if (days > 0) return `In ${days}d ${hours}h`
+  if (hours > 0) return `In ${hours}h ${minutes}m`
+  return `In ${minutes}m`
+}
+
 function postToForm(post) {
   return {
     title: post.title || '',
@@ -46,12 +191,12 @@ function postToForm(post) {
     content: post.content || '',
     cover_image_url: post.cover_image_url || '',
     scheduleMode: post.status === 'scheduled' ? 'schedule' : 'now',
-    publish_at: post.publish_at ? post.publish_at.slice(0, 16) : '',
+    publish_at: post.publish_at || '',
   }
 }
 
 function formToPost(f) {
-  const { scheduleMode, publish_at, ...rest } = f
+  const { scheduleMode: _scheduleMode, publish_at: _publishAt, ...rest } = f
   return rest
 }
 
@@ -125,11 +270,23 @@ export default function AdminBlogs() {
   const [uploading, setUploading] = useState(false)
   const [notice, setNotice] = useState('')
   const isMobile = useIsMobile(768)
+  const [scheduleDraft, setScheduleDraft] = useState(() => getDefaultScheduleDraft())
+
+  const scheduleValidation = useMemo(() => {
+    if (form.scheduleMode !== 'schedule') return { iso: null, error: null }
+    return buildIsoFromNyDraft(scheduleDraft)
+  }, [form.scheduleMode, scheduleDraft])
 
   const draftPosts = useMemo(() => posts.filter(p => p.status === 'draft'), [posts])
   const publishedPosts = useMemo(() => posts.filter(p => p.status === 'published' || (!p.status && p.published_at)), [posts])
-  const scheduledPosts = useMemo(() => posts.filter(p => p.status === 'scheduled'), [posts])
+  const scheduledPosts = useMemo(
+    () => posts
+      .filter(p => p.status === 'scheduled')
+      .sort((a, b) => new Date(a.publish_at || 0).getTime() - new Date(b.publish_at || 0).getTime()),
+    [posts]
+  )
   const isEditingPublished = editing?.status === 'published'
+  const postActionDisabled = saving || uploading || (form.scheduleMode === 'schedule' && Boolean(scheduleValidation.error))
 
   const selectedPreview = useMemo(() => {
     if (previewId) return posts.find(p => String(p.id) === String(previewId)) || null
@@ -205,14 +362,18 @@ export default function AdminBlogs() {
   function beginCreate() {
     setEditing(null)
     setForm(emptyForm)
+    setScheduleDraft(getDefaultScheduleDraft())
     setNotice('')
   }
 
   function beginEdit(post) {
     setEditing(post)
     setForm(postToForm(post))
+    setScheduleDraft(isoToScheduleDraft(post.publish_at))
     if (post.status === 'published') {
       setNotice('Viewing a published blog. Posting from here creates a new blog and keeps existing blogs intact.')
+    } else if (post.status === 'scheduled') {
+      setNotice(`Editing scheduled blog. All times are shown in New York (ET).`)
     } else {
       setNotice('Editing saved draft.')
     }
@@ -329,7 +490,13 @@ export default function AdminBlogs() {
       const updateExistingDraft = Boolean(editing?.id && editing.status === 'draft')
       const slug = await ensureUniqueSlug(baseSlug, updateExistingDraft ? editing.id : null)
 
-      const isScheduled = form.scheduleMode === 'schedule' && form.publish_at
+      const isScheduled = form.scheduleMode === 'schedule'
+      const scheduleResult = isScheduled ? buildIsoFromNyDraft(scheduleDraft) : { iso: null, error: null }
+      if (isScheduled && scheduleResult.error) {
+        setSaving(false)
+        setNotice(scheduleResult.error)
+        return
+      }
       const basePost = formToPost(form)
 
       const payload = isScheduled
@@ -337,7 +504,7 @@ export default function AdminBlogs() {
             ...basePost,
             slug,
             status: 'scheduled',
-            publish_at: new Date(form.publish_at).toISOString(),
+            publish_at: scheduleResult.iso,
             published_at: null,
             updated_at: nowIso,
           }
@@ -369,10 +536,11 @@ export default function AdminBlogs() {
       }
 
       setNotice(isScheduled
-        ? `Blog scheduled for ${new Date(form.publish_at).toLocaleString()}.`
+        ? `Blog scheduled for ${formatDateEST(scheduleResult.iso)} (New York time).`
         : 'Blog posted successfully and is now live on the public Blogs page.')
       setEditing(null)
       setForm(emptyForm)
+      setScheduleDraft(getDefaultScheduleDraft())
       await load()
     } catch (error) {
       setSaving(false)
@@ -483,20 +651,12 @@ export default function AdminBlogs() {
             showPublishedDate
           />
 
-          <PostTable
-            title="Scheduled"
+          <ScheduledPostsPanel
             posts={scheduledPosts}
             loading={loading}
-            emptyText="No scheduled posts."
-            renderActions={post => (
-              <>
-                <span style={{ fontSize: 11, color: '#b45309', background: '#fef3c7', padding: '2px 8px', borderRadius: 100 }}>
-                  {post.publish_at ? new Date(post.publish_at).toLocaleString() : 'Scheduled'}
-                </span>
-                <button style={ghostBtn} onClick={() => beginEdit(post)}>Edit</button>
-                <button style={ghostBtn} onClick={() => remove(post.id)}>Delete</button>
-              </>
-            )}
+            onEdit={beginEdit}
+            onDelete={remove}
+            onPublishNow={publishFromRow}
           />
         </div>
 
@@ -572,18 +732,19 @@ export default function AdminBlogs() {
                     name="scheduleMode"
                     value="schedule"
                     checked={form.scheduleMode === 'schedule'}
-                    onChange={() => setForm(f => ({ ...f, scheduleMode: 'schedule' }))}
+                    onChange={() => {
+                      setForm(f => ({ ...f, scheduleMode: 'schedule' }))
+                      setScheduleDraft(prev => prev || getDefaultScheduleDraft())
+                    }}
                   />
                   Schedule for later
                 </label>
               </div>
               {form.scheduleMode === 'schedule' && (
-                <input
-                  type="datetime-local"
-                  value={form.publish_at}
-                  onChange={e => setForm(f => ({ ...f, publish_at: e.target.value }))}
-                  min={new Date().toISOString().slice(0, 16)}
-                  style={inp}
+                <ScheduleComposer
+                  value={scheduleDraft}
+                  onChange={setScheduleDraft}
+                  error={scheduleValidation.error}
                 />
               )}
             </div>
@@ -597,7 +758,7 @@ export default function AdminBlogs() {
                 type="button"
                 style={{ ...darkBtn, background: '#b45309' }}
                 onClick={publishCurrent}
-                disabled={saving || uploading}
+                disabled={postActionDisabled}
               >
                 {saving ? 'Posting…' : (isEditingPublished ? 'Post as New Blog' : 'Post Blog')}
               </button>
@@ -693,6 +854,197 @@ function PostTable({ title, posts, loading, emptyText, renderActions, showPublis
       )}
     </div>
   )
+}
+
+function ScheduledPostsPanel({ posts, loading, onEdit, onDelete, onPublishNow }) {
+  const nextUp = posts[0]
+
+  return (
+    <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, overflow: 'hidden' }}>
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', background: 'linear-gradient(180deg,#fcfbf9 0%, #f5f3f0 100%)' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#18181a', letterSpacing: '-0.2px' }}>
+          Scheduled Blogs ({posts.length})
+        </div>
+        <div style={{ marginTop: 4, fontSize: 12, color: '#7a7888' }}>
+          All schedule times are set and displayed in New York time (ET).
+        </div>
+      </div>
+
+      {loading ? (
+        <div style={{ padding: 14, color: '#7a7888', fontSize: 13 }}>Loading…</div>
+      ) : posts.length === 0 ? (
+        <div style={{ padding: 16, color: '#7a7888', fontSize: 13 }}>No scheduled posts yet.</div>
+      ) : (
+        <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {nextUp && (
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(184,144,106,0.14) 0%, rgba(184,144,106,0.03) 100%)',
+              border: '1px solid rgba(184,144,106,0.25)',
+              borderRadius: 12,
+              padding: '10px 12px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 8,
+              flexWrap: 'wrap',
+              alignItems: 'center',
+            }}>
+              <div style={{ fontSize: 12, color: '#7a7888' }}>
+                Next to publish: <strong style={{ color: '#18181a' }}>{nextUp.title}</strong>
+              </div>
+              <div style={{ fontSize: 12, color: '#9a3412', fontWeight: 600 }}>
+                {formatCountdown(nextUp.publish_at)} · {formatDateEST(nextUp.publish_at)}
+              </div>
+            </div>
+          )}
+
+          {posts.map(post => (
+            <article
+              key={post.id}
+              style={{
+                border: '1px solid rgba(0,0,0,0.08)',
+                borderRadius: 12,
+                padding: '11px 12px',
+                background: '#fcfbf9',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {post.title}
+                  </div>
+                  <div style={{ marginTop: 4, fontSize: 12, color: '#7a7888', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                    <span>{post.category || 'Digital Marketing'}</span>
+                    <span>•</span>
+                    <span>{formatDateEST(post.publish_at)}</span>
+                    <span>•</span>
+                    <span>{formatCountdown(post.publish_at)}</span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, color: '#b45309', background: '#fef3c7', padding: '3px 9px', borderRadius: 100 }}>
+                    Queued
+                  </span>
+                  <button style={ghostBtn} onClick={() => onEdit(post)}>Edit</button>
+                  <button style={ghostBtn} onClick={() => onDelete(post.id)}>Delete</button>
+                  <button style={{ ...darkBtn, background: '#0f766e' }} onClick={() => onPublishNow(post)}>
+                    Publish now
+                  </button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ScheduleComposer({ value, onChange, error }) {
+  const nowNy = getDatePartsInTimeZone(new Date(), NEW_YORK_TZ)
+  const years = Array.from({ length: 4 }, (_, i) => nowNy.year + i)
+  const daysInMonth = getDaysInMonth(Number(value.year), Number(value.month))
+  const selectedHour24 = toHour24(value.hour, value.ampm)
+  const selectedIsToday =
+    Number(value.year) === nowNy.year &&
+    Number(value.month) === nowNy.month &&
+    Number(value.day) === nowNy.day
+
+  const schedulePreview = buildIsoFromNyDraft(value)
+
+  function setPart(patch) {
+    onChange(prev => {
+      const next = { ...prev, ...patch }
+      const maxDay = getDaysInMonth(Number(next.year), Number(next.month))
+      if (Number(next.day) > maxDay) next.day = maxDay
+      return next
+    })
+  }
+
+  return (
+    <div style={{ border: '1px solid rgba(184,144,106,0.28)', borderRadius: 12, background: 'rgba(255,255,255,0.76)', padding: 12 }}>
+      <div style={{ fontSize: 12, color: '#7a7888', marginBottom: 10 }}>
+        Schedule in <strong style={{ color: '#18181a' }}>America/New_York</strong> timezone
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr 0.9fr', gap: 8 }}>
+        <select value={value.month} onChange={e => setPart({ month: Number(e.target.value) })} style={selectInp}>
+          {MONTH_NAMES.map((label, i) => {
+            const month = i + 1
+            const disabled = Number(value.year) === nowNy.year && month < nowNy.month
+            return (
+              <option key={label} value={month} disabled={disabled}>{label}</option>
+            )
+          })}
+        </select>
+        <select value={value.day} onChange={e => setPart({ day: Number(e.target.value) })} style={selectInp}>
+          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map(day => {
+            const disabled =
+              Number(value.year) === nowNy.year &&
+              Number(value.month) === nowNy.month &&
+              day < nowNy.day
+            return (
+              <option key={day} value={day} disabled={disabled}>{day}</option>
+            )
+          })}
+        </select>
+        <select value={value.year} onChange={e => setPart({ year: Number(e.target.value) })} style={selectInp}>
+          {years.map(year => <option key={year} value={year}>{year}</option>)}
+        </select>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 0.8fr', gap: 8, marginTop: 8 }}>
+        <select value={value.hour} onChange={e => setPart({ hour: Number(e.target.value) })} style={selectInp}>
+          {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => {
+            const hour24 = toHour24(hour, value.ampm)
+            const disabled = selectedIsToday && hour24 < nowNy.hour24
+            return (
+              <option key={hour} value={hour} disabled={disabled}>{hour}</option>
+            )
+          })}
+        </select>
+        <select value={value.minute} onChange={e => setPart({ minute: e.target.value })} style={selectInp}>
+          {MINUTE_OPTIONS.map(minute => {
+            const disabled = selectedIsToday && selectedHour24 === nowNy.hour24 && Number(minute) <= nowNy.minute
+            return (
+              <option key={minute} value={minute} disabled={disabled}>{minute}</option>
+            )
+          })}
+        </select>
+        <select value={value.ampm} onChange={e => setPart({ ampm: e.target.value })} style={selectInp}>
+          {['AM', 'PM'].map(period => <option key={period} value={period}>{period}</option>)}
+        </select>
+      </div>
+
+      <div style={{ marginTop: 10, fontSize: 12, color: error ? '#b91c1c' : '#0f766e', fontWeight: 500 }}>
+        {error
+          ? error
+          : `Will publish: ${formatDateEST(schedulePreview.iso)}`}
+      </div>
+    </div>
+  )
+}
+
+const selectInp = {
+  padding: '10px 12px',
+  borderRadius: 10,
+  border: '1px solid rgba(0,0,0,0.12)',
+  fontSize: 13,
+  color: '#18181a',
+  background: '#fff',
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box',
+  fontFamily: 'inherit',
+  appearance: 'none',
+  WebkitAppearance: 'none',
+  MozAppearance: 'none',
+  backgroundImage:
+    'linear-gradient(45deg, transparent 50%, #7a7888 50%), linear-gradient(135deg, #7a7888 50%, transparent 50%)',
+  backgroundPosition: 'calc(100% - 14px) calc(1em + 1px), calc(100% - 9px) calc(1em + 1px)',
+  backgroundSize: '5px 5px, 5px 5px',
+  backgroundRepeat: 'no-repeat',
+  paddingRight: 30,
 }
 
 const inp = {
