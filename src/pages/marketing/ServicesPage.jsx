@@ -31,6 +31,7 @@ export default function ServicesPage() {
         title="VibefoxStudio Services | Jacksonville SEO, Web Design & Growth"
         description="Jacksonville-focused SEO, websites, content strategy, and conversion-focused digital marketing services from VibefoxStudio."
         path="/services"
+        noindex
         keywords="digital marketing services jacksonville florida, seo services jacksonville, web design and seo agency jacksonville, best digital marketing agency in jacksonville florida, local marketing company jacksonville"
         structuredData={schema}
       />
