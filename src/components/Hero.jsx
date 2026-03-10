@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import useIsMobile from './useIsMobile'
 
 const s = {
@@ -64,6 +66,22 @@ const s = {
 
 export default function Hero() {
   const isMobile = useIsMobile()
+  const [titleNumber, setTitleNumber] = useState(0)
+  const titles = useMemo(
+    () => ['converts', 'delivers', 'performs', 'scales', 'grows'],
+    []
+  )
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (titleNumber === titles.length - 1) {
+        setTitleNumber(0)
+      } else {
+        setTitleNumber(titleNumber + 1)
+      }
+    }, 2000)
+    return () => clearTimeout(timeoutId)
+  }, [titleNumber, titles])
 
   return (
     <section style={{ ...s.section, padding: isMobile ? '128px 18px 64px' : s.section.padding }}>
@@ -74,7 +92,23 @@ export default function Hero() {
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that{' '}
-        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
+        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'flex-start', overflow: 'hidden', verticalAlign: 'bottom', height: isMobile ? '1.1em' : '1.05em', minWidth: isMobile ? '3.5em' : '4em' }}>
+          {titles.map((title, index) => (
+            <motion.em
+              key={index}
+              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap' }}
+              initial={{ opacity: 0, y: '-100%' }}
+              transition={{ type: 'spring', stiffness: 50 }}
+              animate={
+                titleNumber === index
+                  ? { y: 0, opacity: 1 }
+                  : { y: titleNumber > index ? '-150%' : '150%', opacity: 0 }
+              }
+            >
+              {title}.
+            </motion.em>
+          ))}
+        </span>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
