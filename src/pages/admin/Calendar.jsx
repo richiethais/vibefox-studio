@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { publishDueScheduledPosts } from '../../lib/blog'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
 
@@ -33,6 +35,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 const VIEW_OPTIONS = ['month', 'week', 'day']
 const HOURS = Array.from({ length: 16 }, (_, index) => index + 7)
+const BLOG_TIME_ZONE = 'America/New_York'
 
 const EMPTY_FORM = {
   title: '',
@@ -88,6 +91,63 @@ function sortEvents(events) {
   return [...events].sort((a, b) => eventSortKey(a).localeCompare(eventSortKey(b)))
 }
 
+function getDatePartsInTimeZone(date, timeZone = BLOG_TIME_ZONE) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+
+  const map = {}
+  for (const part of parts) {
+    if (part.type !== 'literal') map[part.type] = Number(part.value)
+  }
+
+  return {
+    year: map.year,
+    month: map.month,
+    day: map.day,
+    hour24: map.hour,
+    minute: map.minute,
+  }
+}
+
+function formatDateKeyInTimeZone(isoValue, timeZone = BLOG_TIME_ZONE) {
+  if (!isoValue) return ''
+  const parts = getDatePartsInTimeZone(new Date(isoValue), timeZone)
+  return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+}
+
+function formatTimeInTimeZone(isoValue, timeZone = BLOG_TIME_ZONE) {
+  if (!isoValue) return ''
+  const parts = getDatePartsInTimeZone(new Date(isoValue), timeZone)
+  return `${String(parts.hour24).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`
+}
+
+function isMissingTableError(error, tableName) {
+  const message = String(error?.message || '').toLowerCase()
+  return message.includes(`could not find the table 'public.${tableName}'`) || message.includes(`relation "${tableName}" does not exist`)
+}
+
+function createLinkedBlogEvent(post) {
+  return {
+    id: `linked-blog-${post.id}`,
+    title: post.title,
+    type: 'blog',
+    event_date: formatDateKeyInTimeZone(post.publish_at),
+    event_time: formatTimeInTimeZone(post.publish_at),
+    notes: 'Synced from the scheduled publish time in Blogs.',
+    blog_post_id: post.id,
+    source: 'blog_post',
+    status: post.status,
+    publish_at: post.publish_at,
+  }
+}
+
 function getMonthCells(cursor) {
   const monthStart = new Date(cursor.getFullYear(), cursor.getMonth(), 1)
   const gridStart = addDays(monthStart, -monthStart.getDay())
@@ -104,6 +164,7 @@ function getMonthCells(cursor) {
 
 export default function AdminCalendar() {
   const isMobile = useIsMobile(768)
+  const navigate = useNavigate()
   const [view, setView] = useState('month')
   const [cursor, setCursor] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(formatDateKey(new Date()))
@@ -120,6 +181,7 @@ export default function AdminCalendar() {
   const [form, setForm] = useState(EMPTY_FORM)
 
   const selectedDateObj = useMemo(() => parseDateKey(selectedDate), [selectedDate])
+  const isLinkedBlogEvent = editingEvent?.source === 'blog_post'
 
   const eventsByDate = useMemo(() => {
     const output = new Map()
@@ -173,6 +235,8 @@ export default function AdminCalendar() {
     setError('')
 
     try {
+      await publishDueScheduledPosts()
+
       const [eventsRes, blogRes] = await Promise.all([
         supabase
           .from('calendar_events')
@@ -186,11 +250,26 @@ export default function AdminCalendar() {
           .order('updated_at', { ascending: false }),
       ])
 
-      if (eventsRes.error) throw eventsRes.error
+      if (eventsRes.error && !isMissingTableError(eventsRes.error, 'calendar_events')) throw eventsRes.error
       if (blogRes.error) throw blogRes.error
 
-      setEvents(eventsRes.data ?? [])
+      const manualEvents = (eventsRes.data ?? []).map(event => ({ ...event, source: 'calendar' }))
+      const linkedBlogIds = new Set(
+        manualEvents
+          .filter(event => event.type === 'blog' && event.blog_post_id)
+          .map(event => String(event.blog_post_id))
+      )
+      const syncedBlogEvents = (blogRes.data ?? [])
+        .filter(post => post.status === 'scheduled' && post.publish_at)
+        .filter(post => !linkedBlogIds.has(String(post.id)))
+        .map(createLinkedBlogEvent)
+
+      setEvents(sortEvents([...manualEvents, ...syncedBlogEvents]))
       setBlogPosts(blogRes.data ?? [])
+
+      if (eventsRes.error && isMissingTableError(eventsRes.error, 'calendar_events')) {
+        setError('Calendar events table is missing, but scheduled blog posts are still syncing into the calendar.')
+      }
     } catch (loadError) {
       setError(loadError?.message || 'Could not load calendar data.')
     } finally {
@@ -319,6 +398,11 @@ export default function AdminCalendar() {
   }
 
   async function deleteEvent(event) {
+    if (event.source === 'blog_post') {
+      setError('Scheduled blog entries are synced from Blogs. Delete or reschedule them from the Blogs admin page.')
+      return
+    }
+
     const approved = window.confirm('Delete this event?')
     if (!approved) return
 
@@ -379,6 +463,7 @@ export default function AdminCalendar() {
 
   const today = new Date()
   const todayKey = formatDateKey(today)
+  const linkedBlogOption = blogPosts.find(post => String(post.id) === String(form.blog_post_id))
 
   return (
     <div style={{ padding: isMobile ? '18px 16px 30px' : '34px 40px 44px' }}>
@@ -690,6 +775,9 @@ export default function AdminCalendar() {
                       >
                         <div style={{ fontSize: 11, marginBottom: 2 }}>{formatEventTime(event.event_time)}</div>
                         <div style={{ fontSize: 13, fontWeight: 600, lineHeight: 1.25 }}>{event.title}</div>
+                        {event.source === 'blog_post' && (
+                          <div style={{ fontSize: 11, marginTop: 4, opacity: 0.85 }}>Scheduled blog sync</div>
+                        )}
                       </button>
                     )
                   })}
@@ -730,6 +818,9 @@ export default function AdminCalendar() {
                         {event.event_date} • {formatEventTime(event.event_time)}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3 }}>{event.title}</div>
+                      {event.source === 'blog_post' && (
+                        <div style={{ fontSize: 11, color: '#7a7888', marginBottom: 4 }}>Synced from scheduled blog</div>
+                      )}
                       <span style={{ ...chip, background: colors.bg, color: colors.text }}>{EVENT_TYPES[event.type]?.label || 'General'}</span>
                     </button>
                   )
@@ -755,7 +846,15 @@ export default function AdminCalendar() {
       {modalOpen && (
         <div style={overlay}>
           <div style={{ ...modalBox, margin: isMobile ? 16 : 0 }}>
-            <h2 style={{ margin: '0 0 14px', fontSize: 18, fontWeight: 600, color: '#18181a' }}>{editingEvent ? 'Edit event' : 'New event'}</h2>
+            <h2 style={{ margin: '0 0 14px', fontSize: 18, fontWeight: 600, color: '#18181a' }}>
+              {isLinkedBlogEvent ? 'Scheduled blog event' : editingEvent ? 'Edit event' : 'New event'}
+            </h2>
+
+            {isLinkedBlogEvent && (
+              <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 10, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: 12 }}>
+                This calendar item is synced from a scheduled blog post. Change the publish time in Blogs and the calendar will update automatically.
+              </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <input
@@ -763,10 +862,11 @@ export default function AdminCalendar() {
                 onChange={event => updateForm('title', event.target.value)}
                 placeholder="Event title"
                 style={inp}
+                disabled={isLinkedBlogEvent}
               />
 
               <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10 }}>
-                <select value={form.type} onChange={event => updateForm('type', event.target.value)} style={inp}>
+                <select value={form.type} onChange={event => updateForm('type', event.target.value)} style={inp} disabled={isLinkedBlogEvent}>
                   {Object.entries(EVENT_TYPES).map(([key, value]) => (
                     <option key={key} value={key}>{value.label}</option>
                   ))}
@@ -777,6 +877,7 @@ export default function AdminCalendar() {
                   value={form.event_date}
                   onChange={event => updateForm('event_date', event.target.value)}
                   style={inp}
+                  disabled={isLinkedBlogEvent}
                 />
               </div>
 
@@ -785,10 +886,27 @@ export default function AdminCalendar() {
                 value={form.event_time}
                 onChange={event => updateForm('event_time', event.target.value)}
                 style={inp}
+                disabled={isLinkedBlogEvent}
               />
 
               {form.type === 'blog' && (
-                <select value={form.blog_post_id} onChange={event => updateForm('blog_post_id', event.target.value)} style={inp}>
+                <select
+                  value={form.blog_post_id}
+                  onChange={event => {
+                    const value = event.target.value
+                    const linkedPost = blogPosts.find(post => String(post.id) === String(value))
+                    setForm(current => ({
+                      ...current,
+                      blog_post_id: value,
+                      title: linkedPost && !current.title.trim() ? linkedPost.title : current.title,
+                      event_date: linkedPost?.publish_at ? formatDateKeyInTimeZone(linkedPost.publish_at) : current.event_date,
+                      event_time: linkedPost?.publish_at ? formatTimeInTimeZone(linkedPost.publish_at) : current.event_time,
+                      notes: linkedPost?.publish_at && !current.notes.trim() ? 'Linked to scheduled blog publish time.' : current.notes,
+                    }))
+                  }}
+                  style={inp}
+                  disabled={isLinkedBlogEvent}
+                >
                   <option value="">Link scheduled or draft blog (optional)</option>
                   {blogPosts.map(post => (
                     <option key={post.id} value={post.id}>
@@ -798,12 +916,27 @@ export default function AdminCalendar() {
                 </select>
               )}
 
+              {form.type === 'blog' && linkedBlogOption?.publish_at && !isLinkedBlogEvent && (
+                <div style={{ fontSize: 12, color: '#7a7888' }}>
+                  Linked blog schedule: {new Intl.DateTimeFormat('en-US', {
+                    timeZone: BLOG_TIME_ZONE,
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true,
+                  }).format(new Date(linkedBlogOption.publish_at))} EST
+                </div>
+              )}
+
               <textarea
                 value={form.notes}
                 onChange={event => updateForm('notes', event.target.value)}
                 placeholder="Notes"
                 rows={4}
                 style={{ ...inp, resize: 'vertical' }}
+                disabled={isLinkedBlogEvent}
               />
 
               {validationError && <div style={{ fontSize: 12, color: '#b91c1c' }}>{validationError}</div>}
@@ -811,8 +944,11 @@ export default function AdminCalendar() {
 
             <div style={{ marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <div>
-                {editingEvent && (
+                {editingEvent && !isLinkedBlogEvent && (
                   <button onClick={() => deleteEvent(editingEvent)} style={{ ...ghostBtn, color: '#b91c1c', borderColor: '#fca5a5' }}>Delete</button>
+                )}
+                {isLinkedBlogEvent && (
+                  <button onClick={() => navigate(`/admin/blogs?preview=${editingEvent.blog_post_id}`)} style={ghostBtn}>Open in Blogs</button>
                 )}
               </div>
 
@@ -826,9 +962,11 @@ export default function AdminCalendar() {
                 >
                   Cancel
                 </button>
-                <button onClick={saveEvent} disabled={saving || Boolean(validationError)} style={{ ...darkBtn, opacity: saving ? 0.7 : 1 }}>
-                  {saving ? 'Saving…' : 'Save event'}
-                </button>
+                {!isLinkedBlogEvent && (
+                  <button onClick={saveEvent} disabled={saving || Boolean(validationError)} style={{ ...darkBtn, opacity: saving ? 0.7 : 1 }}>
+                    {saving ? 'Saving…' : 'Save event'}
+                  </button>
+                )}
               </div>
             </div>
           </div>
