@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import BrandLogo from './BrandLogo'
 
 const links = [
@@ -14,6 +15,11 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [hoveredTab, setHoveredTab] = useState(null)
+  const location = useLocation()
+
+  // Determine the active tab based on current route
+  const activeTab = links.find(([, to]) => location.pathname === to)?.[0] || null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -78,36 +84,96 @@ export default function Nav() {
             {menuOpen ? '×' : '☰'}
           </button>
         ) : (
-          <ul style={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}>
-            {links.map(([label, to]) => (
-              <li key={label}>
-                <NavLink
-                  to={to}
-                  style={({ isActive }) => ({
-                    textDecoration: 'none',
-                    color: isActive ? '#18181a' : '#7a7888',
-                    fontSize: 14,
-                    fontWeight: 400,
-                    padding: '7px 14px',
-                    borderRadius: 100,
-                    display: 'block',
-                    transition: 'all 0.18s',
-                    background: isActive ? 'rgba(0,0,0,0.06)' : 'transparent',
-                  })}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#18181a'; e.currentTarget.style.background = 'rgba(0,0,0,0.04)' }}
-                  onMouseLeave={e => {
-                    if (e.currentTarget.getAttribute('aria-current') !== 'page') {
-                      e.currentTarget.style.color = '#7a7888'
-                      e.currentTarget.style.background = 'transparent'
-                    } else {
-                      e.currentTarget.style.background = 'rgba(0,0,0,0.06)'
-                    }
-                  }}
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
+          <ul
+            style={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}
+            onMouseLeave={() => setHoveredTab(null)}
+          >
+            {links.map(([label, to]) => {
+              const isActive = location.pathname === to
+              const isHovered = hoveredTab === label
+              const showHighlight = isHovered || (isActive && hoveredTab === null)
+
+              return (
+                <li key={label} style={{ position: 'relative' }}>
+                  <NavLink
+                    to={to}
+                    onMouseEnter={() => setHoveredTab(label)}
+                    style={{
+                      textDecoration: 'none',
+                      color: isActive || isHovered ? '#18181a' : '#7a7888',
+                      fontSize: 14,
+                      fontWeight: 400,
+                      padding: '7px 14px',
+                      borderRadius: 100,
+                      display: 'block',
+                      position: 'relative',
+                      zIndex: 10,
+                      transition: 'color 0.18s',
+                    }}
+                  >
+                    {label}
+                  </NavLink>
+                  {showHighlight && (
+                    <motion.div
+                      layoutId="nav-tubelight"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'rgba(0,0,0,0.06)',
+                        borderRadius: 100,
+                        zIndex: 0,
+                      }}
+                      initial={false}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 350,
+                        damping: 30,
+                      }}
+                    >
+                      {/* Tubelight glow effect */}
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: -2,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: 24,
+                          height: 3,
+                          background: '#b8906a',
+                          borderRadius: '4px 4px 0 0',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: -6,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: 36,
+                          height: 12,
+                          background: 'rgba(184,144,106,0.25)',
+                          borderRadius: 20,
+                          filter: 'blur(6px)',
+                        }}
+                      />
+                      <div
+                        style={{
+                          position: 'absolute',
+                          top: -4,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: 20,
+                          height: 8,
+                          background: 'rgba(184,144,106,0.3)',
+                          borderRadius: 20,
+                          filter: 'blur(4px)',
+                        }}
+                      />
+                    </motion.div>
+                  )}
+                </li>
+              )
+            })}
             <li>
               <a
                 href="/#contact"
