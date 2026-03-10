@@ -1,16 +1,118 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { publishDueScheduledPosts } from '../../lib/blog'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
+
+const BLOG_TIME_ZONE = 'America/New_York'
+
+function formatDateKey(date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
+
+function getDatePartsInTimeZone(date, timeZone = BLOG_TIME_ZONE) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  }).formatToParts(date)
+
+  const map = {}
+  for (const part of parts) {
+    if (part.type !== 'literal') map[part.type] = Number(part.value)
+  }
+
+  return {
+    year: map.year,
+    month: map.month,
+    day: map.day,
+    hour24: map.hour,
+    minute: map.minute,
+  }
+}
+
+function formatDateKeyInTimeZone(isoValue, timeZone = BLOG_TIME_ZONE) {
+  if (!isoValue) return ''
+  const parts = getDatePartsInTimeZone(new Date(isoValue), timeZone)
+  return `${parts.year}-${String(parts.month).padStart(2, '0')}-${String(parts.day).padStart(2, '0')}`
+}
+
+function formatTimeInTimeZone(isoValue, timeZone = BLOG_TIME_ZONE) {
+  if (!isoValue) return null
+  const parts = getDatePartsInTimeZone(new Date(isoValue), timeZone)
+  return `${String(parts.hour24).padStart(2, '0')}:${String(parts.minute).padStart(2, '0')}`
+}
+
+function sortAgendaItems(items) {
+  return [...items].sort((a, b) => {
+    const aKey = `${a.event_date || ''}T${a.event_time || '00:00'}`
+    const bKey = `${b.event_date || ''}T${b.event_time || '00:00'}`
+    return aKey.localeCompare(bKey)
+  })
+}
+
+function formatDate(date) {
+  if (!date) return 'Unknown date'
+  return new Date(date).toLocaleDateString()
+}
+
+function formatDateTime(date) {
+  if (!date) return 'Unknown date'
+  return new Date(date).toLocaleString([], { month: 'numeric', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+}
+
+function formatEventTime(value) {
+  if (!value) return 'All day'
+  const [hourRaw = '0', minuteRaw = '00'] = String(value).split(':')
+  const hour = Number(hourRaw)
+  const minute = Number(minuteRaw)
+  const suffix = hour >= 12 ? 'PM' : 'AM'
+  const hour12 = hour % 12 || 12
+  return `${hour12}:${String(minute).padStart(2, '0')} ${suffix}`
+}
+
+function formatAgendaType(type) {
+  if (type === 'seo') return 'SEO'
+  if (type === 'blog') return 'Blog'
+  if (type === 'project') return 'Project'
+  return 'General'
+}
+
+function truncate(value, maxLength) {
+  const clean = String(value || '').trim()
+  if (!clean) return 'No message body'
+  if (clean.length <= maxLength) return clean
+  return `${clean.slice(0, maxLength - 1)}…`
+}
+
+function getInviteStatusLabel(invite) {
+  if (invite.used) return 'Registered'
+  if (invite.expires_at && new Date(invite.expires_at).getTime() <= Date.now()) return 'Expired'
+  return 'Pending'
+}
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const isMobile = useIsMobile(768)
   const [stats, setStats] = useState({ inquiries: 0, clients: 0, projects: 0, invoices: 0, drafts: 0 })
-  const [recent, setRecent] = useState({ inquiries: [], invoices: [], invites: [], draft: null })
+  const [recent, setRecent] = useState({
+    inquiries: [],
+    invoices: [],
+    invites: [],
+    draft: null,
+    messages: [],
+    todayAgenda: [],
+  })
 
   useEffect(() => {
     async function load() {
+      await publishDueScheduledPosts()
+      const todayKey = formatDateKey(new Date())
+
       const [
         inquiryCountRes,
         clientCountRes,
@@ -21,6 +123,9 @@ export default function AdminDashboard() {
         invoicesRes,
         invitesRes,
         latestDraftRes,
+        messagesRes,
+        calendarRes,
+        scheduledBlogsRes,
       ] = await Promise.all([
         supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'new'),
         supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -29,9 +134,32 @@ export default function AdminDashboard() {
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
         supabase.from('inquiries').select('id, name, service_type, created_at').eq('status', 'new').order('created_at', { ascending: false }).limit(5),
         supabase.from('invoices').select('id, description, amount, created_at, clients(name)').eq('status', 'unpaid').order('created_at', { ascending: false }).limit(5),
-        supabase.from('invite_tokens').select('token, name, email, used, created_at').order('created_at', { ascending: false }).limit(5),
+        supabase.from('invite_tokens').select('token, name, email, used, created_at, expires_at').order('created_at', { ascending: false }).limit(5),
         supabase.from('blog_posts').select('id, title, excerpt, updated_at, slug, status').eq('status', 'draft').order('updated_at', { ascending: false }).limit(1).maybeSingle(),
+        supabase.from('messages').select('id, body, created_at, client_id, clients(name)').eq('from_admin', false).order('created_at', { ascending: false }).limit(5),
+        supabase.from('calendar_events').select('id, title, type, event_date, event_time, blog_post_id, notes').eq('event_date', todayKey).order('event_time', { ascending: true }),
+        supabase.from('blog_posts').select('id, title, status, publish_at').eq('status', 'scheduled').not('publish_at', 'is', null).order('publish_at', { ascending: true }),
       ])
+
+      const manualAgenda = calendarRes.error ? [] : (calendarRes.data ?? [])
+      const linkedBlogIds = new Set(
+        manualAgenda
+          .filter(event => event.type === 'blog' && event.blog_post_id)
+          .map(event => String(event.blog_post_id))
+      )
+      const syncedTodayBlogs = (scheduledBlogsRes.error ? [] : (scheduledBlogsRes.data ?? []))
+        .filter(post => formatDateKeyInTimeZone(post.publish_at) === todayKey)
+        .filter(post => !linkedBlogIds.has(String(post.id)))
+        .map(post => ({
+          id: `scheduled-blog-${post.id}`,
+          title: post.title,
+          type: 'blog',
+          event_date: todayKey,
+          event_time: formatTimeInTimeZone(post.publish_at),
+          notes: 'Scheduled blog publish',
+          blog_post_id: post.id,
+          source: 'blog_post',
+        }))
 
       setStats({
         inquiries: inquiryCountRes.count ?? 0,
@@ -46,6 +174,11 @@ export default function AdminDashboard() {
         invoices: invoicesRes.data ?? [],
         invites: invitesRes.data ?? [],
         draft: latestDraftRes.data ?? null,
+        messages: messagesRes.error ? [] : (messagesRes.data ?? []),
+        todayAgenda: sortAgendaItems([
+          ...manualAgenda.map(event => ({ ...event, source: 'calendar' })),
+          ...syncedTodayBlogs,
+        ]),
       })
     }
 
@@ -67,6 +200,8 @@ export default function AdminDashboard() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {[
             { label: 'Review inquiries', route: '/admin/inquiries' },
+            { label: 'Today\'s calendar', route: '/admin/calendar' },
+            { label: 'New messages', route: '/admin/messages' },
             { label: 'Write blog', route: '/admin/blogs' },
             { label: 'Check invoices', route: '/admin/invoices' },
           ].map(action => (
@@ -131,7 +266,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 1fr 1fr 1.1fr', gap: 16 }}>
+      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 1fr 1fr 1fr 1.1fr', gap: 16 }}>
         <Panel title="New inquiries" actionLabel="Open CRM" onAction={() => navigate('/admin/inquiries')}>
           {recent.inquiries.length === 0 ? (
             <EmptyRow text="No new inquiries." />
@@ -145,15 +280,28 @@ export default function AdminDashboard() {
           ))}
         </Panel>
 
-        <Panel title="Unpaid invoices" actionLabel="View invoices" onAction={() => navigate('/admin/invoices')}>
-          {recent.invoices.length === 0 ? (
-            <EmptyRow text="No unpaid invoices." />
-          ) : recent.invoices.map(row => (
+        <Panel title="Today's Agenda" actionLabel="Open calendar" onAction={() => navigate('/admin/calendar')}>
+          {recent.todayAgenda.length === 0 ? (
+            <EmptyRow text="No calendar items today." />
+          ) : recent.todayAgenda.map(row => (
+            <ChecklistRow
+              key={row.id}
+              title={row.title}
+              subtitle={`${formatEventTime(row.event_time)} · ${formatAgendaType(row.type)}${row.source === 'blog_post' ? ' · Scheduled blog' : ''}`}
+              onClick={() => navigate('/admin/calendar')}
+            />
+          ))}
+        </Panel>
+
+        <Panel title="New messages" actionLabel="Open inbox" onAction={() => navigate('/admin/messages')}>
+          {recent.messages.length === 0 ? (
+            <EmptyRow text="No new client messages." />
+          ) : recent.messages.map(row => (
             <Row
               key={row.id}
-              title={row.clients?.name || 'Unknown client'}
-              subtitle={`${row.description || 'Invoice'} · ${formatMoney(row.amount)}`}
-              onClick={() => navigate('/admin/invoices')}
+              title={row.clients?.name || 'Client message'}
+              subtitle={`${truncate(row.body, 56)} · ${formatDateTime(row.created_at)}`}
+              onClick={() => navigate('/admin/messages')}
             />
           ))}
         </Panel>
@@ -165,7 +313,7 @@ export default function AdminDashboard() {
             <Row
               key={row.token}
               title={row.name || row.email}
-              subtitle={`${row.used ? 'Registered' : 'Pending'} · ${formatDate(row.created_at)}`}
+              subtitle={`${getInviteStatusLabel(row)} · ${formatDate(row.created_at)}`}
               onClick={() => navigate('/admin/clients')}
             />
           ))}
@@ -236,17 +384,37 @@ function Row({ title, subtitle, onClick }) {
   )
 }
 
+function ChecklistRow({ title, subtitle, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        textAlign: 'left',
+        width: '100%',
+        border: 'none',
+        background: 'white',
+        borderBottom: '1px solid rgba(0,0,0,0.05)',
+        padding: '11px 14px',
+        cursor: 'pointer',
+        display: 'grid',
+        gridTemplateColumns: '18px 1fr',
+        gap: 10,
+        alignItems: 'start',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = '#f8f6f2' }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'white' }}
+    >
+      <span style={{ width: 16, height: 16, borderRadius: 999, border: '1px solid rgba(0,0,0,0.16)', display: 'inline-block', marginTop: 1, background: '#faf9f7' }} />
+      <span>
+        <div style={{ fontSize: 13, color: '#18181a', fontWeight: 500 }}>{title}</div>
+        <div style={{ fontSize: 12, color: '#7a7888', marginTop: 2 }}>{subtitle}</div>
+      </span>
+    </button>
+  )
+}
+
 function EmptyRow({ text }) {
   return <div style={{ padding: '14px', fontSize: 12, color: '#7a7888' }}>{text}</div>
-}
-
-function formatDate(date) {
-  if (!date) return 'Unknown date'
-  return new Date(date).toLocaleDateString()
-}
-
-function formatMoney(value) {
-  return `$${Number(value || 0).toLocaleString()}`
 }
 
 const smallBtn = {

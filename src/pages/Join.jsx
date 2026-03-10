@@ -17,7 +17,15 @@ export default function Join() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!token) return
+    if (linkStatus === 'used' || linkStatus === 'expired' || linkStatus === 'invalid') {
+      navigate('/', { replace: true })
+    }
+  }, [linkStatus, navigate])
+
+  useEffect(() => {
+    if (!token) {
+      return
+    }
     supabase
       .from('invite_tokens')
       .select('*')
@@ -71,7 +79,7 @@ export default function Join() {
     })
     if (signUpError) {
       if (/already|registered|exists/i.test(signUpError.message)) {
-        await supabase.from('invite_tokens').update({ used: true }).eq('token', token)
+        await supabase.from('invite_tokens').update({ used: true, expires_at: new Date().toISOString() }).eq('token', token)
         setLoading(false)
         setLinkStatus('used')
         return
@@ -120,7 +128,7 @@ export default function Join() {
     if (clientError) { setError('Account created but profile setup failed: ' + clientError.message); setLoading(false); return }
 
     // Mark token as used
-    await supabase.from('invite_tokens').update({ used: true }).eq('token', token)
+    await supabase.from('invite_tokens').update({ used: true, expires_at: new Date().toISOString() }).eq('token', token)
 
     navigate('/client/dashboard')
   }
@@ -137,33 +145,10 @@ export default function Join() {
       )
     }
 
-    const messageByStatus = {
-      used: {
-        title: 'Link already used',
-        detail: 'This invite link has already been used to register an account. Please contact Vibefox Studio if you need a new one.',
-      },
-      expired: {
-        title: 'Link expired',
-        detail: 'This invite link has expired. Please contact Vibefox Studio for a fresh invite.',
-      },
-      invalid: {
-        title: 'Invalid link',
-        detail: 'This invite link is no longer valid. Please contact Vibefox Studio for a new one.',
-      },
-    }
-    const message = messageByStatus[linkStatus] ?? messageByStatus.invalid
-
     return (
       <div style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3f0' }}>
         <SEOHead title="Invite Link Status" description="Invite-only signup" path="/join" noindex />
-        <div style={{ background: 'white', borderRadius: 20, padding: isMobile ? '32px 24px' : '48px 40px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 8px 40px rgba(0,0,0,0.08)' }}>
-          <div style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #d97706', margin: '0 auto 16px', position: 'relative' }}>
-            <span style={{ position: 'absolute', width: 3, height: 10, borderRadius: 2, background: '#d97706', top: 7, left: 14 }} />
-            <span style={{ position: 'absolute', width: 3, height: 3, borderRadius: '50%', background: '#d97706', bottom: 6, left: 14 }} />
-          </div>
-          <div style={{ fontSize: 16, fontWeight: 600, color: '#18181a', marginBottom: 8 }}>{message.title}</div>
-          <div style={{ fontSize: 13, color: '#7a7888' }}>{message.detail}</div>
-        </div>
+        <div style={{ fontSize: 13, color: '#7a7888' }}>Redirecting to Vibefox Studio…</div>
       </div>
     )
   }

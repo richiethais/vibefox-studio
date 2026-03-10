@@ -21,6 +21,7 @@ export default function AdminClients() {
   const [linkForm, setLinkForm] = useState({ name: '', email: '' })
   const [generatedLink, setGeneratedLink] = useState('')
   const [generating, setGenerating] = useState(false)
+  const [deletingToken, setDeletingToken] = useState('')
 
   const [invitingClientId, setInvitingClientId] = useState('')
   const [notice, setNotice] = useState(null)
@@ -51,7 +52,10 @@ export default function AdminClients() {
     }
 
     setClients(clientsRes.data ?? [])
-    setInviteLinks(linksRes.data ?? [])
+    setInviteLinks((linksRes.data ?? []).map(link => ({
+      ...link,
+      is_expired: Boolean(link.expires_at && new Date(link.expires_at).getTime() <= Date.now()),
+    })))
     setLoading(false)
   }, [])
 
@@ -201,7 +205,33 @@ export default function AdminClients() {
     const isRegistered = Boolean(link.used || registeredEmails.has(email))
 
     if (isRegistered) return { label: 'Registered', bg: '#dcfce7', text: '#16a34a' }
+    if (link.is_expired) return { label: 'Expired', bg: '#f3f4f6', text: '#6b7280' }
     return { label: 'Pending', bg: '#fef3c7', text: '#d97706' }
+  }
+
+  async function deleteInviteLink(token) {
+    if (!token || deletingToken) return
+    const approved = window.confirm('Delete this invite link? It will no longer work.')
+    if (!approved) return
+
+    setDeletingToken(token)
+    setNotice(null)
+
+    const { error } = await supabase
+      .from('invite_tokens')
+      .delete()
+      .eq('token', token)
+
+    setDeletingToken('')
+
+    if (error) {
+      setNotice({ type: 'error', text: `Error: ${error.message}` })
+      return
+    }
+
+    if (generatedLink.includes(token)) setGeneratedLink('')
+    setNotice({ type: 'success', text: 'Invite link deleted.' })
+    await load()
   }
 
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }))
@@ -303,23 +333,34 @@ export default function AdminClients() {
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{ ...badge, background: status.bg, color: status.text, textTransform: 'none' }}>{status.label}</span>
                     </td>
-                    <td style={{ padding: '12px 16px', color: '#7a7888', maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={url}>
-                      {url}
+                    <td style={{ padding: '12px 16px', color: '#7a7888', maxWidth: 300, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={status.label === 'Pending' ? url : 'Inactive link'}>
+                      {status.label === 'Pending' ? url : 'Inactive'}
                     </td>
                     <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
+                      {status.label === 'Pending' && (
+                        <>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(url)
+                              setCopiedToken(link.token)
+                              setTimeout(() => setCopiedToken(''), 1800)
+                            }}
+                            style={ghostBtn}
+                          >
+                            {copiedToken === link.token ? 'Copied' : 'Copy'}
+                          </button>
+                          <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
+                            Open
+                          </a>
+                        </>
+                      )}
                       <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(url)
-                          setCopiedToken(link.token)
-                          setTimeout(() => setCopiedToken(''), 1800)
-                        }}
+                        onClick={() => deleteInviteLink(link.token)}
+                        disabled={deletingToken === link.token}
                         style={ghostBtn}
                       >
-                        {copiedToken === link.token ? 'Copied' : 'Copy'}
+                        {deletingToken === link.token ? 'Deleting…' : 'Delete'}
                       </button>
-                      <a href={url} target="_blank" rel="noreferrer" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-flex', alignItems: 'center' }}>
-                        Open
-                      </a>
                     </td>
                   </tr>
                 )
