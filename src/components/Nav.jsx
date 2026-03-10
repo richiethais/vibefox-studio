@@ -123,11 +123,13 @@ export default function Nav() {
                         borderRadius: 100,
                         zIndex: 0,
                       }}
-                      initial={false}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
                       transition={{
                         type: 'spring',
                         stiffness: 350,
                         damping: 30,
+                        opacity: { duration: 0.2, ease: 'easeOut' },
                       }}
                     >
                       {/* Tubelight glow effect */}
