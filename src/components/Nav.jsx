@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import BrandLogo from './BrandLogo'
 
 const links = [
@@ -14,6 +15,7 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -58,7 +60,64 @@ export default function Nav() {
           transition: 'box-shadow 0.3s',
         }}
       >
-        <BrandLogo href="/" size={isMobile ? 'sm' : 'nav'} />
+        <Link to="/" style={{ textDecoration: 'none', position: 'relative', display: 'inline-flex' }}>
+          <BrandLogo size={isMobile ? 'sm' : 'nav'} />
+          {location.pathname === '/' && (
+            <motion.div
+              layoutId="lamp"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: 100,
+                background: 'rgba(184,144,106,0.08)',
+                zIndex: -1,
+              }}
+              initial={false}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+            >
+              <div style={{
+                position: 'absolute',
+                bottom: -8,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 32,
+                height: 4,
+                background: 'rgb(184,144,106)',
+                borderRadius: '0 0 4px 4px',
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  width: 48,
+                  height: 24,
+                  background: 'rgba(184,144,106,0.2)',
+                  borderRadius: '50%',
+                  filter: 'blur(8px)',
+                  bottom: -8,
+                  left: -8,
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  width: 32,
+                  height: 24,
+                  background: 'rgba(184,144,106,0.2)',
+                  borderRadius: '50%',
+                  filter: 'blur(8px)',
+                  bottom: -4,
+                }} />
+                <div style={{
+                  position: 'absolute',
+                  width: 16,
+                  height: 16,
+                  background: 'rgba(184,144,106,0.2)',
+                  borderRadius: '50%',
+                  filter: 'blur(4px)',
+                  bottom: 0,
+                  left: 8,
+                }} />
+              </div>
+            </motion.div>
+          )}
+        </Link>
 
         {isMobile ? (
           <button
@@ -79,35 +138,90 @@ export default function Nav() {
           </button>
         ) : (
           <ul style={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}>
-            {links.map(([label, to]) => (
-              <li key={label}>
-                <NavLink
-                  to={to}
-                  style={({ isActive }) => ({
-                    textDecoration: 'none',
-                    color: isActive ? '#18181a' : '#7a7888',
-                    fontSize: 14,
-                    fontWeight: 400,
-                    padding: '7px 14px',
-                    borderRadius: 100,
-                    display: 'block',
-                    transition: 'all 0.18s',
-                    background: isActive ? 'rgba(0,0,0,0.06)' : 'transparent',
-                  })}
-                  onMouseEnter={e => { e.currentTarget.style.color = '#18181a'; e.currentTarget.style.background = 'rgba(0,0,0,0.04)' }}
-                  onMouseLeave={e => {
-                    if (e.currentTarget.getAttribute('aria-current') !== 'page') {
-                      e.currentTarget.style.color = '#7a7888'
-                      e.currentTarget.style.background = 'transparent'
-                    } else {
-                      e.currentTarget.style.background = 'rgba(0,0,0,0.06)'
-                    }
-                  }}
-                >
-                  {label}
-                </NavLink>
-              </li>
-            ))}
+            {links.map(([label, to]) => {
+              const isLampActive = location.pathname === to
+              return (
+                <li key={label}>
+                  <NavLink
+                    to={to}
+                    style={({ isActive }) => ({
+                      textDecoration: 'none',
+                      color: isActive ? '#18181a' : '#7a7888',
+                      fontSize: 14,
+                      fontWeight: 400,
+                      padding: '7px 14px',
+                      borderRadius: 100,
+                      display: 'block',
+                      position: 'relative',
+                      transition: 'color 0.18s',
+                    })}
+                    onMouseEnter={e => { e.currentTarget.style.color = '#18181a' }}
+                    onMouseLeave={e => {
+                      if (e.currentTarget.getAttribute('aria-current') !== 'page') {
+                        e.currentTarget.style.color = '#7a7888'
+                      }
+                    }}
+                  >
+                    {label}
+                    {isLampActive && (
+                      <motion.div
+                        layoutId="lamp"
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          borderRadius: 100,
+                          background: 'rgba(184,144,106,0.08)',
+                          zIndex: -1,
+                        }}
+                        initial={false}
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      >
+                        <div style={{
+                          position: 'absolute',
+                          top: -8,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: 32,
+                          height: 4,
+                          background: 'rgb(184,144,106)',
+                          borderRadius: '4px 4px 0 0',
+                        }}>
+                          <div style={{
+                            position: 'absolute',
+                            width: 48,
+                            height: 24,
+                            background: 'rgba(184,144,106,0.2)',
+                            borderRadius: '50%',
+                            filter: 'blur(8px)',
+                            top: -8,
+                            left: -8,
+                          }} />
+                          <div style={{
+                            position: 'absolute',
+                            width: 32,
+                            height: 24,
+                            background: 'rgba(184,144,106,0.2)',
+                            borderRadius: '50%',
+                            filter: 'blur(8px)',
+                            top: -4,
+                          }} />
+                          <div style={{
+                            position: 'absolute',
+                            width: 16,
+                            height: 16,
+                            background: 'rgba(184,144,106,0.2)',
+                            borderRadius: '50%',
+                            filter: 'blur(4px)',
+                            top: 0,
+                            left: 8,
+                          }} />
+                        </div>
+                      </motion.div>
+                    )}
+                  </NavLink>
+                </li>
+              )
+            })}
             <li>
               <a
                 href="/#contact"
