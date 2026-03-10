@@ -94,11 +94,11 @@ export default function Hero() {
         Your business deserves a site that
         <br />
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually </em>
-        <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', height: '1.15em', width: isMobile ? '3.6em' : '4em', textAlign: 'left' }}>
+        <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', height: '1.35em', width: isMobile ? '3.6em' : '4em', textAlign: 'left' }}>
           {titles.map((title, index) => (
             <motion.em
               key={index}
-              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', left: 0, bottom: 0 }}
+              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', left: 0, bottom: '0.1em' }}
               initial={{ opacity: 0, y: '100%' }}
               transition={{ type: 'spring', stiffness: 50 }}
               animate={
