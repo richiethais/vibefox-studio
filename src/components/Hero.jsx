@@ -1,4 +1,7 @@
+import { useState, useEffect } from 'react'
 import useIsMobile from './useIsMobile'
+
+const cyclingWords = ['converts', 'performs', 'works', 'functions', 'delivers']
 
 const s = {
   section: {
@@ -64,6 +67,14 @@ const s = {
 
 export default function Hero() {
   const isMobile = useIsMobile()
+  const [currentWordIndex, setCurrentWordIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWordIndex((prev) => (prev + 1) % cyclingWords.length)
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <section style={{ ...s.section, padding: isMobile ? '128px 18px 64px' : s.section.padding }}>
@@ -74,7 +85,7 @@ export default function Hero() {
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that{' '}
-        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
+        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>works.</em>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
@@ -110,6 +121,44 @@ export default function Hero() {
 
       <div className="anim-rise-6" style={{ marginTop: isMobile ? 48 : 72, width: '100%', maxWidth: 820 }}>
         <DashboardMockup isMobile={isMobile} />
+      </div>
+
+      <div 
+        className="anim-rise-7" 
+        style={{ 
+          marginTop: isMobile ? 48 : 64, 
+          textAlign: 'center',
+          overflow: 'hidden',
+          height: isMobile ? 48 : 64,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: `translateY(-${currentWordIndex * (isMobile ? 48 : 64)}px)`,
+          }}
+        >
+          {cyclingWords.map((word, index) => (
+            <span
+              key={word}
+              style={{
+                fontFamily: '"DM Serif Display", serif',
+                fontSize: isMobile ? 'clamp(32px, 10vw, 40px)' : 'clamp(40px, 6vw, 56px)',
+                fontStyle: 'italic',
+                color: '#b8906a',
+                height: isMobile ? 48 : 64,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                letterSpacing: '-1px',
+              }}
+            >
+              {word}
+            </span>
+          ))}
+        </div>
       </div>
     </section>
   )
