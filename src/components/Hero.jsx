@@ -94,17 +94,17 @@ export default function Hero() {
         Your business deserves a site that
         <br />
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually </em>
-        <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', height: '1.35em', width: isMobile ? '3.6em' : '4em', textAlign: 'left' }}>
+        <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', verticalAlign: 'text-bottom', height: '1.25em', width: isMobile ? '4em' : '4.5em', textAlign: 'left', marginBottom: '-0.15em' }}>
           {titles.map((title, index) => (
             <motion.em
               key={index}
-              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', left: 0, bottom: '0.1em' }}
-              initial={{ opacity: 0, y: '100%' }}
+              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', left: 0, top: 0 }}
+              initial={{ opacity: 0, y: '-100%' }}
               transition={{ type: 'spring', stiffness: 50 }}
               animate={
                 titleNumber === index
                   ? { y: 0, opacity: 1 }
-                  : { y: titleNumber > index ? '-100%' : '100%', opacity: 0 }
+                  : { y: titleNumber > index ? '100%' : '-100%', opacity: 0 }
               }
             >
               {title}
