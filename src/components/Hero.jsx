@@ -94,11 +94,11 @@ export default function Hero() {
         Your business deserves a site that
         <br />
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually{' '}</em>
-        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'center', overflow: 'hidden', verticalAlign: 'bottom', height: '1.05em', width: isMobile ? '3.6em' : '4em' }}>
+        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'center', verticalAlign: 'baseline', height: '1.2em', width: isMobile ? '3.6em' : '4em' }}>
           {titles.map((title, index) => (
             <motion.em
               key={index}
-              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap' }}
+              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', top: 0 }}
               initial={{ opacity: 0, y: '-100%' }}
               transition={{ type: 'spring', stiffness: 50 }}
               animate={
@@ -111,7 +111,6 @@ export default function Hero() {
             </motion.em>
           ))}
         </span>
-        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>.</em>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
