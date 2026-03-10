@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import useIsMobile from './useIsMobile'
 
 const cyclingWords = ['converts', 'performs', 'works', 'functions', 'delivers']
@@ -132,20 +132,23 @@ export default function Hero() {
           position: 'relative',
           display: 'flex',
           justifyContent: 'center',
+          alignItems: 'center',
           overflow: 'hidden',
           height: isMobile ? 56 : 72,
         }}
       >
-        {cyclingWords.map((word, index) => (
+        <AnimatePresence mode="wait">
           <motion.span
-            key={word}
-            initial={{ opacity: 0, y: 100 }}
-            animate={
-              currentWordIndex === index
-                ? { y: 0, opacity: 1 }
-                : { y: currentWordIndex > index ? -150 : 150, opacity: 0 }
-            }
-            transition={{ type: 'spring', stiffness: 50 }}
+            key={cyclingWords[currentWordIndex]}
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -40 }}
+            transition={{ 
+              type: 'spring', 
+              stiffness: 100, 
+              damping: 15,
+              duration: 0.4 
+            }}
             style={{
               position: 'absolute',
               fontFamily: '"DM Serif Display", serif',
@@ -155,9 +158,9 @@ export default function Hero() {
               letterSpacing: '-1px',
             }}
           >
-            {word}
+            {cyclingWords[currentWordIndex]}
           </motion.span>
-        ))}
+        </AnimatePresence>
       </div>
     </section>
   )
