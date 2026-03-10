@@ -93,27 +93,24 @@ export default function Hero() {
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that
         <br />
-        <span style={{ fontStyle: 'italic', color: '#b8906a' }}>
-          actually{' '}
-          <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', width: isMobile ? '4em' : '4.5em', textAlign: 'left' }}>
-            <span style={{ visibility: 'hidden' }}>converts</span>
+        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually{' '}
+          <span style={{ position: 'relative', display: 'inline-block', width: isMobile ? '3.5em' : '4em', overflow: 'hidden', height: '1em', verticalAlign: 'baseline' }}>
             {titles.map((title, index) => (
               <motion.span
                 key={index}
-                style={{ position: 'absolute', whiteSpace: 'nowrap', left: 0, top: 0 }}
+                style={{ position: 'absolute', left: 0, top: 0, whiteSpace: 'nowrap' }}
                 initial={{ opacity: 0, y: '-100%' }}
                 transition={{ type: 'spring', stiffness: 50 }}
-                animate={
-                  titleNumber === index
-                    ? { y: 0, opacity: 1 }
-                    : { y: titleNumber > index ? '100%' : '-100%', opacity: 0 }
-                }
+                animate={{
+                  opacity: titleNumber === index ? 1 : 0,
+                  y: titleNumber === index ? 0 : (titleNumber > index ? '100%' : '-100%')
+                }}
               >
                 {title}
               </motion.span>
             ))}
           </span>
-        </span>
+        </em>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
