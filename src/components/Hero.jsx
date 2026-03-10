@@ -93,18 +93,18 @@ export default function Hero() {
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that
         <br />
-        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually{' '}</em>
-        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'center', verticalAlign: 'baseline', height: '1.2em', width: isMobile ? '3.6em' : '4em' }}>
+        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually </em>
+        <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', verticalAlign: 'bottom', height: '1.15em', width: isMobile ? '3.6em' : '4em', textAlign: 'left' }}>
           {titles.map((title, index) => (
             <motion.em
               key={index}
-              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', top: 0 }}
-              initial={{ opacity: 0, y: '-100%' }}
+              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', left: 0, bottom: 0 }}
+              initial={{ opacity: 0, y: '100%' }}
               transition={{ type: 'spring', stiffness: 50 }}
               animate={
                 titleNumber === index
                   ? { y: 0, opacity: 1 }
-                  : { y: titleNumber > index ? '-150%' : '150%', opacity: 0 }
+                  : { y: titleNumber > index ? '-100%' : '100%', opacity: 0 }
               }
             >
               {title}
