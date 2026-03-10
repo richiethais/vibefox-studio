@@ -92,7 +92,7 @@ export default function Hero() {
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that{' '}
-        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'flex-start', overflow: 'hidden', verticalAlign: 'bottom', height: isMobile ? '1.1em' : '1.05em', minWidth: isMobile ? '3.5em' : '4em' }}>
+        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'flex-start', overflow: 'hidden', verticalAlign: 'bottom', height: isMobile ? '1.1em' : '1.05em', minWidth: isMobile ? '7em' : '9em' }}>
           {titles.map((title, index) => (
             <motion.em
               key={index}
@@ -105,7 +105,7 @@ export default function Hero() {
                   : { y: titleNumber > index ? '-150%' : '150%', opacity: 0 }
               }
             >
-              {title}.
+              actually {title}.
             </motion.em>
           ))}
         </span>
