@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import useIsMobile from './useIsMobile'
 
 const cyclingWords = ['converts', 'performs', 'works', 'functions', 'delivers']
@@ -128,37 +129,35 @@ export default function Hero() {
         style={{ 
           marginTop: isMobile ? 48 : 64, 
           textAlign: 'center',
+          position: 'relative',
+          display: 'flex',
+          justifyContent: 'center',
           overflow: 'hidden',
-          height: isMobile ? 48 : 64,
+          height: isMobile ? 56 : 72,
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: `translateY(-${currentWordIndex * (isMobile ? 48 : 64)}px)`,
-          }}
-        >
-          {cyclingWords.map((word, index) => (
-            <span
-              key={word}
-              style={{
-                fontFamily: '"DM Serif Display", serif',
-                fontSize: isMobile ? 'clamp(32px, 10vw, 40px)' : 'clamp(40px, 6vw, 56px)',
-                fontStyle: 'italic',
-                color: '#b8906a',
-                height: isMobile ? 48 : 64,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                letterSpacing: '-1px',
-              }}
-            >
-              {word}
-            </span>
-          ))}
-        </div>
+        {cyclingWords.map((word, index) => (
+          <motion.span
+            key={word}
+            initial={{ opacity: 0, y: 100 }}
+            animate={
+              currentWordIndex === index
+                ? { y: 0, opacity: 1 }
+                : { y: currentWordIndex > index ? -150 : 150, opacity: 0 }
+            }
+            transition={{ type: 'spring', stiffness: 50 }}
+            style={{
+              position: 'absolute',
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: isMobile ? 'clamp(32px, 10vw, 40px)' : 'clamp(40px, 6vw, 56px)',
+              fontStyle: 'italic',
+              color: '#b8906a',
+              letterSpacing: '-1px',
+            }}
+          >
+            {word}
+          </motion.span>
+        ))}
       </div>
     </section>
   )
