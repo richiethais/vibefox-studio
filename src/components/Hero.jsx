@@ -91,8 +91,10 @@ export default function Hero() {
       </div>
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
-        Your business deserves a site that{' '}
-        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'flex-start', overflow: 'hidden', verticalAlign: 'bottom', height: isMobile ? '1.1em' : '1.05em', minWidth: isMobile ? '7em' : '9em' }}>
+        Your business deserves a site that
+        <br />
+        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually{' '}</em>
+        <span style={{ position: 'relative', display: 'inline-flex', justifyContent: 'center', overflow: 'hidden', verticalAlign: 'bottom', height: '1.05em', width: isMobile ? '2.8em' : '3.2em' }}>
           {titles.map((title, index) => (
             <motion.em
               key={index}
@@ -105,10 +107,11 @@ export default function Hero() {
                   : { y: titleNumber > index ? '-150%' : '150%', opacity: 0 }
               }
             >
-              actually {title}.
+              {title}
             </motion.em>
           ))}
         </span>
+        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>.</em>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
