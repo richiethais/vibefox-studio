@@ -1,4 +1,8 @@
+import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import useIsMobile from './useIsMobile'
+
+const ROTATING_WORDS = ['works.', 'performs.', 'converts.', 'grows.', 'scales.']
 
 const s = {
   section: {
@@ -64,6 +68,14 @@ const s = {
 
 export default function Hero() {
   const isMobile = useIsMobile()
+  const [wordIndex, setWordIndex] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % ROTATING_WORDS.length)
+    }, 2500)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <section style={{ ...s.section, padding: isMobile ? '128px 18px 64px' : s.section.padding }}>
@@ -74,7 +86,36 @@ export default function Hero() {
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that{' '}
-        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
+        <span style={{ position: 'relative', display: 'inline-flex', overflow: 'hidden', verticalAlign: 'bottom' }}>
+          <span style={{ fontStyle: 'italic', color: '#b8906a', visibility: 'hidden' }}>actually {ROTATING_WORDS[0]}</span>
+          {ROTATING_WORDS.map((word, index) => (
+            <motion.span
+              key={word}
+              style={{
+                position: 'absolute',
+                left: 0,
+                fontStyle: 'italic',
+                color: '#b8906a',
+                whiteSpace: 'nowrap',
+              }}
+              initial={{ y: '100%', opacity: 0 }}
+              animate={
+                wordIndex === index
+                  ? { y: 0, opacity: 1 }
+                  : wordIndex > index || (wordIndex === 0 && index === ROTATING_WORDS.length - 1)
+                    ? { y: '-100%', opacity: 0 }
+                    : { y: '100%', opacity: 0 }
+              }
+              transition={{
+                type: 'spring',
+                stiffness: 80,
+                damping: 20,
+              }}
+            >
+              actually {word}
+            </motion.span>
+          ))}
+        </span>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
