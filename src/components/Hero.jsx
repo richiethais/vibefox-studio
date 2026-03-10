@@ -93,23 +93,26 @@ export default function Hero() {
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
         Your business deserves a site that
         <br />
-        <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually </em>
-        <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', verticalAlign: 'text-bottom', height: '1.25em', width: isMobile ? '4em' : '4.5em', textAlign: 'left', marginBottom: '-0.15em' }}>
-          {titles.map((title, index) => (
-            <motion.em
-              key={index}
-              style={{ fontStyle: 'italic', color: '#b8906a', position: 'absolute', whiteSpace: 'nowrap', left: 0, top: 0 }}
-              initial={{ opacity: 0, y: '-100%' }}
-              transition={{ type: 'spring', stiffness: 50 }}
-              animate={
-                titleNumber === index
-                  ? { y: 0, opacity: 1 }
-                  : { y: titleNumber > index ? '100%' : '-100%', opacity: 0 }
-              }
-            >
-              {title}
-            </motion.em>
-          ))}
+        <span style={{ fontStyle: 'italic', color: '#b8906a' }}>
+          actually{' '}
+          <span style={{ position: 'relative', display: 'inline-block', overflow: 'hidden', width: isMobile ? '4em' : '4.5em', textAlign: 'left' }}>
+            <span style={{ visibility: 'hidden' }}>converts</span>
+            {titles.map((title, index) => (
+              <motion.span
+                key={index}
+                style={{ position: 'absolute', whiteSpace: 'nowrap', left: 0, top: 0 }}
+                initial={{ opacity: 0, y: '-100%' }}
+                transition={{ type: 'spring', stiffness: 50 }}
+                animate={
+                  titleNumber === index
+                    ? { y: 0, opacity: 1 }
+                    : { y: titleNumber > index ? '100%' : '-100%', opacity: 0 }
+                }
+              >
+                {title}
+              </motion.span>
+            ))}
+          </span>
         </span>
       </h1>
 
