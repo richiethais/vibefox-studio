@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import useIsMobile from './useIsMobile'
 
-const ROTATING_WORDS = ['works.', 'performs.', 'converts.', 'grows.', 'scales.']
+const ROTATING_WORDS = ['converts.', 'performs.', 'works.', 'functions.', 'delivers.']
 
 const s = {
   section: {
@@ -85,38 +85,42 @@ export default function Hero() {
       </div>
 
       <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.3px' : s.h1.letterSpacing }}>
-        Your business deserves a site that{' '}
-        <span style={{ position: 'relative', display: 'inline-flex', overflow: 'hidden', verticalAlign: 'bottom' }}>
-          <span style={{ fontStyle: 'italic', color: '#b8906a', visibility: 'hidden' }}>actually {ROTATING_WORDS[0]}</span>
-          {ROTATING_WORDS.map((word, index) => (
-            <motion.span
-              key={word}
-              style={{
-                position: 'absolute',
-                left: 0,
-                fontStyle: 'italic',
-                color: '#b8906a',
-                whiteSpace: 'nowrap',
-              }}
-              initial={{ y: '100%', opacity: 0 }}
-              animate={
-                wordIndex === index
-                  ? { y: 0, opacity: 1 }
-                  : wordIndex > index || (wordIndex === 0 && index === ROTATING_WORDS.length - 1)
-                    ? { y: '-100%', opacity: 0 }
-                    : { y: '100%', opacity: 0 }
-              }
-              transition={{
-                type: 'spring',
-                stiffness: 80,
-                damping: 20,
-              }}
-            >
-              actually {word}
-            </motion.span>
-          ))}
-        </span>
+        Your business deserves a site that
       </h1>
+
+      <div className="anim-rise-2" style={{ position: 'relative', height: isMobile ? 50 : 80, overflow: 'hidden', marginTop: isMobile ? 4 : 8 }}>
+        {ROTATING_WORDS.map((word, index) => (
+          <motion.span
+            key={word}
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              fontFamily: '"DM Serif Display", serif',
+              fontSize: isMobile ? 'clamp(36px, 12vw, 52px)' : 'clamp(48px, 8vw, 96px)',
+              fontStyle: 'italic',
+              color: '#b8906a',
+              letterSpacing: isMobile ? '-1.3px' : '-2.5px',
+              textAlign: 'center',
+            }}
+            initial={{ y: '100%', opacity: 0 }}
+            animate={
+              wordIndex === index
+                ? { y: 0, opacity: 1 }
+                : wordIndex > index || (wordIndex === 0 && index === ROTATING_WORDS.length - 1)
+                  ? { y: '-100%', opacity: 0 }
+                  : { y: '100%', opacity: 0 }
+            }
+            transition={{
+              type: 'spring',
+              stiffness: 80,
+              damping: 20,
+            }}
+          >
+            {word}
+          </motion.span>
+        ))}
+      </div>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '18px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.56 : s.sub.lineHeight }}>
         Jacksonville web design and SEO services built for measurable growth. Vibefox Studio delivers fast, high-converting websites and SEO systems for local businesses ready to scale.
