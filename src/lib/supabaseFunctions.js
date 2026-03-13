@@ -4,51 +4,44 @@ export async function parseFunctionError(error, fallbackMessage) {
   }
 
   const fallback = error.message || fallbackMessage || 'Unexpected function error.'
+  const context = error.context
 
-  // Supabase JS v2: error.context is already the parsed JSON body (plain object)
-  if (error.context && typeof error.context === 'object' && typeof error.context.json !== 'function') {
-    const payload = error.context
-    const stage = payload.stage ? ` (stage: ${payload.stage})` : ''
-    return {
-      message: payload.error ? `${payload.error}${stage}` : fallback,
-      payload,
-      status: 500,
+  if (!context) {
+    return { message: fallback, payload: null, status: 500 }
+  }
+
+  // Context is a Response object — read as text first to avoid body-stream consumption bug
+  // (.json() consumes the stream; if it fails, .text() also fails)
+  if (typeof context.text === 'function') {
+    try {
+      const rawText = await context.text()
+      try {
+        const payload = JSON.parse(rawText)
+        const stage = payload?.stage ? ` (stage: ${payload.stage})` : ''
+        return {
+          message: payload?.error ? `${payload.error}${stage}` : (rawText.trim() || fallback),
+          payload,
+          status: context.status || 500,
+        }
+      } catch {
+        return {
+          message: rawText.trim() || fallback,
+          payload: null,
+          status: context.status || 500,
+        }
+      }
+    } catch {
+      return { message: fallback, payload: null, status: context.status || 500 }
     }
   }
 
-  // Fallback: error.context is a Response object (older Supabase JS versions)
-  if (error.context && typeof error.context.json === 'function') {
-    try {
-      const payload = await error.context.json()
-      const stage = payload?.stage ? ` (stage: ${payload.stage})` : ''
-      return {
-        message: payload?.error ? `${payload.error}${stage}` : fallback,
-        payload,
-        status: error.context.status || 500,
-      }
-    } catch {
-      if (typeof error.context.text === 'function') {
-        try {
-          const rawText = (await error.context.text()).trim()
-          return {
-            message: rawText || fallback,
-            payload: null,
-            status: error.context.status || 500,
-          }
-        } catch {
-          return {
-            message: fallback,
-            payload: null,
-            status: error.context.status || 500,
-          }
-        }
-      }
-
-      return {
-        message: fallback,
-        payload: null,
-        status: error.context.status || 500,
-      }
+  // Context is already a parsed plain object (some Supabase versions)
+  if (typeof context === 'object') {
+    const stage = context.stage ? ` (stage: ${context.stage})` : ''
+    return {
+      message: context.error ? `${context.error}${stage}` : fallback,
+      payload: context,
+      status: 500,
     }
   }
 
