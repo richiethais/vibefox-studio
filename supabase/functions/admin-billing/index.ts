@@ -1,4 +1,4 @@
-import { requireAdminUser } from '../_shared/auth.ts'
+import { getSupabaseAdminClient, requireAdminUser } from '../_shared/auth.ts'
 import { corsHeaders, json } from '../_shared/cors.ts'
 import { getStripeClient } from '../_shared/stripe.ts'
 
@@ -121,6 +121,8 @@ async function findOrCreateCustomer(stripe: ReturnType<typeof getStripeClient>, 
 }
 
 Deno.serve(async request => {
+  let stage = 'request start'
+
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -130,16 +132,57 @@ Deno.serve(async request => {
   }
 
   try {
-    const { supabaseAdmin } = await requireAdminUser(request)
-    const stripe = getStripeClient()
-    const body = await request.json()
+    stage = 'parse request body'
+    const body = await request.json().catch(() => ({}))
     const action = cleanText(body.action)
+
+    if (action === 'health_check') {
+      stage = 'run billing health check'
+      const result = {
+        env: {
+          hasAdminEmail: Boolean(Deno.env.get('ADMIN_EMAIL')?.trim()),
+          hasStripeSecretKey: Boolean(Deno.env.get('STRIPE_SECRET_KEY')?.trim()),
+          hasSupabaseServiceRoleKey: Boolean(Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')?.trim()),
+          hasSupabaseUrl: Boolean(Deno.env.get('SUPABASE_URL')?.trim()),
+        },
+        stripe: { error: null as string | null, ok: false },
+        supabase: { error: null as string | null, ok: false },
+      }
+
+      try {
+        const stripe = getStripeClient()
+        await stripe.accounts.retrieve()
+        result.stripe.ok = true
+      } catch (error) {
+        result.stripe.error = error instanceof Error ? error.message : 'Unknown Stripe error.'
+      }
+
+      try {
+        const supabaseAdmin = getSupabaseAdminClient()
+        const { error } = await supabaseAdmin.from('clients').select('id', { head: true, count: 'exact' })
+        if (error) {
+          result.supabase.error = error.message
+        } else {
+          result.supabase.ok = true
+        }
+      } catch (error) {
+        result.supabase.error = error instanceof Error ? error.message : 'Unknown Supabase error.'
+      }
+
+      return json(result)
+    }
+
+    stage = 'authorize admin user'
+    const { supabaseAdmin } = await requireAdminUser(request)
+    stage = 'initialize stripe client'
+    const stripe = getStripeClient()
     const clientId = cleanText(body.client_id)
 
     if (!clientId) {
       return json({ error: 'Client selection is required.' }, 400)
     }
 
+    stage = 'load client'
     const { data: client, error: clientError } = await supabaseAdmin
       .from('clients')
       .select('id, name, email, phone, company')
@@ -173,6 +216,7 @@ Deno.serve(async request => {
     }
 
     if (action === 'create_payment_link') {
+      stage = 'create stripe payment link'
       const paymentLink = await stripe.paymentLinks.create({
         billing_address_collection: 'required',
         customer_creation: 'always',
@@ -195,6 +239,7 @@ Deno.serve(async request => {
         submit_type: 'pay',
       })
 
+      stage = 'insert payment link into crm'
       const { data: invoiceRow, error: insertError } = await supabaseAdmin
         .from('invoices')
         .insert({
@@ -225,12 +270,14 @@ Deno.serve(async request => {
       return json({ error: 'Customer email is required to create an invoice.' }, 400)
     }
 
+    stage = 'find or create stripe customer'
     const customer = await findOrCreateCustomer(stripe, {
       email: customerEmail,
       name: customerName,
       phone: customerPhone,
     })
 
+    stage = 'create draft stripe invoice'
     const draftInvoice = await stripe.invoices.create({
       auto_advance: false,
       collection_method: 'send_invoice',
@@ -243,6 +290,7 @@ Deno.serve(async request => {
       },
     })
 
+    stage = 'create stripe invoice items'
     for (const item of lineItems) {
       await stripe.invoiceItems.create({
         amount: item.amount * item.quantity,
@@ -253,17 +301,20 @@ Deno.serve(async request => {
       })
     }
 
+    stage = 'finalize stripe invoice'
     const finalizedInvoice = await stripe.invoices.finalizeInvoice(draftInvoice.id, {
       auto_advance: false,
     })
 
     const shouldSendInvoice = Boolean(body.send_invoice_now)
+    stage = shouldSendInvoice ? 'send stripe invoice' : 'prepare stripe invoice response'
     const deliveredInvoice = shouldSendInvoice
       ? await stripe.invoices.sendInvoice(finalizedInvoice.id)
       : finalizedInvoice
 
     const stripeStatus = cleanText(deliveredInvoice.status) || 'open'
 
+    stage = 'insert stripe invoice into crm'
     const { data: invoiceRow, error: insertError } = await supabaseAdmin
       .from('invoices')
       .insert({
@@ -290,6 +341,7 @@ Deno.serve(async request => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected billing error.'
+    console.error('admin-billing error', { stage, message })
     const status = message === 'Unauthorized'
       ? 401
       : message === 'Forbidden'
@@ -297,6 +349,6 @@ Deno.serve(async request => {
         : error instanceof ValidationError
           ? 400
           : 500
-    return json({ error: message }, status)
+    return json({ error: message, stage }, status)
   }
 })

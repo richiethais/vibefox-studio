@@ -74,7 +74,7 @@ function createBillingForm(kind = 'invoice') {
     footer: 'Questions about this billing item? Reply to this email and we will handle it directly.',
     kind,
     line_items: [createLineItem()],
-    send_invoice_now: true,
+    send_invoice_now: false,
   }
 }
 
