@@ -8,6 +8,11 @@ Deno.serve(async request => {
   }
 
   const result = {
+    clients: {
+      invalidPhoneCount: 0,
+      missingEmailCount: 0,
+      total: 0,
+    },
     env: {
       hasAdminEmail: Boolean(Deno.env.get('ADMIN_EMAIL')?.trim()),
       hasStripeSecretKey: Boolean(Deno.env.get('STRIPE_SECRET_KEY')?.trim()),
@@ -28,11 +33,17 @@ Deno.serve(async request => {
 
   try {
     const supabaseAdmin = getSupabaseAdminClient()
-    const { error } = await supabaseAdmin.from('clients').select('id', { head: true, count: 'exact' })
+    const { data, error } = await supabaseAdmin.from('clients').select('id, email, phone')
     if (error) {
       result.supabase.error = error.message
     } else {
       result.supabase.ok = true
+      result.clients.total = data?.length ?? 0
+      result.clients.missingEmailCount = (data ?? []).filter(client => !String(client.email || '').trim()).length
+      result.clients.invalidPhoneCount = (data ?? []).filter(client => {
+        const digits = String(client.phone || '').replace(/\D/g, '')
+        return Boolean(digits) && !(digits.length === 10 || (digits.length === 11 && digits.startsWith('1')))
+      }).length
     }
   } catch (error) {
     result.supabase.error = error instanceof Error ? error.message : 'Unknown Supabase error.'

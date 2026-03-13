@@ -307,10 +307,20 @@ Deno.serve(async request => {
     })
 
     const shouldSendInvoice = Boolean(body.send_invoice_now)
-    stage = shouldSendInvoice ? 'send stripe invoice' : 'prepare stripe invoice response'
-    const deliveredInvoice = shouldSendInvoice
-      ? await stripe.invoices.sendInvoice(finalizedInvoice.id)
-      : finalizedInvoice
+    let deliveredInvoice = finalizedInvoice
+    let deliveryWarning: string | null = null
+
+    if (shouldSendInvoice) {
+      stage = 'send stripe invoice'
+      try {
+        deliveredInvoice = await stripe.invoices.sendInvoice(finalizedInvoice.id)
+      } catch (error) {
+        deliveryWarning = error instanceof Error ? error.message : 'Stripe invoice email delivery failed.'
+        console.error('admin-billing delivery warning', { message: deliveryWarning })
+      }
+    }
+
+    stage = 'prepare stripe invoice response'
 
     const stripeStatus = cleanText(deliveredInvoice.status) || 'open'
 
@@ -338,6 +348,7 @@ Deno.serve(async request => {
       kind: 'invoice',
       status: stripeStatus,
       url: deliveredInvoice.hosted_invoice_url,
+      warning: deliveryWarning,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected billing error.'

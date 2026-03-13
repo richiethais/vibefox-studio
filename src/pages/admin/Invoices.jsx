@@ -367,7 +367,11 @@ export default function AdminInvoices() {
       actionHref: data?.url || '',
       actionLabel: billingForm.kind === 'payment_link' ? 'Open payment link' : 'Open invoice',
       type: 'success',
-      text: billingForm.kind === 'payment_link' ? 'Payment link created.' : 'Invoice created in Stripe.',
+      text: data?.warning
+        ? `Invoice created in Stripe. Email delivery warning: ${data.warning}`
+        : billingForm.kind === 'payment_link'
+          ? 'Payment link created.'
+          : 'Invoice created in Stripe.',
     })
     setBillingModal(null)
     setBillingForm(createBillingForm())
