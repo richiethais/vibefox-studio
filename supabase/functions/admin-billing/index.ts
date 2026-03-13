@@ -10,6 +10,16 @@ function cleanText(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function normalizePhone(value: unknown) {
+  const digits = cleanText(value).replace(/\D/g, '')
+
+  if (!digits) return ''
+  if (digits.length === 10) return digits
+  if (digits.length === 11 && digits.startsWith('1')) return digits
+
+  throw new Error('Phone number must be 10 digits, or 11 digits starting with 1.')
+}
+
 function toMinorUnits(value: unknown) {
   const numeric = Number(value)
 
@@ -143,7 +153,7 @@ Deno.serve(async request => {
     const customFields = sanitizeCustomFields(body.custom_fields)
     const customerEmail = cleanText(body.customer_email).toLowerCase() || cleanText(client.email).toLowerCase()
     const customerName = cleanText(body.customer_name) || cleanText(client.name)
-    const customerPhone = cleanText(body.customer_phone) || cleanText(client.phone)
+    const customerPhone = normalizePhone(body.customer_phone || client.phone)
     const description = buildInvoiceDescription(lineItems, cleanText(body.description))
     const totalAmountMinor = lineItems.reduce((sum, item) => sum + item.amount * item.quantity, 0)
     const invoiceRowPayload = {

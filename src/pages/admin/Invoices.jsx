@@ -15,6 +15,34 @@ import useIsMobile from '../../components/useIsMobile'
 const STATUSES = ['unpaid', 'paid', 'overdue']
 const CURRENCIES = ['usd', 'eur', 'gbp', 'cad']
 
+function sanitizeMoneyInput(value) {
+  const stripped = String(value || '').replace(/[^0-9.]/g, '')
+  const [whole = '', ...rest] = stripped.split('.')
+  const decimals = rest.join('').slice(0, 2)
+  return decimals ? `${whole}.${decimals}` : whole
+}
+
+function sanitizeIntegerInput(value, fallback = '1') {
+  const digits = String(value || '').replace(/\D/g, '')
+  return digits || fallback
+}
+
+function formatPhoneInput(value) {
+  const digits = String(value || '').replace(/\D/g, '').slice(0, 11)
+
+  if (!digits) return ''
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+  if (digits.length <= 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+  return `1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
+}
+
+function hasValidPhone(value) {
+  if (!value.trim()) return true
+  const digits = value.replace(/\D/g, '')
+  return digits.length === 10 || digits.length === 11
+}
+
 function createLineItem() {
   return {
     amount: '',
@@ -165,6 +193,7 @@ export default function AdminInvoices() {
 
     if (hasLineItemError) return 'Each line item needs a name, a positive amount, and a valid quantity.'
     if (billingForm.kind === 'invoice' && !billingForm.customer_email.trim()) return 'Customer email is required for invoices.'
+    if (!hasValidPhone(billingForm.customer_phone)) return 'Phone number must be 10 digits, or 11 digits starting with 1.'
 
     return ''
   }, [billingForm, session])
@@ -188,7 +217,10 @@ export default function AdminInvoices() {
   }
 
   function setEditField(key) {
-    return event => setEditForm(current => ({ ...current, [key]: event.target.value }))
+    return event => setEditForm(current => ({
+      ...current,
+      [key]: key === 'amount' ? sanitizeMoneyInput(event.target.value) : event.target.value,
+    }))
   }
 
   function openCreate(kind) {
@@ -216,14 +248,33 @@ export default function AdminInvoices() {
       client_id: clientId,
       customer_email: client?.email || '',
       customer_name: client?.name || '',
-      customer_phone: client?.phone || '',
+      customer_phone: formatPhoneInput(client?.phone || ''),
     }))
   }
 
   function updateLineItem(id, key, value) {
     setBillingForm(current => ({
       ...current,
-      line_items: current.line_items.map(item => (item.id === id ? { ...item, [key]: value } : item)),
+      line_items: current.line_items.map(item => {
+        if (item.id !== id) return item
+
+        if (key === 'amount') {
+          return { ...item, amount: sanitizeMoneyInput(value) }
+        }
+
+        if (key === 'quantity') {
+          return { ...item, quantity: sanitizeIntegerInput(value) }
+        }
+
+        return { ...item, [key]: value }
+      }),
+    }))
+  }
+
+  function handleBillingPhoneChange(event) {
+    setBillingForm(current => ({
+      ...current,
+      customer_phone: formatPhoneInput(event.target.value),
     }))
   }
 
@@ -540,7 +591,14 @@ export default function AdminInvoices() {
                 </div>
                 <div>
                   <Label>Customer phone</Label>
-                  <input style={inp} value={billingForm.customer_phone} onChange={setBillingField('customer_phone')} />
+                  <input
+                    inputMode="tel"
+                    pattern="[0-9()\\-\\s]+"
+                    placeholder="(555) 123-4567"
+                    style={inp}
+                    value={billingForm.customer_phone}
+                    onChange={handleBillingPhoneChange}
+                  />
                 </div>
               </div>
 
@@ -567,8 +625,22 @@ export default function AdminInvoices() {
 
                       <div style={{ display: 'grid', gap: 10, gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr' }}>
                         <input placeholder="Item name *" style={inp} value={item.name} onChange={event => updateLineItem(item.id, 'name', event.target.value)} />
-                        <input placeholder="Price *" min="0" step="0.01" style={inp} type="number" value={item.amount} onChange={event => updateLineItem(item.id, 'amount', event.target.value)} />
-                        <input placeholder="Qty *" min="1" step="1" style={inp} type="number" value={item.quantity} onChange={event => updateLineItem(item.id, 'quantity', event.target.value)} />
+                        <input
+                          inputMode="decimal"
+                          placeholder="Price *"
+                          style={inp}
+                          type="text"
+                          value={item.amount}
+                          onChange={event => updateLineItem(item.id, 'amount', event.target.value)}
+                        />
+                        <input
+                          inputMode="numeric"
+                          placeholder="Qty *"
+                          style={inp}
+                          type="text"
+                          value={item.quantity}
+                          onChange={event => updateLineItem(item.id, 'quantity', event.target.value)}
+                        />
                       </div>
 
                       <div style={{ marginTop: 10 }}>
@@ -670,7 +742,14 @@ export default function AdminInvoices() {
                     {clients.map(client => <option key={client.id} value={client.id}>{client.name}</option>)}
                   </select>
                   <input placeholder="Description *" style={inp} value={editForm.description} onChange={setEditField('description')} />
-                  <input placeholder="Amount *" type="number" min="0" step="0.01" style={inp} value={editForm.amount} onChange={setEditField('amount')} />
+                  <input
+                    inputMode="decimal"
+                    placeholder="Amount *"
+                    style={inp}
+                    type="text"
+                    value={editForm.amount}
+                    onChange={setEditField('amount')}
+                  />
                 </>
               )}
 
