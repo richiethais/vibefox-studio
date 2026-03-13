@@ -6,6 +6,8 @@ const DEFAULT_CURRENCY = 'usd'
 const MAX_LINE_ITEMS = 10
 const MAX_CUSTOM_FIELDS = 4
 
+class ValidationError extends Error {}
+
 function cleanText(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
@@ -17,14 +19,14 @@ function normalizePhone(value: unknown) {
   if (digits.length === 10) return digits
   if (digits.length === 11 && digits.startsWith('1')) return digits
 
-  throw new Error('Phone number must be 10 digits, or 11 digits starting with 1.')
+  throw new ValidationError('Phone number must be 10 digits, or 11 digits starting with 1.')
 }
 
 function toMinorUnits(value: unknown) {
   const numeric = Number(value)
 
   if (!Number.isFinite(numeric) || numeric <= 0) {
-    throw new Error('Amounts must be greater than 0.')
+    throw new ValidationError('Amounts must be greater than 0.')
   }
 
   return Math.round(numeric * 100)
@@ -32,11 +34,11 @@ function toMinorUnits(value: unknown) {
 
 function sanitizeLineItems(input: unknown) {
   if (!Array.isArray(input) || input.length === 0) {
-    throw new Error('At least one line item is required.')
+    throw new ValidationError('At least one line item is required.')
   }
 
   if (input.length > MAX_LINE_ITEMS) {
-    throw new Error(`You can add up to ${MAX_LINE_ITEMS} line items.`)
+    throw new ValidationError(`You can add up to ${MAX_LINE_ITEMS} line items.`)
   }
 
   return input.map((item, index) => {
@@ -44,9 +46,9 @@ function sanitizeLineItems(input: unknown) {
     const description = cleanText(item?.description)
     const quantity = Number(item?.quantity || 1)
 
-    if (!name) throw new Error(`Line item ${index + 1} needs a name.`)
+    if (!name) throw new ValidationError(`Line item ${index + 1} needs a name.`)
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 100) {
-      throw new Error(`Line item ${index + 1} needs a quantity between 1 and 100.`)
+      throw new ValidationError(`Line item ${index + 1} needs a quantity between 1 and 100.`)
     }
 
     return {
@@ -288,7 +290,13 @@ Deno.serve(async request => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected billing error.'
-    const status = message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500
+    const status = message === 'Unauthorized'
+      ? 401
+      : message === 'Forbidden'
+        ? 403
+        : error instanceof ValidationError
+          ? 400
+          : 500
     return json({ error: message }, status)
   }
 })

@@ -40,7 +40,7 @@ function formatPhoneInput(value) {
 function hasValidPhone(value) {
   if (!value.trim()) return true
   const digits = value.replace(/\D/g, '')
-  return digits.length === 10 || digits.length === 11
+  return digits.length === 10 || (digits.length === 11 && digits.startsWith('1'))
 }
 
 function createLineItem() {
@@ -552,6 +552,12 @@ export default function AdminInvoices() {
             </div>
 
             <div style={{ display: 'grid', gap: 16 }}>
+              {billingValidationError && (
+                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, color: '#b91c1c', fontSize: 12, padding: '8px 10px' }}>
+                  {billingValidationError}
+                </div>
+              )}
+
               <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr' }}>
                 <div>
                   <Label>Client</Label>
@@ -697,12 +703,6 @@ export default function AdminInvoices() {
                     Email the invoice to the client immediately after creation.
                   </label>
                 </>
-              )}
-
-              {billingValidationError && (
-                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, color: '#b91c1c', fontSize: 12, padding: '8px 10px' }}>
-                  {billingValidationError}
-                </div>
               )}
 
               <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
