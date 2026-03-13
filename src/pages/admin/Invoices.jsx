@@ -14,6 +14,7 @@ import useIsMobile from '../../components/useIsMobile'
 
 const STATUSES = ['unpaid', 'paid', 'overdue']
 const CURRENCIES = ['usd', 'eur', 'gbp', 'cad']
+const MAX_LINE_ITEMS = 10
 
 function sanitizeMoneyInput(value) {
   const stripped = String(value || '').replace(/[^0-9.]/g, '')
@@ -140,6 +141,7 @@ export default function AdminInvoices() {
     due_date: '',
     status: 'unpaid',
   })
+  const [deleteModal, setDeleteModal] = useState(null)
 
   const load = useCallback(async () => {
     const [invoicesRes, clientsRes] = await Promise.all([
@@ -420,6 +422,68 @@ export default function AdminInvoices() {
     await load()
   }
 
+  async function confirmDelete() {
+    if (!deleteModal || saving) return
+
+    setSaving(true)
+    setNotice(null)
+
+    if (isStripeBacked(deleteModal)) {
+      const { data, error } = await supabase.functions.invoke('admin-billing', {
+        body: {
+          action: 'delete_invoice',
+          invoice_id: deleteModal.id,
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      })
+
+      if (error) {
+        const details = await parseFunctionError(error, 'Could not delete billing item.')
+        setNotice({ type: 'error', text: details.message })
+        setSaving(false)
+        return
+      }
+
+      setNotice({
+        type: 'success',
+        text: data?.warning
+          ? `Billing item deleted from CRM. Stripe warning: ${data.warning}`
+          : 'Billing item deleted from CRM and Stripe.',
+      })
+    } else {
+      const { error } = await supabase
+        .from('invoices')
+        .delete()
+        .eq('id', deleteModal.id)
+
+      if (error) {
+        setNotice({ type: 'error', text: error.message || 'Could not delete billing item.' })
+        setSaving(false)
+        return
+      }
+
+      setNotice({ type: 'success', text: 'Billing item deleted.' })
+    }
+
+    setDeleteModal(null)
+    setSaving(false)
+    await load()
+  }
+
+  function setLineItemCount(newCount) {
+    setBillingForm(current => {
+      const currentItems = current.line_items
+      if (newCount === currentItems.length) return current
+      if (newCount > currentItems.length) {
+        const toAdd = Array.from({ length: newCount - currentItems.length }, () => createLineItem())
+        return { ...current, line_items: [...currentItems, ...toAdd] }
+      }
+      return { ...current, line_items: currentItems.slice(0, newCount) }
+    })
+  }
+
   return (
     <div style={{ padding: isMobile ? '20px 16px' : '36px 40px' }}>
       <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between', marginBottom: 24 }}>
@@ -528,6 +592,9 @@ export default function AdminInvoices() {
                         <button onClick={() => openEdit(invoice)} style={ghostBtn}>
                           {isStripeBacked(invoice) ? 'Update status' : 'Edit'}
                         </button>
+                        <button onClick={() => setDeleteModal(invoice)} style={{ ...ghostBtn, color: '#dc2626', borderColor: 'rgba(220,38,38,0.2)' }}>
+                          Delete
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -618,7 +685,18 @@ export default function AdminInvoices() {
                     <div style={{ color: '#18181a', fontSize: 14, fontWeight: 600 }}>Line items</div>
                     <div style={{ color: '#7a7888', fontSize: 12, marginTop: 4 }}>Add custom names, notes, quantities, and prices.</div>
                   </div>
-                  <button onClick={addLineItem} style={ghostBtn} type="button">Add row</button>
+                  <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
+                    <label style={{ color: '#7a7888', fontSize: 12 }}>Items</label>
+                    <select
+                      value={billingForm.line_items.length}
+                      onChange={event => setLineItemCount(Number(event.target.value))}
+                      style={{ ...inp, padding: '7px 10px', width: 60, textAlign: 'center' }}
+                    >
+                      {Array.from({ length: MAX_LINE_ITEMS }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>{i + 1}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -627,7 +705,13 @@ export default function AdminInvoices() {
                       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                         <div style={{ color: '#18181a', fontSize: 13, fontWeight: 600 }}>Item {index + 1}</div>
                         {billingForm.line_items.length > 1 && (
-                          <button onClick={() => removeLineItem(item.id)} style={{ background: 'none', border: 'none', color: '#7a7888', cursor: 'pointer', fontSize: 12 }} type="button">
+                          <button
+                            onClick={() => {
+                              removeLineItem(item.id)
+                            }}
+                            style={{ background: 'none', border: 'none', color: '#7a7888', cursor: 'pointer', fontSize: 12 }}
+                            type="button"
+                          >
                             Remove
                           </button>
                         )}
@@ -777,6 +861,29 @@ export default function AdminInvoices() {
               <button onClick={() => setEditModal(null)} style={ghostBtn}>Cancel</button>
               <button onClick={saveEdit} style={darkBtn} disabled={saving || Boolean(editValidationError)}>
                 {saving ? 'Saving...' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteModal && (
+        <div style={overlay}>
+          <div style={{ background: 'white', borderRadius: 18, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', margin: isMobile ? 16 : 0, maxWidth: 420, padding: isMobile ? 20 : 28, width: '100%' }}>
+            <h2 style={{ color: '#18181a', fontSize: 17, fontWeight: 600, margin: '0 0 10px' }}>Delete billing item</h2>
+            <p style={{ color: '#7a7888', fontSize: 13, margin: '0 0 16px', lineHeight: 1.5 }}>
+              Are you sure you want to delete <strong style={{ color: '#18181a' }}>{deleteModal.description || 'this item'}</strong>?
+              {isStripeBacked(deleteModal) && (
+                <> This will also {deleteModal.stripe_invoice_id ? 'void the invoice' : 'deactivate the payment link'} on Stripe. This cannot be undone.</>
+              )}
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button onClick={() => setDeleteModal(null)} style={ghostBtn}>Cancel</button>
+              <button
+                onClick={confirmDelete}
+                disabled={saving}
+                style={{ ...darkBtn, background: '#dc2626' }}
+              >
+                {saving ? 'Deleting...' : 'Delete'}
               </button>
             </div>
           </div>

@@ -176,6 +176,68 @@ Deno.serve(async request => {
     const { supabaseAdmin } = await requireAdminUser(request)
     stage = 'initialize stripe client'
     const stripe = getStripeClient()
+
+    if (action === 'delete_invoice') {
+      const invoiceId = cleanText(body.invoice_id)
+      if (!invoiceId) {
+        return json({ error: 'Invoice ID is required.' }, 400)
+      }
+
+      stage = 'load invoice for deletion'
+      const { data: invoice, error: loadError } = await supabaseAdmin
+        .from('invoices')
+        .select('*')
+        .eq('id', invoiceId)
+        .single()
+
+      if (loadError || !invoice) {
+        return json({ error: loadError?.message || 'Invoice not found.' }, 404)
+      }
+
+      let stripeWarning: string | null = null
+
+      if (invoice.stripe_invoice_id) {
+        stage = 'void stripe invoice'
+        try {
+          const stripeInvoice = await stripe.invoices.retrieve(invoice.stripe_invoice_id)
+          if (stripeInvoice.status === 'draft') {
+            await stripe.invoices.del(invoice.stripe_invoice_id)
+          } else if (stripeInvoice.status === 'open') {
+            await stripe.invoices.voidInvoice(invoice.stripe_invoice_id)
+          }
+          // paid / void / uncollectible — leave as-is on Stripe
+        } catch (error) {
+          stripeWarning = error instanceof Error ? error.message : 'Could not void Stripe invoice.'
+          console.error('admin-billing delete stripe warning', { message: stripeWarning })
+        }
+      }
+
+      if (invoice.stripe_payment_link_id) {
+        stage = 'deactivate stripe payment link'
+        try {
+          await stripe.paymentLinks.update(invoice.stripe_payment_link_id, { active: false })
+        } catch (error) {
+          stripeWarning = error instanceof Error ? error.message : 'Could not deactivate Stripe payment link.'
+          console.error('admin-billing delete stripe warning', { message: stripeWarning })
+        }
+      }
+
+      stage = 'delete invoice from crm'
+      const { error: deleteError } = await supabaseAdmin
+        .from('invoices')
+        .delete()
+        .eq('id', invoiceId)
+
+      if (deleteError) {
+        return json({ error: deleteError.message || 'Could not delete invoice.' }, 500)
+      }
+
+      return json({
+        deleted: true,
+        warning: stripeWarning,
+      })
+    }
+
     const clientId = cleanText(body.client_id)
 
     if (!clientId) {
