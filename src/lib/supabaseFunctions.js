@@ -5,6 +5,18 @@ export async function parseFunctionError(error, fallbackMessage) {
 
   const fallback = error.message || fallbackMessage || 'Unexpected function error.'
 
+  // Supabase JS v2: error.context is already the parsed JSON body (plain object)
+  if (error.context && typeof error.context === 'object' && typeof error.context.json !== 'function') {
+    const payload = error.context
+    const stage = payload.stage ? ` (stage: ${payload.stage})` : ''
+    return {
+      message: payload.error ? `${payload.error}${stage}` : fallback,
+      payload,
+      status: 500,
+    }
+  }
+
+  // Fallback: error.context is a Response object (older Supabase JS versions)
   if (error.context && typeof error.context.json === 'function') {
     try {
       const payload = await error.context.json()

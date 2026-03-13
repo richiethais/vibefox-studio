@@ -352,14 +352,18 @@ Deno.serve(async request => {
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected billing error.'
-    console.error('admin-billing error', { stage, message })
+    const stripeCode = (error as any)?.code || null
+    const stripeType = (error as any)?.type || null
+    console.error('admin-billing error', { stage, message, stripeCode, stripeType })
+
     const status = message === 'Unauthorized'
       ? 401
       : message === 'Forbidden'
         ? 403
         : error instanceof ValidationError
           ? 400
-          : 500
-    return json({ error: message, stage }, status)
+          : (error as any)?.statusCode || 500
+
+    return json({ error: message, stage, stripeCode, stripeType }, status)
   }
 })
