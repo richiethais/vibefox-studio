@@ -189,7 +189,7 @@ export default function AdminDashboard() {
     { label: 'New inquiries', value: stats.inquiries, color: '#2563eb', route: '/admin/inquiries', hint: 'Needs follow-up' },
     { label: 'Active clients', value: stats.clients, color: '#16a34a', route: '/admin/clients', hint: 'Current accounts' },
     { label: 'Active projects', value: stats.projects, color: '#7c3aed', route: '/admin/projects', hint: 'In progress' },
-    { label: 'Unpaid invoices', value: stats.invoices, color: '#d97706', route: '/admin/invoices', hint: 'Cashflow check' },
+    { label: 'Open billing items', value: stats.invoices, color: '#d97706', route: '/admin/invoices', hint: 'Invoice and payment link follow-up' },
     { label: 'Draft blogs', value: stats.drafts, color: '#b45309', route: '/admin/blogs', hint: 'Ready to publish' },
   ]), [stats])
 
@@ -203,7 +203,7 @@ export default function AdminDashboard() {
             { label: 'Today\'s calendar', route: '/admin/calendar' },
             { label: 'New messages', route: '/admin/messages' },
             { label: 'Write blog', route: '/admin/blogs' },
-            { label: 'Check invoices', route: '/admin/invoices' },
+            { label: 'Open billing', route: '/admin/invoices' },
           ].map(action => (
             <button
               key={action.label}

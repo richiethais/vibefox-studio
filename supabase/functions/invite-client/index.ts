@@ -1,38 +1,32 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const ADMIN_EMAIL = 'richiethais@gmail.com'
+import { requireAdminUser } from '../_shared/auth.ts'
+import { corsHeaders, json } from '../_shared/cors.ts'
 
 Deno.serve(async (req) => {
-  const authHeader = req.headers.get('Authorization')
-  if (!authHeader) return new Response('Unauthorized', { status: 401 })
-
-  const supabaseAdmin = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  )
-
-  const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(
-    authHeader.replace('Bearer ', '')
-  )
-  if (authError || user?.email !== ADMIN_EMAIL) {
-    return new Response('Forbidden', { status: 403 })
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
-  const { email, name } = await req.json()
+  if (req.method !== 'POST') {
+    return json({ error: 'Method not allowed.' }, 405)
+  }
 
-  const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-    data: { name },
-    redirectTo: 'https://vibefoxstudio.com/client/login',
-  })
+  try {
+    const { supabaseAdmin } = await requireAdminUser(req)
+    const { email, name } = await req.json()
 
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
+    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      data: { name },
+      redirectTo: 'https://vibefoxstudio.com/client/login',
     })
-  }
 
-  return new Response(JSON.stringify({ id: data.user.id }), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+    if (error) {
+      return json({ error: error.message }, 400)
+    }
+
+    return json({ id: data.user.id })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unexpected invite error.'
+    const status = message === 'Unauthorized' ? 401 : message === 'Forbidden' ? 403 : 500
+    return json({ error: message }, status)
+  }
 })

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion as Motion } from 'framer-motion'
 import BrandLogo from './BrandLogo'
 
 const links = [
@@ -63,7 +63,7 @@ export default function Nav() {
         <Link to="/" style={{ textDecoration: 'none', position: 'relative', display: 'inline-flex' }}>
           <BrandLogo size={isMobile ? 'sm' : 'nav'} />
           {location.pathname === '/' && (
-            <motion.div
+            <Motion.div
               layoutId="lamp"
               style={{
                 position: 'absolute',
@@ -115,7 +115,7 @@ export default function Nav() {
                   left: 8,
                 }} />
               </div>
-            </motion.div>
+            </Motion.div>
           )}
         </Link>
 
@@ -164,7 +164,7 @@ export default function Nav() {
                   >
                     {label}
                     {isLampActive && (
-                      <motion.div
+                      <Motion.div
                         layoutId="lamp"
                         style={{
                           position: 'absolute',
@@ -216,7 +216,7 @@ export default function Nav() {
                             left: 8,
                           }} />
                         </div>
-                      </motion.div>
+                      </Motion.div>
                     )}
                   </NavLink>
                 </li>

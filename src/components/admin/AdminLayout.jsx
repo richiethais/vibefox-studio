@@ -10,7 +10,7 @@ const navItems = [
   { to: '/admin/inquiries', label: 'Inquiries' },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/projects', label: 'Projects' },
-  { to: '/admin/invoices', label: 'Invoices' },
+  { to: '/admin/invoices', label: 'Billing' },
   { to: '/admin/messages', label: 'Messages' },
   { to: '/admin/notes', label: 'Client Notes' },
   { to: '/admin/seo-notes', label: 'SEO Notes' },

@@ -1,34 +1,14 @@
 # Vibefox Studio
 
-Website for Vibefox Studio — fast, modern websites and custom apps for small businesses.
+Marketing site, admin CRM, and client portal for Vibefox Studio.
 
 ## Stack
 
-- **React** — component-based UI
-- **Vite** — fast dev server and build tool
-- **Tailwind CSS** — utility-first styling
-- **DM Serif Display + DM Sans** — typography
-
-## Structure
-
-```
-src/
-  components/
-    Nav.jsx          # Fixed pill navigation
-    Hero.jsx         # Hero section + dashboard mockup
-    LogoStrip.jsx    # Client logo strip
-    Services.jsx     # Services grid (6 cards)
-    HowItWorks.jsx   # 3-step process
-    Work.jsx         # Portfolio / project cards
-    Comparison.jsx   # Dark comparison table
-    Pricing.jsx      # 3-tier pricing cards
-    Testimonial.jsx  # Client testimonial
-    FAQ.jsx          # Accordion FAQ
-    CTAFooter.jsx    # CTA block + footer
-    useFadeUp.js     # Scroll animation hook
-  App.jsx            # Root component
-  index.css          # Global styles + Tailwind
-```
+- React 19
+- Vite
+- Supabase Auth, Database, and Edge Functions
+- Tailwind CSS on marketing pages
+- Inline styles across admin and client portal screens
 
 ## Development
 
@@ -44,6 +24,28 @@ npm run build
 npm run preview
 ```
 
-## Deploy
+## Billing and inquiry backend
 
-Push to GitHub and connect to Vercel. Auto-deploys on every push to `main`.
+This repo now includes:
+
+- `supabase/functions/admin-billing` for Stripe invoice and payment link creation
+- `supabase/functions/submit-inquiry` for the public contact form with a 60-second rate limit
+- `supabase/migrations/005_billing_and_inquiry_rate_limit.sql` to extend billing records and lock inquiry inserts behind the edge function
+
+Required Supabase secrets for the edge functions:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `ADMIN_EMAIL`
+- `STRIPE_SECRET_KEY`
+
+Deploy steps after code changes:
+
+```bash
+supabase db push
+supabase functions deploy invite-client
+supabase functions deploy submit-inquiry
+supabase functions deploy admin-billing
+```
+
+The browser app does not store the Stripe secret. Stripe calls only happen inside Supabase Edge Functions.

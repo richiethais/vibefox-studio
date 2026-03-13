@@ -22,7 +22,7 @@ export default function ClientDashboard() {
 
       {invoices.length > 0 && (
         <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 12, padding: '14px 18px', marginBottom: 24, fontSize: 13, color: '#d97706' }}>
-          You have {invoices.length} unpaid invoice{invoices.length > 1 ? 's' : ''}.
+          You have {invoices.length} open billing item{invoices.length > 1 ? 's' : ''}.
         </div>
       )}
 

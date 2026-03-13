@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { parseFunctionError } from '../lib/supabaseFunctions'
 import { useFadeUp } from './useFadeUp'
 import useIsMobile from './useIsMobile'
 
@@ -35,9 +36,22 @@ export default function Contact() {
       company: form.company.trim(),
       message: form.message.trim(),
     }
-    const { error } = await supabase.from('inquiries').insert(payload)
-    if (error) { setError('Something went wrong. Please email us directly.'); setLoading(false) }
-    else { setDone(true); setLoading(false) }
+    const { error } = await supabase.functions.invoke('submit-inquiry', {
+      body: {
+        ...payload,
+        form_key: 'contact',
+      },
+    })
+
+    if (error) {
+      const details = await parseFunctionError(error, 'Something went wrong. Please email us directly.')
+      setError(details.message)
+      setLoading(false)
+      return
+    }
+
+    setDone(true)
+    setLoading(false)
   }
 
   return (

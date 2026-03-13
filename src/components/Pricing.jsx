@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion as Motion, AnimatePresence } from 'framer-motion'
 import NumberFlow from '@number-flow/react'
 import { useFadeUp } from './useFadeUp'
 import Eyebrow from './Eyebrow'
@@ -105,7 +105,7 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
     >
       <span style={{ position: 'relative', zIndex: 10 }}>{text}</span>
       {selected && (
-        <motion.span
+        <Motion.span
           layoutId="frequency-tab"
           transition={{ type: 'spring', duration: 0.4 }}
           style={{
