@@ -189,11 +189,10 @@ export default function AdminInvoices() {
 
     const hasLineItemError = billingForm.line_items.some(item => {
       const amount = Number(item.amount)
-      const quantity = Number(item.quantity)
-      return !item.name.trim() || !Number.isFinite(amount) || amount <= 0 || !Number.isInteger(quantity) || quantity < 1
+      return !item.name.trim() || !Number.isFinite(amount) || amount <= 0
     })
 
-    if (hasLineItemError) return 'Each line item needs a name, a positive amount, and a valid quantity.'
+    if (hasLineItemError) return 'Each line item needs a name and a positive amount.'
     if (billingForm.kind === 'invoice' && !billingForm.customer_email.trim()) return 'Customer email is required for invoices.'
     if (!hasValidPhone(billingForm.customer_phone)) return 'Phone number must be 10 digits, or 11 digits starting with 1.'
 
@@ -321,8 +320,7 @@ export default function AdminInvoices() {
 
   const billingTotal = billingForm.line_items.reduce((sum, item) => {
     const amount = Number(item.amount)
-    const quantity = Number(item.quantity)
-    return sum + (Number.isFinite(amount) ? amount : 0) * (Number.isInteger(quantity) ? quantity : 0)
+    return sum + (Number.isFinite(amount) ? amount : 0)
   }, 0)
 
   async function submitBilling() {
@@ -349,7 +347,7 @@ export default function AdminInvoices() {
           amount: item.amount,
           description: item.description.trim(),
           name: item.name.trim(),
-          quantity: item.quantity,
+          quantity: 1,
         })),
         send_invoice_now: billingForm.send_invoice_now,
       },
@@ -683,7 +681,7 @@ export default function AdminInvoices() {
                 <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                   <div>
                     <div style={{ color: '#18181a', fontSize: 14, fontWeight: 600 }}>Line items</div>
-                    <div style={{ color: '#7a7888', fontSize: 12, marginTop: 4 }}>Add custom names, notes, quantities, and prices.</div>
+                    <div style={{ color: '#7a7888', fontSize: 12, marginTop: 4 }}>Add custom names, notes, and prices.</div>
                   </div>
                   <div style={{ alignItems: 'center', display: 'flex', gap: 8 }}>
                     <label style={{ color: '#7a7888', fontSize: 12 }}>Items</label>
@@ -717,7 +715,7 @@ export default function AdminInvoices() {
                         )}
                       </div>
 
-                      <div style={{ display: 'grid', gap: 10, gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr' }}>
+                      <div style={{ display: 'grid', gap: 10, gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr' }}>
                         <input placeholder="Item name *" style={inp} value={item.name} onChange={event => updateLineItem(item.id, 'name', event.target.value)} />
                         <input
                           inputMode="decimal"
@@ -726,14 +724,6 @@ export default function AdminInvoices() {
                           type="text"
                           value={item.amount}
                           onChange={event => updateLineItem(item.id, 'amount', event.target.value)}
-                        />
-                        <input
-                          inputMode="numeric"
-                          placeholder="Qty *"
-                          style={inp}
-                          type="text"
-                          value={item.quantity}
-                          onChange={event => updateLineItem(item.id, 'quantity', event.target.value)}
                         />
                       </div>
 

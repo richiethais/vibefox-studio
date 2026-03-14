@@ -10,9 +10,12 @@ export function getStripeClient() {
   }
 
   if (!stripeClient) {
+    const accountId = Deno.env.get('STRIPE_ACCOUNT_ID')?.trim()
+
     stripeClient = new Stripe(secretKey, {
       apiVersion: '2026-02-25.clover',
       httpClient: Stripe.createFetchHttpClient(),
+      ...(accountId ? { stripeAccount: accountId } : {}),
     })
   }
 
