@@ -108,7 +108,6 @@ export default function ClientSupport() {
       if (error) {
         const { message } = await parseFunctionError(error, 'Could not submit support request.')
         setNotice({ text: message, type: 'error' })
-        setSubmitting(false)
         return
       }
 
@@ -117,9 +116,9 @@ export default function ClientSupport() {
       load()
     } catch {
       setNotice({ text: 'Could not submit support request.', type: 'error' })
+    } finally {
+      setSubmitting(false)
     }
-
-    setSubmitting(false)
   }
 
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }))
@@ -151,6 +150,7 @@ export default function ClientSupport() {
         {FAQ_ITEMS.map((item, index) => (
           <div key={index} style={{ borderBottom: index < FAQ_ITEMS.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
             <button
+              aria-expanded={openFaq === index}
               onClick={() => toggleFaq(index)}
               style={{
                 alignItems: 'center',
