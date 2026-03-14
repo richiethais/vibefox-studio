@@ -15,6 +15,7 @@ import AdminNotes from './pages/admin/Notes.jsx'
 import AdminSeoNotes from './pages/admin/SeoNotes.jsx'
 import AdminCalendar from './pages/admin/Calendar.jsx'
 import AdminBlogs from './pages/admin/Blogs.jsx'
+import AdminSupport from './pages/admin/Support.jsx'
 import ClientLogin from './pages/client/Login.jsx'
 import ClientDashboard from './pages/client/Dashboard.jsx'
 import ClientProjects from './pages/client/Projects.jsx'
@@ -53,6 +54,7 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="inquiries" element={<AdminInquiries />} />
+            <Route path="support" element={<AdminSupport />} />
             <Route path="clients" element={<AdminClients />} />
             <Route path="projects" element={<AdminProjects />} />
             <Route path="invoices" element={<AdminInvoices />} />
