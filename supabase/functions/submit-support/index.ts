@@ -5,6 +5,15 @@ function cleanText(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function escapeHtml(str: string) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 async function sendSupportEmail(params: {
   apiKey: string
   to: string
@@ -24,10 +33,10 @@ async function sendSupportEmail(params: {
       to: params.to,
       subject: `New support request: ${params.title}`,
       html: `
-        <p><strong>From:</strong> ${params.clientName || 'Unknown'} &lt;${params.clientEmail}&gt;</p>
-        <p><strong>Subject:</strong> ${params.title}</p>
+        <p><strong>From:</strong> ${escapeHtml(params.clientName || 'Unknown')} &lt;${escapeHtml(params.clientEmail)}&gt;</p>
+        <p><strong>Subject:</strong> ${escapeHtml(params.title)}</p>
         <hr />
-        <p>${params.description.replace(/\n/g, '<br>')}</p>
+        <p>${escapeHtml(params.description).replace(/\n/g, '<br>')}</p>
       `,
     }),
   })
@@ -77,6 +86,9 @@ Deno.serve(async request => {
     const body = await request.json().catch(() => ({}))
     const title = cleanText(body.title)
     const description = cleanText(body.description)
+
+    if (title.length > 200) return json({ error: 'Subject must be 200 characters or less.' }, 400)
+    if (description.length > 5000) return json({ error: 'Message must be 5000 characters or less.' }, 400)
 
     if (!title) return json({ error: 'Subject is required.' }, 400)
     if (!description) return json({ error: 'Message is required.' }, 400)
