@@ -10,7 +10,7 @@ const navItems = [
   { to: '/client/projects', label: 'Projects' },
   { to: '/client/invoices', label: 'Invoices' },
   { to: '/client/messages', label: 'Messages' },
-  { to: '/client/requests', label: 'Requests' },
+  { to: '/client/support', label: 'Support' },
 ]
 
 export default function ClientLayout() {

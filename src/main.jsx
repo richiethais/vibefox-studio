@@ -20,7 +20,7 @@ import ClientDashboard from './pages/client/Dashboard.jsx'
 import ClientProjects from './pages/client/Projects.jsx'
 import ClientInvoices from './pages/client/Invoices.jsx'
 import ClientMessages from './pages/client/Messages.jsx'
-import ClientRequests from './pages/client/Requests.jsx'
+import ClientSupport from './pages/client/Support.jsx'
 import Join from './pages/Join.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import ClientLayout from './components/client/ClientLayout.jsx'
@@ -70,7 +70,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="projects" element={<ClientProjects />} />
             <Route path="invoices" element={<ClientInvoices />} />
             <Route path="messages" element={<ClientMessages />} />
-            <Route path="requests" element={<ClientRequests />} />
+            <Route path="support" element={<ClientSupport />} />
           </Route>
         </Routes>
       </BrowserRouter>
