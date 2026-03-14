@@ -23,6 +23,7 @@ import ClientInvoices from './pages/client/Invoices.jsx'
 import ClientMessages from './pages/client/Messages.jsx'
 import ClientSupport from './pages/client/Support.jsx'
 import Join from './pages/Join.jsx'
+import ResetPassword from './pages/ResetPassword.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import ClientLayout from './components/client/ClientLayout.jsx'
 import { AdminRoute, ClientRoute } from './components/ProtectedRoute.jsx'
@@ -48,6 +49,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/blog" element={<Navigate to="/blogs" replace />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
           <Route path="/join" element={<Join />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>

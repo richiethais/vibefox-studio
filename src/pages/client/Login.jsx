@@ -49,7 +49,10 @@ export default function ClientLogin() {
             {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
-        <p style={{ fontSize: 12, color: '#7a7888', textAlign: 'center', marginTop: 20 }}>
+        <a href="/reset-password" style={{ fontSize: 12, color: '#7a7888', textAlign: 'center', display: 'block', marginTop: 20 }}>
+          Forgot password?
+        </a>
+        <p style={{ fontSize: 12, color: '#7a7888', textAlign: 'center', marginTop: 8 }}>
           Access is by invitation only.
         </p>
       </div>
