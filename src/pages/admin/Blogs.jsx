@@ -1,8 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { marked } from 'marked'
 import { publishDueScheduledPosts } from '../../lib/blog'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
+
+marked.setOptions({ breaks: true, gfm: true })
 
 const emptyForm = {
   title: '',
@@ -735,11 +738,11 @@ export default function AdminBlogs() {
               </label>
             </div>
             <textarea
-              placeholder="Blog content. Separate paragraphs with blank lines."
+              placeholder={"Blog content (supports Markdown for SEO).\n\n## H2 Subheading\n### H3 Subheading\n**bold text**\n- bullet point\n1. numbered list\n[link text](url)\n> blockquote"}
               value={form.content}
               onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-              rows={12}
-              style={{ ...inp, resize: 'vertical' }}
+              rows={14}
+              style={{ ...inp, resize: 'vertical', fontFamily: 'monospace, monospace', fontSize: 13, lineHeight: 1.6 }}
             />
 
             {/* Scheduling toggle */}
@@ -830,16 +833,10 @@ export default function AdminBlogs() {
             <p style={{ color: '#7a7888', fontSize: 16, lineHeight: 1.6, marginTop: 0 }}>
               {form.excerpt || selectedPreview?.excerpt || 'Draft excerpt will appear here.'}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {String(form.content || selectedPreview?.content || '')
-                .split('\n\n')
-                .map(p => p.trim())
-                .filter(Boolean)
-                .slice(0, 6)
-                .map(p => (
-                  <p key={p.slice(0, 24)} style={{ margin: 0, color: '#3a3840', fontSize: 16, lineHeight: 1.72 }}>{p}</p>
-                ))}
-            </div>
+            <div
+              className="blog-content"
+              dangerouslySetInnerHTML={{ __html: marked.parse(String(form.content || selectedPreview?.content || '')) }}
+            />
           </div>
         )}
       </div>

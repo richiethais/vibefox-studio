@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, Navigate, useLocation, useParams } from 'react-router-dom'
+import { marked } from 'marked'
 import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import { fetchPostBySlug, fetchPublishedPosts } from '../../lib/blog'
 import useIsMobile from '../../components/useIsMobile'
+
+marked.setOptions({ breaks: true, gfm: true })
 
 export default function BlogPostPage() {
   const isMobile = useIsMobile()
@@ -127,13 +130,10 @@ export default function BlogPostPage() {
 
           <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 24 }} />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            {activePost.body.map(paragraph => (
-              <p key={paragraph.slice(0, 24)} style={{ fontSize: isMobile ? 16 : 17, lineHeight: 1.78, color: '#3a3840', margin: 0 }}>
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <div
+            className="blog-content"
+            dangerouslySetInnerHTML={{ __html: marked.parse(activePost.content || activePost.body.join('\n\n')) }}
+          />
         </div>
       </article>
 
