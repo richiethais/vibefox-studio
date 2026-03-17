@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { marked } from 'marked'
 import { publishDueScheduledPosts } from '../../lib/blog'
@@ -273,8 +273,96 @@ async function createProcessedCoverBlob(file) {
   return blob
 }
 
+function autoFormatContent(text) {
+  if (!text) return text
+  const lines = text.split('\n')
+  const result = []
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i]
+    const trimmed = line.trim()
+
+    // Skip lines that already have markdown formatting
+    if (/^#{1,3}\s/.test(trimmed) || /^\*\*/.test(trimmed) || /^[-*]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed) || /^>\s/.test(trimmed)) {
+      result.push(line)
+      continue
+    }
+
+    // Detect header-like lines: short (under 80 chars), no ending period, followed by content
+    const nextNonEmpty = lines.slice(i + 1).find(l => l.trim())
+    const isShort = trimmed.length > 0 && trimmed.length <= 80
+    const noPeriod = !trimmed.endsWith('.') && !trimmed.endsWith('?') && !trimmed.endsWith('!')
+    const hasFollowingContent = nextNonEmpty && nextNonEmpty.trim().length > 0
+    const looksLikeHeader = isShort && noPeriod && hasFollowingContent && trimmed.length > 3
+
+    // Check if next line is blank (paragraph break after this line = likely a header)
+    const nextLine = lines[i + 1]
+    const nextIsBlank = nextLine !== undefined && nextLine.trim() === ''
+    const prevIsBlank = i === 0 || (lines[i - 1] !== undefined && lines[i - 1].trim() === '')
+
+    if (looksLikeHeader && (nextIsBlank || prevIsBlank)) {
+      // Detect if it looks like a sub-header (shorter, less prominent)
+      if (trimmed.length <= 40) {
+        line = `### ${trimmed}`
+      } else {
+        line = `## ${trimmed}`
+      }
+    } else if (trimmed.length > 0) {
+      // Bold key phrases at the start of sentences (pattern: "Word/phrase:" at start)
+      line = line.replace(/^([A-Z][^.!?:]{2,30}:)\s/, '**$1** ')
+    }
+
+    result.push(line)
+  }
+
+  return result.join('\n')
+}
+
+function insertMarkdown(textarea, prefix, suffix, placeholder, setContent) {
+  if (!textarea) return
+  const { selectionStart, selectionEnd, value } = textarea
+  const selected = value.slice(selectionStart, selectionEnd)
+  const text = selected || placeholder
+
+  const isBlock = prefix.endsWith('\n') || prefix.startsWith('\n')
+  let before = value.slice(0, selectionStart)
+  let after = value.slice(selectionEnd)
+
+  // For block-level elements, ensure blank lines around them
+  if (isBlock && before.length > 0 && !before.endsWith('\n\n')) {
+    before = before.replace(/\n?$/, '\n\n')
+  }
+
+  const insertion = `${prefix}${text}${suffix}`
+  const newValue = before + insertion + after
+  setContent(newValue)
+
+  // Restore cursor after React re-render
+  const cursorPos = before.length + prefix.length
+  requestAnimationFrame(() => {
+    textarea.focus()
+    textarea.setSelectionRange(cursorPos, cursorPos + text.length)
+  })
+}
+
+const TOOLBAR_ITEMS = [
+  { label: 'H2', title: 'Heading 2', prefix: '## ', suffix: '', placeholder: 'Subheading', block: true },
+  { label: 'H3', title: 'Heading 3', prefix: '### ', suffix: '', placeholder: 'Sub-subheading', block: true },
+  { type: 'sep' },
+  { label: 'B', title: 'Bold', prefix: '**', suffix: '**', placeholder: 'bold text', style: { fontWeight: 700 } },
+  { label: 'I', title: 'Italic', prefix: '*', suffix: '*', placeholder: 'italic text', style: { fontStyle: 'italic' } },
+  { type: 'sep' },
+  { label: 'UL', title: 'Bullet list', prefix: '- ', suffix: '', placeholder: 'list item', block: true },
+  { label: 'OL', title: 'Numbered list', prefix: '1. ', suffix: '', placeholder: 'list item', block: true },
+  { type: 'sep' },
+  { label: 'Link', title: 'Insert link', prefix: '[', suffix: '](url)', placeholder: 'link text' },
+  { label: 'Quote', title: 'Blockquote', prefix: '> ', suffix: '', placeholder: 'quote', block: true },
+  { label: 'HR', title: 'Horizontal rule', prefix: '\n---\n', suffix: '', placeholder: '' },
+]
+
 export default function AdminBlogs() {
   const [params] = useSearchParams()
+  const contentRef = useRef(null)
   const previewId = params.get('preview')
 
   const [posts, setPosts] = useState([])
@@ -737,13 +825,76 @@ export default function AdminBlogs() {
                 />
               </label>
             </div>
-            <textarea
-              placeholder={"Blog content (supports Markdown for SEO).\n\n## H2 Subheading\n### H3 Subheading\n**bold text**\n- bullet point\n1. numbered list\n[link text](url)\n> blockquote"}
-              value={form.content}
-              onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
-              rows={14}
-              style={{ ...inp, resize: 'vertical', fontFamily: 'monospace, monospace', fontSize: 13, lineHeight: 1.6 }}
-            />
+            {/* Markdown toolbar + editor */}
+            <div style={{ border: '1px solid rgba(0,0,0,0.1)', borderRadius: 10, overflow: 'hidden', background: '#faf9f7' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '6px 8px', borderBottom: '1px solid rgba(0,0,0,0.08)', background: '#f5f3f0', flexWrap: 'wrap' }}>
+                {TOOLBAR_ITEMS.map((item, i) => {
+                  if (item.type === 'sep') return <div key={i} style={{ width: 1, height: 18, background: 'rgba(0,0,0,0.1)', margin: '0 4px' }} />
+                  return (
+                    <button
+                      key={item.label}
+                      type="button"
+                      title={item.title}
+                      style={{
+                        padding: '4px 8px',
+                        borderRadius: 6,
+                        border: '1px solid transparent',
+                        background: 'transparent',
+                        color: '#3a3840',
+                        fontSize: 12,
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        lineHeight: 1.3,
+                        ...item.style,
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.06)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)' }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent' }}
+                      onClick={() => {
+                        const prefix = item.block ? (form.content && !form.content.endsWith('\n') ? '\n' : '') + item.prefix : item.prefix
+                        insertMarkdown(contentRef.current, prefix, item.suffix, item.placeholder, val => setForm(f => ({ ...f, content: val })))
+                      }}
+                    >
+                      {item.label}
+                    </button>
+                  )
+                })}
+                <div style={{ flex: 1 }} />
+                <button
+                  type="button"
+                  title="Auto-format: detect headings and bold key phrases from plain text"
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: 6,
+                    border: '1px solid rgba(184,144,106,0.3)',
+                    background: 'rgba(184,144,106,0.08)',
+                    color: '#92400e',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    lineHeight: 1.3,
+                  }}
+                  onClick={() => {
+                    const formatted = autoFormatContent(form.content)
+                    if (formatted !== form.content) {
+                      setForm(f => ({ ...f, content: formatted }))
+                      setNotice('Auto-format applied. Review the content and adjust as needed.')
+                    } else {
+                      setNotice('Content already looks formatted — no changes made.')
+                    }
+                  }}
+                >
+                  Auto-format
+                </button>
+              </div>
+              <textarea
+                ref={contentRef}
+                placeholder={"Write your blog content here.\nUse the toolbar above or type Markdown directly.\n\n## H2 Subheading\n### H3 Subheading\n**bold text**\n- bullet point\n1. numbered list"}
+                value={form.content}
+                onChange={e => setForm(f => ({ ...f, content: e.target.value }))}
+                rows={14}
+                style={{ ...inp, resize: 'vertical', fontFamily: 'monospace, monospace', fontSize: 13, lineHeight: 1.6, border: 'none', borderRadius: 0, background: 'transparent' }}
+              />
+            </div>
 
             {/* Scheduling toggle */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '12px 14px', background: '#f5f3f0', borderRadius: 10 }}>
