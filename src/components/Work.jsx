@@ -20,12 +20,18 @@ export default function Work() {
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
         <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: isMobile ? 16 : 18, marginTop: isMobile ? 36 : 52 }}>
+        <div className={isMobile ? 'mobile-scroll' : ''} style={isMobile ? {
+          display: 'flex', gap: 14, marginTop: 36,
+          overflowX: 'auto', scrollSnapType: 'x mandatory',
+          paddingBottom: 8, WebkitOverflowScrolling: 'touch',
+        } : {
+          display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18, marginTop: 52,
+        }}>
           {projects.map((project, i) => (
             <div
               key={project.title}
               className={`fade-up d${i + 1}`}
-              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: isMobile ? 14 : 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)' }}
+              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: isMobile ? 14 : 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)', minWidth: isMobile ? '85vw' : undefined, scrollSnapAlign: isMobile ? 'start' : undefined, flexShrink: isMobile ? 0 : undefined }}
               onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(200,169,126,0.25)' }}}
               onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)' }}}
             >

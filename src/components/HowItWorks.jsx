@@ -6,7 +6,7 @@ import useIsMobile from './useIsMobile'
 const steps = [
   { num: '01', title: 'Discovery call', desc: 'We talk through your goals, audience, and what you need. Takes 30 minutes. No obligation.' },
   { num: '02', title: 'We build it', desc: 'First draft in 5–7 days. Two rounds of revisions included. You approve before anything goes live.' },
-  { num: '03', title: 'Launch & grow', desc: 'We handle launch, hosting, and SSL. Your retainer keeps everything running and improving each month.' },
+  { num: '03', title: 'Launch & grow', desc: 'We handle launch, hosting, and SSL. Your growth plan keeps everything running and improving each month.' },
 ]
 
 export default function HowItWorks() {

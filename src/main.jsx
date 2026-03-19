@@ -33,6 +33,7 @@ import PricingPage from './pages/marketing/PricingPage.jsx'
 import FAQPage from './pages/marketing/FAQPage.jsx'
 import BlogPage from './pages/marketing/BlogPage.jsx'
 import BlogPostPage from './pages/marketing/BlogPostPage.jsx'
+import ContactPage from './pages/marketing/ContactPage.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -44,6 +45,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/work" element={<WorkPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/faq" element={<FAQPage />} />
+          <Route path="/contact" element={<ContactPage />} />
           <Route path="/blogs" element={<BlogPage />} />
           <Route path="/blogs/:slug" element={<BlogPostPage />} />
           <Route path="/blog" element={<Navigate to="/blogs" replace />} />

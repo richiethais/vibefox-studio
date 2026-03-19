@@ -83,7 +83,7 @@ export default function Hero() {
 
       <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 30 : s.btns.marginTop, gap: isMobile ? 10 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
         <a
-          href="#contact"
+          href="/contact"
           style={{ ...s.btnDark, width: isMobile ? 'min(320px, 100%)' : 'auto', justifyContent: 'center' }}
           onMouseEnter={e => { e.currentTarget.style.background = '#2a2830'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#18181a'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
@@ -101,16 +101,18 @@ export default function Hero() {
       </div>
 
       <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 30 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
-        {['Fast turnaround', 'Jacksonville local SEO', 'Retainers available'].map(t => (
+        {['Fast turnaround', 'Jacksonville local SEO', 'Growth plans available'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot} /> {t}
           </div>
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ marginTop: isMobile ? 48 : 72, width: '100%', maxWidth: 820 }}>
-        <DashboardMockup isMobile={isMobile} />
-      </div>
+      {!isMobile && (
+        <div className="anim-rise-6" style={{ marginTop: 72, width: '100%', maxWidth: 820 }}>
+          <DashboardMockup isMobile={false} />
+        </div>
+      )}
     </section>
   )
 }
@@ -154,7 +156,7 @@ function DashboardMockup({ isMobile }) {
           </div>
           {[
             { name: 'New project inquiry', desc: 'Local restaurant — website + booking', status: 'Active', statusColor: '#dcfce7', statusText: '#16a34a', bg: 'linear-gradient(135deg,#c8a97e,#b8906a)' },
-            { name: 'Retainer renewal', desc: 'Growth plan — month 4 of 12', status: 'Renewed', statusColor: '#fef3c7', statusText: '#d97706', bg: 'linear-gradient(135deg,#8b68d4,#6644b0)' },
+            { name: 'Plan renewal', desc: 'Growth plan — month 4 of 12', status: 'Renewed', statusColor: '#fef3c7', statusText: '#d97706', bg: 'linear-gradient(135deg,#8b68d4,#6644b0)' },
           ].map(item => (
             <div key={item.name} style={{ background: 'white', borderRadius: 10, padding: isMobile ? '11px 12px' : '12px 14px', border: '1px solid rgba(0,0,0,0.08)', display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', gap: 10, flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
               <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0, background: item.bg }} />

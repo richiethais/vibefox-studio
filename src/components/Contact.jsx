@@ -4,7 +4,7 @@ import { parseFunctionError } from '../lib/supabaseFunctions'
 import { useFadeUp } from './useFadeUp'
 import useIsMobile from './useIsMobile'
 
-const services = ['Landing Page', 'Business Website', 'Custom Web App', 'E-commerce', 'Retainer', 'Other']
+const services = ['Landing Page', 'Business Website', 'Custom Web App', 'E-commerce', 'Growth Plan', 'Other']
 const budgets = ['Under $1,000', '$1,000–$3,000', '$3,000–$10,000', '$10,000+']
 
 export default function Contact() {

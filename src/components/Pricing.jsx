@@ -42,7 +42,7 @@ const projectPlans = [
     desc: 'High-converting single-page websites tailored for lead generation or product launches.',
     features: ['Custom design & development', 'Conversion optimization', 'Mobile responsiveness', 'Basic SEO setup', 'Analytics integration'],
     featured: false,
-    requiresRetainer: true,
+    requiresGrowthPlan: true,
   },
   {
     name: 'Company Sites',
@@ -50,7 +50,7 @@ const projectPlans = [
     desc: 'Professional multi-page websites designed to establish your brand and drive growth.',
     features: ['Everything in Landing Pages', 'Up to 10 pages', 'Advanced SEO foundation', 'Content management system (CMS)', 'Performance optimization'],
     featured: true,
-    requiresRetainer: true,
+    requiresGrowthPlan: true,
   },
   {
     name: 'Custom Web Apps/CRM',
@@ -58,7 +58,7 @@ const projectPlans = [
     desc: 'Tailored software solutions for your unique business logic and operations.',
     features: ['Custom user portals', 'Third-party integrations', 'Database architecture', 'Automated workflows', 'Scalable infrastructure'],
     featured: false,
-    requiresRetainer: false,
+    requiresGrowthPlan: false,
   },
 ]
 
@@ -71,7 +71,7 @@ export default function Pricing() {
     <section id="pricing" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 36 : 48 }}>
-          <Eyebrow>Retainer plans</Eyebrow>
+          <Eyebrow>Growth Plans</Eyebrow>
           <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
             Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>monthly pricing.</em>
           </h2>
@@ -293,7 +293,7 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
 }
 
 function ProjectCard({ plan, delay, isMobile }) {
-  const { name, price, desc, features, featured, requiresRetainer } = plan
+  const { name, price, desc, features, featured, requiresGrowthPlan } = plan
 
   return (
     <div
@@ -336,7 +336,7 @@ function ProjectCard({ plan, delay, isMobile }) {
           {price !== 'Custom' && <span style={{ fontSize: 18, fontWeight: 500, color: featured ? 'rgba(255,255,255,0.6)' : '#18181a', marginBottom: 6 }}>+</span>}
         </div>
         <p style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', marginTop: price === 'Custom' ? 6 : -2 }}>
-          {requiresRetainer ? 'Starts at price + monthly plan' : 'Project investment'}
+          {requiresGrowthPlan ? 'Starts at price + monthly plan' : 'Project investment'}
         </p>
       </div>
 
