@@ -4,6 +4,7 @@ import { motion as Motion } from 'framer-motion'
 import BrandLogo from './BrandLogo'
 
 const links = [
+  ['Home', '/'],
   ['Services', '/services'],
   ['Work', '/work'],
   ['Pricing', '/pricing'],
@@ -60,90 +61,45 @@ export default function Nav() {
           transition: 'box-shadow 0.3s',
         }}
       >
-        <Link to="/" style={{ textDecoration: 'none', position: 'relative', display: 'inline-flex' }}>
+        <Link to="/" style={{ textDecoration: 'none', position: 'relative', display: 'inline-flex', cursor: 'pointer' }}>
           <BrandLogo size={isMobile ? 'sm' : 'nav'} />
-          {location.pathname === '/' && (
-            <Motion.div
-              layoutId="lamp"
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: 100,
-                background: 'rgba(184,144,106,0.08)',
-                zIndex: -1,
-              }}
-              initial={false}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            >
-              <div style={{
-                position: 'absolute',
-                bottom: -8,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                width: 32,
-                height: 4,
-                background: 'rgb(184,144,106)',
-                borderRadius: '0 0 4px 4px',
-              }}>
-                <div style={{
-                  position: 'absolute',
-                  width: 48,
-                  height: 24,
-                  background: 'rgba(184,144,106,0.2)',
-                  borderRadius: '50%',
-                  filter: 'blur(8px)',
-                  bottom: -8,
-                  left: -8,
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  width: 32,
-                  height: 24,
-                  background: 'rgba(184,144,106,0.2)',
-                  borderRadius: '50%',
-                  filter: 'blur(8px)',
-                  bottom: -4,
-                }} />
-                <div style={{
-                  position: 'absolute',
-                  width: 16,
-                  height: 16,
-                  background: 'rgba(184,144,106,0.2)',
-                  borderRadius: '50%',
-                  filter: 'blur(4px)',
-                  bottom: 0,
-                  left: 8,
-                }} />
-              </div>
-            </Motion.div>
-          )}
         </Link>
 
         {isMobile ? (
           <button
-            aria-label="Toggle menu"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             onClick={() => setMenuOpen(v => !v)}
             style={{
-              width: 38,
-              height: 38,
+              width: 44,
+              height: 44,
               borderRadius: '50%',
               border: '1px solid rgba(0,0,0,0.1)',
               background: 'white',
               color: '#18181a',
               fontSize: 18,
               cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            {menuOpen ? '×' : '☰'}
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              {menuOpen ? (
+                <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>
+              ) : (
+                <><line x1="3" y1="7" x2="21" y2="7" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="17" x2="21" y2="17" /></>
+              )}
+            </svg>
           </button>
         ) : (
           <ul style={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}>
             {links.map(([label, to]) => {
-              const isLampActive = location.pathname === to
+              const isLampActive = to === '/' ? location.pathname === '/' : location.pathname === to
               return (
                 <li key={label}>
                   <NavLink
                     to={to}
+                    end={to === '/'}
                     style={({ isActive }) => ({
                       textDecoration: 'none',
                       color: isActive ? '#18181a' : '#7a7888',
@@ -154,6 +110,7 @@ export default function Nav() {
                       display: 'block',
                       position: 'relative',
                       transition: 'color 0.18s',
+                      cursor: 'pointer',
                     })}
                     onMouseEnter={e => { e.currentTarget.style.color = '#18181a' }}
                     onMouseLeave={e => {
@@ -261,22 +218,33 @@ export default function Nav() {
             boxShadow: '0 18px 36px rgba(0,0,0,0.12)',
           }}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {links.map(([label, to]) => (
               <NavLink
                 key={label}
                 to={to}
+                end={to === '/'}
                 onClick={() => setMenuOpen(false)}
                 style={({ isActive }) => ({
                   textDecoration: 'none',
                   color: isActive ? '#18181a' : '#3a3840',
                   fontSize: 15,
-                  fontWeight: 500,
-                  padding: '11px 14px',
+                  fontWeight: isActive ? 600 : 500,
+                  padding: '13px 16px',
                   borderRadius: 12,
-                  background: isActive ? 'rgba(0,0,0,0.06)' : 'transparent',
+                  background: isActive ? 'rgba(200,169,126,0.1)' : 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  minHeight: 44,
+                  transition: 'background 0.18s, color 0.18s',
                 })}
               >
+                {to === '/' && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 12l9-8 9 8" /><path d="M5 10.5V20h14V10.5" />
+                  </svg>
+                )}
                 {label}
               </NavLink>
             ))}

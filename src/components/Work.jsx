@@ -4,9 +4,9 @@ import { h2Style, subStyle } from './sectionStyles'
 import useIsMobile from './useIsMobile'
 
 const projects = [
-  { tag: 'Web App', title: 'Meridian Fitness Studio', desc: 'Class booking, membership management, and trainer dashboard with real-time availability.', iconKey: 'calendar', label: 'Booking System', sub: 'Meridian Fitness', bg: 'linear-gradient(135deg, #f0ebff 0%, #e2d8f8 100%)' },
-  { tag: 'Website', title: 'Cedar & Oak Realty', desc: 'Multi-page site with property search, contact forms, and monthly SEO content.', iconKey: 'home', label: 'Marketing Site', sub: 'Cedar & Oak Realty', bg: 'linear-gradient(135deg, #ebf2ff 0%, #d8e8ff 100%)' },
-  { tag: 'Custom App', title: 'Bloom & Co Spa', desc: 'Intake forms, appointment history, file uploads, and a staff-facing admin dashboard.', iconKey: 'portal', label: 'Client Portal', sub: 'Bloom & Co Spa', bg: 'linear-gradient(135deg, #fff5eb 0%, #fae3cc 100%)' },
+  { tag: 'Web App', title: 'Fitness Booking Platform', desc: 'Class scheduling, membership tiers, trainer dashboards, and real-time availability — all in one seamless app.', iconKey: 'calendar', label: 'Booking System', sub: 'Fitness & Wellness', bg: 'linear-gradient(135deg, #f0ebff 0%, #e2d8f8 100%)' },
+  { tag: 'Website', title: 'Real Estate Marketing Site', desc: 'Property listings with advanced search, virtual tours, lead capture forms, and ongoing SEO content strategy.', iconKey: 'home', label: 'Marketing Site', sub: 'Real Estate', bg: 'linear-gradient(135deg, #ebf2ff 0%, #d8e8ff 100%)' },
+  { tag: 'Custom App', title: 'Spa & Salon Client Portal', desc: 'Online booking, intake forms, appointment history, file uploads, and a staff-facing admin dashboard.', iconKey: 'portal', label: 'Client Portal', sub: 'Beauty & Wellness', bg: 'linear-gradient(135deg, #fff5eb 0%, #fae3cc 100%)' },
 ]
 
 export default function Work() {
@@ -16,31 +16,31 @@ export default function Work() {
   return (
     <section id="work" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow>Our work</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Recent <em style={{ fontStyle: 'italic', color: '#b8906a' }}>projects.</em></h2>
-        <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>A sample of what we've built - from landing pages to full custom apps.</p>
+        <Eyebrow>Demo Projects</Eyebrow>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
+        <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 14, marginTop: isMobile ? 36 : 52 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: isMobile ? 16 : 18, marginTop: isMobile ? 36 : 52 }}>
           {projects.map((project, i) => (
             <div
               key={project.title}
               className={`fade-up d${i + 1}`}
-              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)' }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(200,169,126,0.25)' }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)' }}
+              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: isMobile ? 14 : 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)' }}
+              onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(200,169,126,0.25)' }}}
+              onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)' }}}
             >
-              <div style={{ background: project.bg, aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ background: 'white', borderRadius: 11, padding: '12px 16px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.09)', textAlign: 'center', fontSize: 13, fontWeight: 600, color: '#18181a', lineHeight: 1.4 }}>
+              <div style={{ background: project.bg, aspectRatio: isMobile ? '16/10' : '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ background: 'white', borderRadius: 11, padding: isMobile ? '14px 18px' : '12px 16px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.09)', textAlign: 'center', fontSize: 13, fontWeight: 600, color: '#18181a', lineHeight: 1.4 }}>
                   <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
                     <WorkGlyph iconKey={project.iconKey} /> {project.label}
                   </div>
-                  <div style={{ fontSize: 11, color: '#7a7888', fontWeight: 400, marginTop: 2 }}>{project.sub}</div>
+                  <div style={{ fontSize: 11, color: '#7a7888', fontWeight: 400, marginTop: 3 }}>{project.sub}</div>
                 </div>
               </div>
-              <div style={{ padding: '18px 20px' }}>
-                <div style={{ display: 'inline-block', background: 'rgba(200,169,126,0.15)', color: '#b8906a', fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, marginBottom: 8 }}>{project.tag}</div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: '#18181a', letterSpacing: '-0.3px' }}>{project.title}</div>
-                <div style={{ fontSize: 13, color: '#7a7888', marginTop: 5, lineHeight: 1.5, fontWeight: 300 }}>{project.desc}</div>
+              <div style={{ padding: isMobile ? '16px 18px 20px' : '18px 20px' }}>
+                <div style={{ display: 'inline-block', background: 'rgba(200,169,126,0.15)', color: '#b8906a', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100, marginBottom: 8 }}>{project.tag}</div>
+                <div style={{ fontSize: isMobile ? 16 : 15, fontWeight: 600, color: '#18181a', letterSpacing: '-0.3px' }}>{project.title}</div>
+                <div style={{ fontSize: isMobile ? 14 : 13, color: '#7a7888', marginTop: 6, lineHeight: 1.55, fontWeight: 300 }}>{project.desc}</div>
               </div>
             </div>
           ))}

@@ -16,9 +16,9 @@ export default function WorkPage() {
       />
 
       <PageHero
-        eyebrow="Our Work"
-        title="Recent website, SEO, and growth projects."
-        sub="Real outcomes from businesses that needed better visibility, faster sites, and stronger lead flow from a Jacksonville digital marketing agency."
+        eyebrow="Demo Projects"
+        title="A sample of what we can build."
+        sub="From marketing sites to full-stack apps — here's a taste of what's possible when you work with a Jacksonville digital agency that builds everything custom."
       />
 
       <Work />
