@@ -35,6 +35,33 @@ const plans = [
   },
 ]
 
+const projectPlans = [
+  {
+    name: 'Landing Pages',
+    price: '1,500',
+    desc: 'High-converting single-page websites tailored for lead generation or product launches.',
+    features: ['Custom design & development', 'Conversion optimization', 'Mobile responsiveness', 'Basic SEO setup', 'Analytics integration'],
+    featured: false,
+    requiresRetainer: true,
+  },
+  {
+    name: 'Company Sites',
+    price: '3,500',
+    desc: 'Professional multi-page websites designed to establish your brand and drive growth.',
+    features: ['Everything in Landing Pages', 'Up to 10 pages', 'Advanced SEO foundation', 'Content management system (CMS)', 'Performance optimization'],
+    featured: true,
+    requiresRetainer: true,
+  },
+  {
+    name: 'Custom Web Apps/CRM',
+    price: 'Custom',
+    desc: 'Tailored software solutions for your unique business logic and operations.',
+    features: ['Custom user portals', 'Third-party integrations', 'Database architecture', 'Automated workflows', 'Scalable infrastructure'],
+    featured: false,
+    requiresRetainer: false,
+  },
+]
+
 export default function Pricing() {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
@@ -74,10 +101,21 @@ export default function Pricing() {
           ))}
         </div>
 
-        <p className="fade-up" style={{ textAlign: 'center', marginTop: 22, fontSize: isMobile ? 12 : 13, color: '#7a7888' }}>
-          One-time project pricing from $1,500 —{' '}
-          <a href="mailto:richie@vibefoxstudio.com" style={{ color: '#b8906a', textDecoration: 'none' }}>get a custom quote →</a>
-        </p>
+        <div className="fade-up" style={{ textAlign: 'center', marginTop: isMobile ? 64 : 80, marginBottom: isMobile ? 36 : 48 }}>
+          <Eyebrow>One-time Projects</Eyebrow>
+          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+            Build something <em style={{ fontStyle: 'italic', color: '#b8906a' }}>unforgettable.</em>
+          </h2>
+          <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 480 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight, margin: '14px auto 0' }}>
+            High-performance websites and web applications built from scratch. Project costs are one-time investments.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
+          {projectPlans.map((p, i) => (
+            <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={isMobile} />
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -253,6 +291,104 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
     </div>
   )
 }
+
+function ProjectCard({ plan, delay, isMobile }) {
+  const { name, price, desc, features, featured, requiresRetainer } = plan
+
+  return (
+    <div
+      className={`fade-up ${delay}`}
+      style={{
+        background: featured ? '#18181a' : '#faf9f7',
+        border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 16,
+        padding: isMobile ? '24px 20px' : '30px 26px',
+        position: 'relative',
+        boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
+        transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
+        overflow: 'hidden',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; if (!featured) e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; if (!featured) e.currentTarget.style.boxShadow = 'none' }}
+    >
+      {/* Background patterns */}
+      {featured && <HighlightedBackground />}
+
+      {/* Plan name with badge */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888' }}>
+          {name}
+        </span>
+      </div>
+
+      <div style={{ position: 'relative', height: 60, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
+          {price !== 'Custom' && <span style={{ fontSize: 18, fontWeight: 500, color: featured ? 'rgba(255,255,255,0.6)' : '#18181a', marginBottom: 6 }}>$</span>}
+          <span style={{
+            fontFamily: '"DM Serif Display", serif',
+            fontSize: price === 'Custom' ? (isMobile ? 38 : 44) : (isMobile ? 46 : 54),
+            color: featured ? 'white' : '#18181a',
+            letterSpacing: '-2px',
+            lineHeight: 1,
+          }}>
+            {price === 'Custom' ? 'Custom Quote' : price}
+          </span>
+          {price !== 'Custom' && <span style={{ fontSize: 18, fontWeight: 500, color: featured ? 'rgba(255,255,255,0.6)' : '#18181a', marginBottom: 6 }}>+</span>}
+        </div>
+        <p style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', marginTop: price === 'Custom' ? 6 : -2 }}>
+          {requiresRetainer ? 'Starts at price + monthly plan' : 'Project investment'}
+        </p>
+      </div>
+
+      <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 22, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
+      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 18 }} />
+
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 26px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {features.map(f => (
+          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
+            <CheckIcon featured={featured} />
+            {f}
+          </li>
+        ))}
+      </ul>
+
+      <a
+        href="mailto:richie@vibefoxstudio.com"
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          textAlign: 'center',
+          padding: 12,
+          borderRadius: 100,
+          fontSize: 14,
+          fontWeight: 500,
+          textDecoration: 'none',
+          transition: 'all 0.2s',
+          background: featured ? '#b8906a' : 'transparent',
+          border: featured ? '1.5px solid #b8906a' : '1.5px solid rgba(0,0,0,0.08)',
+          color: featured ? 'white' : '#18181a',
+          boxShadow: featured ? '0 4px 14px rgba(184,144,106,0.3)' : 'none',
+          position: 'relative',
+          zIndex: 10,
+        }}
+        onMouseEnter={e => {
+          if (featured) { e.currentTarget.style.background = '#c8a97e'; e.currentTarget.style.transform = 'translateY(-1px)' }
+          else e.currentTarget.style.background = '#edeae5'
+        }}
+        onMouseLeave={e => {
+          if (featured) { e.currentTarget.style.background = '#b8906a'; e.currentTarget.style.transform = 'none' }
+          else e.currentTarget.style.background = 'transparent'
+        }}
+      >
+        Get a quote
+        <ArrowIcon />
+      </a>
+    </div>
+  )
+}
+
 
 function CheckIcon({ featured }) {
   return (
