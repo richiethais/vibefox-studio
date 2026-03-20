@@ -103,7 +103,7 @@ export default function Contact() {
             {error && <p style={{ fontSize: 13, color: '#dc2626', margin: 0 }}>{error}</p>}
             <button type="submit" disabled={loading || !canSubmit} style={{
               padding: '14px 28px', borderRadius: 100, border: 'none',
-              background: '#18181a', color: 'white', fontSize: 15, fontWeight: 500,
+              background: '#b8906a', color: 'white', fontSize: 15, fontWeight: 500,
               cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1,
               alignSelf: isMobile ? 'stretch' : 'flex-start', transition: 'all 0.2s',
             }}>

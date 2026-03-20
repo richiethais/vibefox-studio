@@ -253,25 +253,25 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
     <div
       className={`fade-up ${delay}`}
       style={{
-        background: featured ? '#18181a' : '#faf9f7',
-        border: popular ? '2px solid #b8906a' : featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
+        background: '#faf9f7',
+        border: popular ? '2px solid #b8906a' : featured ? '2px solid #b8906a' : '1px solid rgba(0,0,0,0.08)',
         borderRadius: 16,
         padding: isMobile ? '22px 18px' : '30px 26px',
         position: 'relative',
-        boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
+        boxShadow: 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
         overflow: 'hidden',
       }}
-      onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-4px)'; if (!featured) e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}}
-      onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; if (!featured) e.currentTarget.style.boxShadow = 'none' }}}
+      onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}}
+      onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}}
     >
       {/* Background patterns */}
-      {featured && <HighlightedBackground />}
       {popular && <PopularBackground />}
+      {featured && <PopularBackground />}
 
       {/* Plan name with badge */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#7a7888' }}>
           {name}
         </span>
         {popular && (
@@ -304,29 +304,29 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
             style={{
               fontFamily: '"DM Serif Display", serif',
               fontSize: isMobile ? 40 : 54,
-              color: featured ? 'white' : '#18181a',
+              color: '#18181a',
               letterSpacing: '-2px',
               lineHeight: 1.1,
             }}
           />
-          <span style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888', fontWeight: 400, marginLeft: 4 }}>/mo</span>
+          <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 400, marginLeft: 4 }}>/mo</span>
         </div>
       </div>
 
-      <div style={{ fontSize: isMobile ? 12 : 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
-      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
+      <div style={{ fontSize: isMobile ? 12 : 13, color: '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
+      <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
 
       <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 10 }}>
         {features.map(f => (
-          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: isMobile ? 12 : 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
-            <CheckIcon featured={featured} />
+          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: isMobile ? 12 : 13, color: '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
+            <CheckIcon featured={false} />
             {f}
           </li>
         ))}
       </ul>
 
       <a
-        href="mailto:richie@vibefoxstudio.com"
+        href="/contact"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -370,10 +370,10 @@ function CompactPricingRow({ plan, paymentFrequency }) {
 
   return (
     <a
-      href="mailto:richie@vibefoxstudio.com"
+      href="/contact"
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: featured ? '#18181a' : '#faf9f7',
+        background: '#faf9f7',
         border: '1px solid rgba(0,0,0,0.08)',
         borderRadius: 14, padding: '16px 18px',
         textDecoration: 'none', cursor: 'pointer',
@@ -381,14 +381,14 @@ function CompactPricingRow({ plan, paymentFrequency }) {
       }}
     >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
-        <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
+        <div style={{ fontSize: 12, color: '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16 }}>
-        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 24, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
+        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 24, color: '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
           ${currentPrice}
         </div>
-        <div style={{ fontSize: 10, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888' }}>/mo</div>
+        <div style={{ fontSize: 10, color: '#7a7888' }}>/mo</div>
       </div>
     </a>
   )
@@ -400,25 +400,25 @@ function CompactProjectRow({ plan }) {
 
   return (
     <a
-      href="mailto:richie@vibefoxstudio.com"
+      href="/contact"
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        background: featured ? '#18181a' : '#faf9f7',
-        border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
+        background: '#faf9f7',
+        border: '1px solid rgba(0,0,0,0.08)',
         borderRadius: 14, padding: '16px 18px',
         textDecoration: 'none', cursor: 'pointer',
         transition: 'all 0.2s',
       }}
     >
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
-        <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
+        <div style={{ fontSize: 12, color: '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16 }}>
-        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: price === 'Custom' ? 18 : 24, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
+        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: price === 'Custom' ? 18 : 24, color: '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
           {price === 'Custom' ? 'Custom' : `$${price}`}
         </div>
-        {price !== 'Custom' && <div style={{ fontSize: 10, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888' }}>starting</div>}
+        {price !== 'Custom' && <div style={{ fontSize: 10, color: '#7a7888' }}>starting</div>}
       </div>
     </a>
   )
@@ -431,24 +431,24 @@ function ProjectCard({ plan, delay, isMobile }) {
     <div
       className={`fade-up ${delay}`}
       style={{
-        background: featured ? '#18181a' : '#faf9f7',
-        border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
+        background: '#faf9f7',
+        border: featured ? '2px solid #b8906a' : '1px solid rgba(0,0,0,0.08)',
         borderRadius: 16,
         padding: '30px 26px',
         position: 'relative',
-        boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
+        boxShadow: 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
         overflow: 'hidden',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; if (!featured) e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; if (!featured) e.currentTarget.style.boxShadow = 'none' }}
+      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
     >
       {/* Background patterns */}
-      {featured && <HighlightedBackground />}
+      {featured && <PopularBackground />}
 
       {/* Plan name */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888' }}>
+        <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#7a7888' }}>
           {name}
         </span>
       </div>
@@ -456,37 +456,37 @@ function ProjectCard({ plan, delay, isMobile }) {
       {/* Price — fixed alignment, no fixed height container */}
       <div style={{ position: 'relative', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
-          {price !== 'Custom' && <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 16, fontWeight: 400, color: featured ? 'rgba(255,255,255,0.6)' : '#7a7888' }}>$</span>}
+          {price !== 'Custom' && <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 16, fontWeight: 400, color: '#7a7888' }}>$</span>}
           <span style={{
             fontFamily: '"DM Serif Display", serif',
             fontSize: price === 'Custom' ? 36 : 54,
-            color: featured ? 'white' : '#18181a',
+            color: '#18181a',
             letterSpacing: '-2px',
             lineHeight: 1.1,
           }}>
             {price === 'Custom' ? 'Custom' : price}
           </span>
-          {price !== 'Custom' && <span style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888', fontWeight: 400, marginLeft: 4 }}>one-time</span>}
+          {price !== 'Custom' && <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 400, marginLeft: 4 }}>one-time</span>}
         </div>
-        <p style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', marginTop: 4 }}>
+        <p style={{ fontSize: 12, color: '#7a7888', marginTop: 4 }}>
           {requiresGrowthPlan ? 'Plus monthly growth plan' : 'Project investment'}
         </p>
       </div>
 
-      <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
-      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
+      <div style={{ fontSize: 13, color: '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
+      <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
 
       <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {features.map(f => (
-          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
-            <CheckIcon featured={featured} />
+          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
+            <CheckIcon featured={false} />
             {f}
           </li>
         ))}
       </ul>
 
       <a
-        href="mailto:richie@vibefoxstudio.com"
+        href="/contact"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -549,21 +549,6 @@ function ArrowIcon() {
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M5 12h14M12 5l7 7-7 7" />
     </svg>
-  )
-}
-
-function HighlightedBackground() {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        inset: 0,
-        background: 'linear-gradient(to right, rgba(79,79,79,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,79,79,0.18) 1px, transparent 1px)',
-        backgroundSize: '45px 45px',
-        maskImage: 'radial-gradient(ellipse 80% 50% at 50% 0%, #000 70%, transparent 110%)',
-        WebkitMaskImage: 'radial-gradient(ellipse 80% 50% at 50% 0%, #000 70%, transparent 110%)',
-      }}
-    />
   )
 }
 

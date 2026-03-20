@@ -9,32 +9,33 @@ export function CTA() {
     <div ref={ref} style={{ padding: isMobile ? '36px 18px' : '72px 40px' }}>
       <div className="fade-up" style={{
         maxWidth: 1040, margin: '0 auto',
-        background: '#18181a', borderRadius: isMobile ? 22 : 28,
+        background: '#f3efe9', borderRadius: isMobile ? 22 : 28,
         padding: isMobile ? '40px 20px' : '80px 60px', textAlign: 'center',
         position: 'relative', overflow: 'hidden',
+        border: '1px solid rgba(184,144,106,0.2)',
       }}>
-        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: isMobile ? 320 : 520, height: isMobile ? 220 : 260, background: 'radial-gradient(ellipse, rgba(200,169,126,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 'clamp(31px, 10vw, 42px)' : 'clamp(36px, 5vw, 56px)', lineHeight: 1.04, color: 'white', letterSpacing: isMobile ? '-1px' : '-1.5px', margin: '0 0 18px', position: 'relative' }}>
+        <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: isMobile ? 320 : 520, height: isMobile ? 220 : 260, background: 'radial-gradient(ellipse, rgba(200,169,126,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 'clamp(31px, 10vw, 42px)' : 'clamp(36px, 5vw, 56px)', lineHeight: 1.04, color: '#18181a', letterSpacing: isMobile ? '-1px' : '-1.5px', margin: '0 0 18px', position: 'relative' }}>
           Ready to build something {isMobile ? ' ' : <br />}
-          <em style={{ fontStyle: 'italic', color: '#c8a97e' }}>that works?</em>
+          <em style={{ fontStyle: 'italic', color: '#b8906a' }}>that works?</em>
         </h2>
-        <p style={{ fontSize: isMobile ? 15 : 17, color: 'rgba(255,255,255,0.42)', maxWidth: 400, margin: '0 auto', fontWeight: 300, lineHeight: isMobile ? 1.58 : 1.68, position: 'relative' }}>
+        <p style={{ fontSize: isMobile ? 15 : 17, color: '#7a7888', maxWidth: 400, margin: '0 auto', fontWeight: 300, lineHeight: isMobile ? 1.58 : 1.68, position: 'relative' }}>
           No pressure, no sales pitch, just a real conversation with a Jacksonville SEO and digital marketing team.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: isMobile ? 30 : 40, flexWrap: 'wrap', position: 'relative', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center' }}>
           <a
             href="/contact"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, justifyContent: 'center', background: '#faf9f7', color: '#18181a', padding: '14px 28px', borderRadius: 100, fontSize: 15, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s', width: isMobile ? 'min(320px, 100%)' : 'auto' }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'white'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#faf9f7'; e.currentTarget.style.transform = 'none' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, justifyContent: 'center', background: '#b8906a', color: 'white', padding: '14px 28px', borderRadius: 100, fontSize: 15, fontWeight: 500, textDecoration: 'none', transition: 'all 0.2s', width: isMobile ? 'min(320px, 100%)' : 'auto' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#c8a97e'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#b8906a'; e.currentTarget.style.transform = 'none' }}
           >
-            Start a project <span style={{ width: 22, height: 22, background: 'rgba(0,0,0,0.08)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>→</span>
+            Start a project <span style={{ width: 22, height: 22, background: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>→</span>
           </a>
           <a
             href="/pricing"
-            style={{ color: 'rgba(255,255,255,0.42)', padding: '14px 22px', borderRadius: 100, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', transition: 'all 0.2s', fontWeight: 400, textAlign: 'center', width: isMobile ? 'min(320px, 100%)' : 'auto' }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.42)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+            style={{ color: '#7a7888', padding: '14px 22px', borderRadius: 100, fontSize: 15, textDecoration: 'none', border: '1px solid rgba(0,0,0,0.1)', transition: 'all 0.2s', fontWeight: 400, textAlign: 'center', width: isMobile ? 'min(320px, 100%)' : 'auto' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#18181a'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.25)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#7a7888'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)' }}
           >
             View pricing
           </a>
@@ -61,7 +62,7 @@ export function Footer() {
           {[
             { heading: 'Services', links: [['Landing Pages','/services'],['Business Websites','/services'],['Custom Web Apps','/services'],['SEO & Content','/services']] },
             { heading: 'Plans', links: [['Starter — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blogs','/blogs']] },
-            { heading: 'Contact', links: [['richie@vibefoxstudio.com','mailto:richie@vibefoxstudio.com'],['Jacksonville, FL','/services'],['FAQ','/faq']] },
+            { heading: 'Contact', links: [['inquiries@vibefoxstudio.com','mailto:inquiries@vibefoxstudio.com'],['Jacksonville, FL','/services'],['FAQ','/faq']] },
           ].map(col => (
             <div key={col.heading}>
               <div style={{ fontSize: 11.5, fontWeight: 700, color: '#18181a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 13 }}>{col.heading}</div>
@@ -81,10 +82,10 @@ export function Footer() {
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', flexWrap: 'wrap', gap: 12 }}>
           <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 300 }}>© 2026 VibefoxStudio. All rights reserved.</span>
-          <a href="mailto:richie@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s' }}
+          <a href="mailto:inquiries@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s' }}
             onMouseEnter={e => e.target.style.color = '#18181a'}
             onMouseLeave={e => e.target.style.color = '#7a7888'}
-          >richie@vibefoxstudio.com</a>
+          >inquiries@vibefoxstudio.com</a>
         </div>
       </div>
     </footer>

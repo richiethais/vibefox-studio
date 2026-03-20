@@ -22,7 +22,7 @@ export default function App() {
     image: 'https://vibefoxstudio.com/seo-preview.png',
     url: 'https://vibefoxstudio.com',
     areaServed: 'Jacksonville, Florida',
-    email: 'richie@vibefoxstudio.com',
+    email: 'inquiries@vibefoxstudio.com',
     slogan: 'Jacksonville Web Design & SEO Services',
     address: {
       '@type': 'PostalAddress',
