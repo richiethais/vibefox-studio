@@ -69,11 +69,11 @@ export default function Pricing() {
   const [activeTab, setActiveTab] = useState('growth')
 
   return (
-    <section id="pricing" ref={ref} style={{ padding: isMobile ? '40px 16px' : '96px 40px' }}>
+    <section id="pricing" ref={ref} style={{ padding: isMobile ? '48px 20px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 48 }}>
+        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 28 : 48 }}>
           <Eyebrow>Pricing</Eyebrow>
-          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(22px, 6.5vw, 32px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.5px' : h2Style.letterSpacing }}>
+          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
             Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
           </h2>
           {!isMobile && (
@@ -87,13 +87,13 @@ export default function Pricing() {
           /* Mobile: Tabbed pricing interface */
           <>
             {/* Section toggle: Growth Plans / One-time */}
-            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 16 }}>
-              {[['growth', 'Monthly'], ['projects', 'One-time']].map(([key, label]) => (
+            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 4, marginBottom: 20 }}>
+              {[['growth', 'Monthly Plans'], ['projects', 'One-time']].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
                   style={{
-                    flex: 1, padding: '10px 8px', fontSize: 12, fontWeight: 600,
+                    flex: 1, padding: '12px 10px', fontSize: 13, fontWeight: 600,
                     background: activeTab === key ? '#faf9f7' : 'transparent',
                     boxShadow: activeTab === key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                     border: 'none', borderRadius: 100, cursor: 'pointer',
@@ -108,8 +108,8 @@ export default function Pricing() {
             {activeTab === 'growth' && (
               <>
                 {/* Frequency Toggle */}
-                <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
-                  <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3 }}>
+                <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
+                  <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 4 }}>
                     {PAYMENT_FREQUENCIES.map((freq) => (
                       <FrequencyTab
                         key={freq}
@@ -124,7 +124,7 @@ export default function Pricing() {
                 </div>
 
                 {/* Featured plan first (Pro), then others as compact rows */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {/* Show popular plan (Growth) featured on mobile */}
                   <PricingCard plan={plans[1]} delay="d1" isMobile={true} paymentFrequency={selectedFrequency} />
                   {/* Compact cards for Starter and Pro */}
@@ -136,7 +136,7 @@ export default function Pricing() {
             )}
 
             {activeTab === 'projects' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {projectPlans.map((p) => (
                   <CompactProjectRow key={p.name} plan={p} />
                 ))}
@@ -195,8 +195,8 @@ function FrequencyTab({ text, selected, setSelected, discount = false, isMobile 
       onClick={() => setSelected(text)}
       style={{
         position: 'relative',
-        padding: isMobile ? '8px 14px' : '10px 20px',
-        fontSize: isMobile ? 12 : 14,
+        padding: isMobile ? '10px 18px' : '10px 20px',
+        fontSize: isMobile ? 13 : 14,
         fontWeight: 600,
         textTransform: 'capitalize',
         color: '#18181a',
@@ -205,7 +205,7 @@ function FrequencyTab({ text, selected, setSelected, discount = false, isMobile 
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: isMobile ? 6 : 10,
+        gap: isMobile ? 8 : 10,
         borderRadius: 100,
       }}
     >
@@ -229,16 +229,16 @@ function FrequencyTab({ text, selected, setSelected, discount = false, isMobile 
           style={{
             position: 'relative',
             zIndex: 10,
-            fontSize: isMobile ? 9 : 10,
+            fontSize: isMobile ? 10 : 10,
             fontWeight: 700,
-            padding: isMobile ? '3px 6px' : '4px 8px',
+            padding: isMobile ? '4px 8px' : '4px 8px',
             borderRadius: 100,
             background: selected ? '#edeae5' : 'rgba(184,144,106,0.15)',
             color: '#b8906a',
             whiteSpace: 'nowrap',
           }}
         >
-          -15%
+          Save 15%
         </span>
       )}
     </button>
@@ -255,8 +255,8 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
       style={{
         background: featured ? '#18181a' : '#faf9f7',
         border: popular ? '2px solid #b8906a' : featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 16,
-        padding: isMobile ? '22px 18px' : '30px 26px',
+        borderRadius: isMobile ? 18 : 16,
+        padding: isMobile ? '26px 22px' : '30px 26px',
         position: 'relative',
         boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
@@ -375,20 +375,20 @@ function CompactPricingRow({ plan, paymentFrequency }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         background: featured ? '#18181a' : '#faf9f7',
         border: '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 14, padding: '16px 18px',
+        borderRadius: 16, padding: '18px 20px',
         textDecoration: 'none', cursor: 'pointer',
         transition: 'all 0.2s',
       }}
     >
       <div>
-        <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
-        <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
+        <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 4 }}>{desc}</div>
       </div>
-      <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16 }}>
-        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 24, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
+      <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 20 }}>
+        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 28, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
           ${currentPrice}
         </div>
-        <div style={{ fontSize: 10, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888' }}>/mo</div>
+        <div style={{ fontSize: 11, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888', marginTop: 2 }}>/month</div>
       </div>
     </a>
   )
@@ -405,20 +405,20 @@ function CompactProjectRow({ plan }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         background: featured ? '#18181a' : '#faf9f7',
         border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 14, padding: '16px 18px',
+        borderRadius: 16, padding: '18px 20px',
         textDecoration: 'none', cursor: 'pointer',
         transition: 'all 0.2s',
       }}
     >
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
-        <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
+        <div style={{ fontSize: 15, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
+        <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 4 }}>{desc}</div>
       </div>
-      <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16 }}>
-        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: price === 'Custom' ? 18 : 24, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
+      <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 20 }}>
+        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: price === 'Custom' ? 20 : 28, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
           {price === 'Custom' ? 'Custom' : `$${price}`}
         </div>
-        {price !== 'Custom' && <div style={{ fontSize: 10, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888' }}>starting</div>}
+        {price !== 'Custom' && <div style={{ fontSize: 11, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888', marginTop: 2 }}>starting</div>}
       </div>
     </a>
   )

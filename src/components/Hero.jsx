@@ -68,27 +68,28 @@ export default function Hero() {
   return (
     <section style={{
       ...s.section,
-      minHeight: isMobile ? 'auto' : s.section.minHeight,
-      padding: isMobile ? '100px 16px 40px' : s.section.padding,
+      minHeight: isMobile ? 'calc(100svh - 60px)' : s.section.minHeight,
+      padding: isMobile ? '80px 20px 48px' : s.section.padding,
+      justifyContent: isMobile ? 'center' : s.section.justifyContent,
     }}>
       <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 11 : s.pill.fontSize, marginBottom: isMobile ? 18 : s.pill.marginBottom, padding: isMobile ? '5px 12px 5px 7px' : s.pill.padding }}>
         <span style={s.chip}>2026</span>
         Jacksonville, FL growth partner
       </div>
 
-      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(24px, 7vw, 32px)' : s.h1.fontSize, letterSpacing: isMobile ? '-0.5px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(28px, 8vw, 38px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, overflowWrap: 'break-word', lineHeight: isMobile ? 1.05 : s.h1.lineHeight }}>
         Your business deserves a site that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>
 
-      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 14 : s.sub.fontSize, margin: isMobile ? '14px auto 0' : s.sub.margin, maxWidth: isMobile ? '100%' : s.sub.maxWidth, lineHeight: isMobile ? 1.5 : s.sub.lineHeight, padding: isMobile ? '0 8px' : 0 }}>
+      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '20px auto 0' : s.sub.margin, maxWidth: isMobile ? 320 : s.sub.maxWidth, lineHeight: isMobile ? 1.55 : s.sub.lineHeight }}>
         Fast, high-converting websites and SEO systems for Jacksonville businesses ready to scale.
       </p>
 
-      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 20 : s.btns.marginTop, gap: isMobile ? 10 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'stretch' : undefined, padding: isMobile ? '0 8px' : 0 }}>
+      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 32 : s.btns.marginTop, gap: isMobile ? 12 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'stretch' : undefined, padding: isMobile ? '0 12px' : 0 }}>
         <a
           href="/contact"
-          style={{ ...s.btnDark, width: isMobile ? '100%' : 'auto', justifyContent: 'center', padding: isMobile ? '12px 20px' : s.btnDark.padding, fontSize: isMobile ? 14 : s.btnDark.fontSize, boxSizing: 'border-box' }}
+          style={{ ...s.btnDark, width: isMobile ? '100%' : 'auto', justifyContent: 'center', padding: isMobile ? '16px 24px' : s.btnDark.padding, fontSize: isMobile ? 15 : s.btnDark.fontSize, boxSizing: 'border-box' }}
           onMouseEnter={e => { e.currentTarget.style.background = '#2a2830'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#18181a'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
         >
@@ -96,7 +97,7 @@ export default function Hero() {
         </a>
         <a
           href="#pricing"
-          style={{ ...s.btnGhost, width: isMobile ? '100%' : 'auto', justifyContent: 'center', padding: isMobile ? '12px 16px' : s.btnGhost.padding, fontSize: isMobile ? 14 : s.btnGhost.fontSize, boxSizing: 'border-box' }}
+          style={{ ...s.btnGhost, width: isMobile ? '100%' : 'auto', justifyContent: 'center', padding: isMobile ? '16px 20px' : s.btnGhost.padding, fontSize: isMobile ? 15 : s.btnGhost.fontSize, boxSizing: 'border-box' }}
           onMouseEnter={e => { e.currentTarget.style.background = '#edeae5' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'rgba(250,249,247,0.8)' }}
         >
@@ -104,7 +105,7 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 12 : s.trust.gap, marginTop: isMobile ? 20 : s.trust.marginTop, fontSize: isMobile ? 11 : s.trust.fontSize }}>
+      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 32 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
         {['Fast turnaround', 'Local SEO', 'Growth plans'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot} /> {t}
