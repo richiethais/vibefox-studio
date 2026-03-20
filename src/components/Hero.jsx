@@ -76,7 +76,7 @@ export default function Hero() {
         Jacksonville, FL growth partner
       </div>
 
-      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(26px, 7.5vw, 36px)' : s.h1.fontSize, letterSpacing: isMobile ? '-0.6px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, overflowWrap: 'break-word' }}>
+      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(24px, 7vw, 34px)' : s.h1.fontSize, letterSpacing: isMobile ? '-0.5px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
         Your business deserves a site that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>

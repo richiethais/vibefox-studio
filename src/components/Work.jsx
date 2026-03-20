@@ -14,16 +14,17 @@ export default function Work() {
   const isMobile = useIsMobile()
 
   return (
-    <section id="work" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section id="work" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', overflow: 'hidden' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow>Demo Projects</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(26px, 8vw, 36px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
         {!isMobile && <p className="fade-up d2" style={subStyle}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>}
 
         <div className={isMobile ? 'mobile-scroll' : ''} style={isMobile ? {
           display: 'flex', gap: 12, marginTop: 24,
           overflowX: 'auto', scrollSnapType: 'x mandatory',
           paddingBottom: 8, WebkitOverflowScrolling: 'touch',
+          width: '100%', maxWidth: '100%',
         } : {
           display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18, marginTop: 52,
         }}>
@@ -31,7 +32,7 @@ export default function Work() {
             <div
               key={project.title}
               className={`fade-up d${i + 1}`}
-              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: isMobile ? 14 : 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)', minWidth: isMobile ? '85vw' : undefined, scrollSnapAlign: isMobile ? 'start' : undefined, flexShrink: isMobile ? 0 : undefined }}
+              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: isMobile ? 14 : 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)', minWidth: isMobile ? '78vw' : undefined, scrollSnapAlign: isMobile ? 'start' : undefined, flexShrink: isMobile ? 0 : undefined }}
               onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(200,169,126,0.25)' }}}
               onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)' }}}
             >

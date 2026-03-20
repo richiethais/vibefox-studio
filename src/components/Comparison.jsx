@@ -24,7 +24,7 @@ export default function Comparison() {
           </span>
           Why VibefoxStudio
         </div>
-        <h2 className="fade-up d1" style={{ ...h2Style, color: 'white', fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+        <h2 className="fade-up d1" style={{ ...h2Style, color: 'white', fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
           Your competitors are already {isMobile ? ' ' : <br />}
           <em style={{ fontStyle: 'italic', color: '#c8a97e' }}>online. Are you?</em>
         </h2>

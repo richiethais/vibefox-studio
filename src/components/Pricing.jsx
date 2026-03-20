@@ -73,7 +73,7 @@ export default function Pricing() {
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 48 }}>
           <Eyebrow>Pricing</Eyebrow>
-          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
             Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
           </h2>
           {!isMobile && (
@@ -87,17 +87,18 @@ export default function Pricing() {
           /* Mobile: Tabbed pricing interface */
           <>
             {/* Section toggle: Growth Plans / One-time */}
-            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 20 }}>
+            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 20, width: '100%' }}>
               {[['growth', 'Monthly Plans'], ['projects', 'One-time Projects']].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
                   style={{
-                    flex: 1, padding: '10px 8px', fontSize: 12, fontWeight: 600,
+                    flex: 1, padding: '10px 6px', fontSize: 12, fontWeight: 600,
                     background: activeTab === key ? '#faf9f7' : 'transparent',
                     boxShadow: activeTab === key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
                     border: 'none', borderRadius: 100, cursor: 'pointer',
                     color: '#18181a', transition: 'all 0.2s',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {label}
@@ -194,8 +195,8 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
       onClick={() => setSelected(text)}
       style={{
         position: 'relative',
-        padding: '10px 20px',
-        fontSize: 14,
+        padding: '10px 16px',
+        fontSize: 13,
         fontWeight: 600,
         textTransform: 'capitalize',
         color: '#18181a',
@@ -204,7 +205,7 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
+        gap: 8,
         borderRadius: 100,
       }}
     >
@@ -228,9 +229,9 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
           style={{
             position: 'relative',
             zIndex: 10,
-            fontSize: 10,
+            fontSize: 9,
             fontWeight: 700,
-            padding: '4px 8px',
+            padding: '3px 7px',
             borderRadius: 100,
             background: selected ? '#edeae5' : 'rgba(184,144,106,0.15)',
             color: '#b8906a',
@@ -379,7 +380,7 @@ function CompactPricingRow({ plan, paymentFrequency }) {
         transition: 'all 0.2s',
       }}
     >
-      <div>
+      <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
         <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
       </div>

@@ -60,7 +60,7 @@ export default function Nav() {
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 220,
-          width: isMobile ? 'calc(100% - 24px)' : 'min(1000px, calc(100% - 48px))',
+          width: isMobile ? 'calc(100% - 32px)' : 'min(1000px, calc(100% - 48px))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
