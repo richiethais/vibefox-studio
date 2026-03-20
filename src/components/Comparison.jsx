@@ -16,7 +16,7 @@ export default function Comparison() {
   const isMobile = useIsMobile()
 
   return (
-    <section ref={ref} style={{ background: '#18181a', padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section ref={ref} style={{ background: '#18181a', padding: isMobile ? '40px 16px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 500, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 18 }}>
           <span style={{ width: 20, height: 20, background: 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -24,7 +24,7 @@ export default function Comparison() {
           </span>
           Why VibefoxStudio
         </div>
-        <h2 className="fade-up d1" style={{ ...h2Style, color: 'white', fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+        <h2 className="fade-up d1" style={{ ...h2Style, color: 'white', fontSize: isMobile ? 'clamp(22px, 6.5vw, 32px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.5px' : h2Style.letterSpacing }}>
           Your competitors are already {isMobile ? ' ' : <br />}
           <em style={{ fontStyle: 'italic', color: '#c8a97e' }}>online. Are you?</em>
         </h2>
@@ -36,22 +36,22 @@ export default function Comparison() {
 
         {isMobile ? (
           /* Card-based comparison for mobile */
-          <div className="fade-up d2" style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="fade-up d2" style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 6 }}>
             {rows.map(row => (
               <div key={row.feature} style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 12, padding: '14px 16px',
+                borderRadius: 10, padding: '12px 14px',
               }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', marginBottom: 10 }}>{row.feature}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.5)', marginBottom: 8 }}>{row.feature}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Agency</div>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>{row.agency}</div>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>Agency</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>{row.agency}</div>
                   </div>
-                  <div style={{ flex: 1, background: 'rgba(200,169,126,0.08)', borderRadius: 8, padding: '8px 12px' }}>
-                    <div style={{ fontSize: 10, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Vibefox</div>
-                    <div style={{ fontSize: 13, color: row.usStrong ? '#4ade80' : 'rgba(255,255,255,0.5)', fontWeight: 500 }}>{row.us}</div>
+                  <div style={{ flex: 1, background: 'rgba(200,169,126,0.08)', borderRadius: 6, padding: '6px 10px' }}>
+                    <div style={{ fontSize: 9, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 2 }}>Vibefox</div>
+                    <div style={{ fontSize: 12, color: row.usStrong ? '#4ade80' : 'rgba(255,255,255,0.5)', fontWeight: 500 }}>{row.us}</div>
                   </div>
                 </div>
               </div>

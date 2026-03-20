@@ -69,11 +69,11 @@ export default function Pricing() {
   const [activeTab, setActiveTab] = useState('growth')
 
   return (
-    <section id="pricing" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section id="pricing" ref={ref} style={{ padding: isMobile ? '40px 16px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 48 }}>
           <Eyebrow>Pricing</Eyebrow>
-          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(22px, 6.5vw, 32px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.5px' : h2Style.letterSpacing }}>
             Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
           </h2>
           {!isMobile && (
@@ -87,8 +87,8 @@ export default function Pricing() {
           /* Mobile: Tabbed pricing interface */
           <>
             {/* Section toggle: Growth Plans / One-time */}
-            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 20 }}>
-              {[['growth', 'Monthly Plans'], ['projects', 'One-time Projects']].map(([key, label]) => (
+            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 16 }}>
+              {[['growth', 'Monthly'], ['projects', 'One-time']].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
@@ -108,7 +108,7 @@ export default function Pricing() {
             {activeTab === 'growth' && (
               <>
                 {/* Frequency Toggle */}
-                <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
                   <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3 }}>
                     {PAYMENT_FREQUENCIES.map((freq) => (
                       <FrequencyTab
@@ -117,6 +117,7 @@ export default function Pricing() {
                         selected={selectedFrequency === freq}
                         setSelected={setSelectedFrequency}
                         discount={freq === 'yearly'}
+                        isMobile={true}
                       />
                     ))}
                   </div>
@@ -188,14 +189,14 @@ export default function Pricing() {
   )
 }
 
-function FrequencyTab({ text, selected, setSelected, discount = false }) {
+function FrequencyTab({ text, selected, setSelected, discount = false, isMobile = false }) {
   return (
     <button
       onClick={() => setSelected(text)}
       style={{
         position: 'relative',
-        padding: '10px 20px',
-        fontSize: 14,
+        padding: isMobile ? '8px 14px' : '10px 20px',
+        fontSize: isMobile ? 12 : 14,
         fontWeight: 600,
         textTransform: 'capitalize',
         color: '#18181a',
@@ -204,7 +205,7 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
-        gap: 10,
+        gap: isMobile ? 6 : 10,
         borderRadius: 100,
       }}
     >
@@ -228,16 +229,16 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
           style={{
             position: 'relative',
             zIndex: 10,
-            fontSize: 10,
+            fontSize: isMobile ? 9 : 10,
             fontWeight: 700,
-            padding: '4px 8px',
+            padding: isMobile ? '3px 6px' : '4px 8px',
             borderRadius: 100,
             background: selected ? '#edeae5' : 'rgba(184,144,106,0.15)',
             color: '#b8906a',
             whiteSpace: 'nowrap',
           }}
         >
-          Save 15%
+          -15%
         </span>
       )}
     </button>

@@ -27,6 +27,13 @@
     /* Hide scrollbars on horizontal scroll containers */
     .mobile-scroll::-webkit-scrollbar { display: none; }
     .mobile-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Prevent horizontal overflow */
+    body { overflow-x: hidden; }
+    section { overflow-x: hidden; }
+  }
+  /* Extra small screens (< 360px) */
+  @media (max-width: 360px) {
+    html { font-size: 14px; }
   }
   /* Touch-friendly button/link targets */
   button, a { -webkit-tap-highlight-color: transparent; }

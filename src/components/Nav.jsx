@@ -26,7 +26,7 @@ export default function Nav() {
 
   useEffect(() => {
     const onResize = () => {
-      const mobile = window.innerWidth < 920
+      const mobile = window.innerWidth < 768
       setIsMobile(mobile)
       if (!mobile) setMenuOpen(false)
     }

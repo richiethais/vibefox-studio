@@ -17,17 +17,17 @@ export default function Services() {
   const isMobile = useIsMobile()
 
   return (
-    <section id="services" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section id="services" ref={ref} style={{ padding: isMobile ? '40px 16px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow>What we build</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Everything your business needs <em style={{ fontStyle: 'italic', color: '#b8906a' }}>online.</em></h2>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(22px, 6.5vw, 32px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.5px' : h2Style.letterSpacing }}>Everything your business needs <em style={{ fontStyle: 'italic', color: '#b8906a' }}>online.</em></h2>
         {!isMobile && <p className="fade-up d2" style={subStyle}>Landing pages to custom apps - built fast, launched clean, maintained long-term.</p>}
 
         <div style={{
           display: 'grid',
           gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3,1fr)',
-          gap: isMobile ? 10 : 14,
-          marginTop: isMobile ? 24 : 52,
+          gap: isMobile ? 8 : 14,
+          marginTop: isMobile ? 20 : 52,
         }}>
           {services.map((service, i) => (
             <ServiceCard key={service.title} {...service} delay={`d${(i % 6) + 1}`} isMobile={isMobile} />
@@ -45,15 +45,15 @@ function ServiceCard({ iconKey, title, desc, delay, isMobile }) {
         className={`fade-up ${delay}`}
         style={{
           background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)',
-          borderRadius: 12, padding: '16px 14px',
+          borderRadius: 10, padding: '12px 10px',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          textAlign: 'center', gap: 8,
+          textAlign: 'center', gap: 6,
         }}
       >
-        <div style={{ width: 34, height: 34, background: '#f5f3f0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.08)' }}>
+        <div style={{ width: 30, height: 30, background: '#f5f3f0', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.08)' }}>
           <ServiceGlyph iconKey={iconKey} />
         </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{title}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px', lineHeight: 1.25 }}>{title}</div>
       </div>
     )
   }

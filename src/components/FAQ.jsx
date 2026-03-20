@@ -18,32 +18,34 @@ export default function FAQ() {
   const isMobile = useIsMobile()
 
   return (
-    <section id="faq" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section id="faq" ref={ref} style={{ padding: isMobile ? '40px 16px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow>Common questions</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(22px, 6.5vw, 32px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.5px' : h2Style.letterSpacing }}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
 
-        <div className="fade-up d2" style={{ marginTop: isMobile ? 24 : 52, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+        <div className="fade-up d2" style={{ marginTop: isMobile ? 20 : 52, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           {faqs.map((faq, i) => (
             <div key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
               <button
                 onClick={() => setOpen(open === i ? null : i)}
                 style={{
                   width: '100%', textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer',
-                  padding: isMobile ? '18px 0' : '22px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20,
-                  fontSize: isMobile ? 14 : 15, fontWeight: 500, color: open === i ? '#b8906a' : '#18181a',
+                  padding: isMobile ? '14px 0' : '22px 0', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12,
+                  fontSize: isMobile ? 13 : 15, fontWeight: 500, color: open === i ? '#b8906a' : '#18181a',
                   fontFamily: '"DM Sans", sans-serif', letterSpacing: '-0.2px', transition: 'color 0.18s',
+                  lineHeight: 1.4,
                 }}
               >
                 {faq.q}
                 <span style={{
-                  width: 28, height: 28, borderRadius: '50%',
+                  width: isMobile ? 24 : 28, height: isMobile ? 24 : 28, borderRadius: '50%',
                   border: '1px solid rgba(0,0,0,0.08)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 18, color: open === i ? 'white' : '#7a7888', flexShrink: 0,
+                  fontSize: isMobile ? 14 : 18, color: open === i ? 'white' : '#7a7888', flexShrink: 0,
                   background: open === i ? '#18181a' : '#f5f3f0',
                   transform: open === i ? 'rotate(45deg)' : 'none',
                   transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
+                  marginTop: isMobile ? 2 : 0,
                 }}>+</span>
               </button>
               <div style={{
@@ -51,7 +53,7 @@ export default function FAQ() {
                 overflow: 'hidden',
                 transition: 'max-height 0.4s cubic-bezier(0.22,1,0.36,1)',
               }}>
-                <p style={{ paddingBottom: 22, fontSize: isMobile ? 14 : 14.5, color: '#7a7888', lineHeight: 1.68, maxWidth: 580, fontWeight: 300, margin: 0 }}>
+                <p style={{ paddingBottom: 16, fontSize: isMobile ? 13 : 14.5, color: '#7a7888', lineHeight: 1.6, maxWidth: 580, fontWeight: 300, margin: 0 }}>
                   {faq.a}
                 </p>
               </div>

@@ -55,15 +55,15 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', background: '#faf9f7' }}>
+    <section id="contact" ref={ref} style={{ padding: isMobile ? '40px 16px' : '96px 40px', background: '#faf9f7' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <div className="fade-up d1" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#b8906a', marginBottom: 14 }}>
           Get in touch
         </div>
-        <h2 className="fade-up d2" style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.08, color: '#18181a', letterSpacing: '-1.2px', margin: '0 0 14px' }}>
+        <h2 className="fade-up d2" style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 'clamp(24px, 7vw, 32px)' : 'clamp(32px, 5vw, 48px)', lineHeight: 1.08, color: '#18181a', letterSpacing: isMobile ? '-0.5px' : '-1.2px', margin: '0 0 12px' }}>
           Start a project
         </h2>
-        <p className="fade-up d3" style={{ fontSize: isMobile ? 15 : 16, color: '#7a7888', marginBottom: isMobile ? 30 : 40, fontWeight: 300, lineHeight: 1.6 }}>
+        <p className="fade-up d3" style={{ fontSize: isMobile ? 13 : 16, color: '#7a7888', marginBottom: isMobile ? 24 : 40, fontWeight: 300, lineHeight: 1.55 }}>
           Tell us what you need and our Jacksonville digital marketing team will be in touch within 24 hours.
         </p>
 
