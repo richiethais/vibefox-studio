@@ -14,14 +14,14 @@ export default function Work() {
   const isMobile = useIsMobile()
 
   return (
-    <section id="work" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
+    <section id="work" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow>Demo Projects</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
-        <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight }}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
+        {!isMobile && <p className="fade-up d2" style={subStyle}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>}
 
         <div className={isMobile ? 'mobile-scroll' : ''} style={isMobile ? {
-          display: 'flex', gap: 14, marginTop: 36,
+          display: 'flex', gap: 12, marginTop: 24,
           overflowX: 'auto', scrollSnapType: 'x mandatory',
           paddingBottom: 8, WebkitOverflowScrolling: 'touch',
         } : {

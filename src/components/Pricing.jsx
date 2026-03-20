@@ -66,56 +66,123 @@ export default function Pricing() {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
   const [selectedFrequency, setSelectedFrequency] = useState('monthly')
+  const [activeTab, setActiveTab] = useState('growth')
 
   return (
-    <section id="pricing" ref={ref} style={{ padding: isMobile ? '80px 18px' : '96px 40px' }}>
+    <section id="pricing" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 36 : 48 }}>
-          <Eyebrow>Growth Plans</Eyebrow>
-          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
-            Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>monthly pricing.</em>
+        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 48 }}>
+          <Eyebrow>Pricing</Eyebrow>
+          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(28px, 9vw, 40px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+            Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
           </h2>
-          <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 360 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight, margin: '14px auto 0' }}>
-            Month-to-month. No contracts. Cancel anytime. Project quotes separate.
-          </p>
+          {!isMobile && (
+            <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0' }}>
+              Month-to-month. No contracts. Cancel anytime. Project quotes separate.
+            </p>
+          )}
+        </div>
 
-          {/* Frequency Toggle */}
-          <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginTop: 28 }}>
-            <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 4 }}>
-              {PAYMENT_FREQUENCIES.map((freq) => (
-                <FrequencyTab
-                  key={freq}
-                  text={freq}
-                  selected={selectedFrequency === freq}
-                  setSelected={setSelectedFrequency}
-                  discount={freq === 'yearly'}
-                />
+        {isMobile ? (
+          /* Mobile: Tabbed pricing interface */
+          <>
+            {/* Section toggle: Growth Plans / One-time */}
+            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 20 }}>
+              {[['growth', 'Monthly Plans'], ['projects', 'One-time Projects']].map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  style={{
+                    flex: 1, padding: '10px 8px', fontSize: 12, fontWeight: 600,
+                    background: activeTab === key ? '#faf9f7' : 'transparent',
+                    boxShadow: activeTab === key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                    border: 'none', borderRadius: 100, cursor: 'pointer',
+                    color: '#18181a', transition: 'all 0.2s',
+                  }}
+                >
+                  {label}
+                </button>
               ))}
             </div>
-          </div>
-        </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
-          {plans.map((p, i) => (
-            <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={isMobile} paymentFrequency={selectedFrequency} />
-          ))}
-        </div>
+            {activeTab === 'growth' && (
+              <>
+                {/* Frequency Toggle */}
+                <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+                  <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3 }}>
+                    {PAYMENT_FREQUENCIES.map((freq) => (
+                      <FrequencyTab
+                        key={freq}
+                        text={freq}
+                        selected={selectedFrequency === freq}
+                        setSelected={setSelectedFrequency}
+                        discount={freq === 'yearly'}
+                      />
+                    ))}
+                  </div>
+                </div>
 
-        <div className="fade-up" style={{ textAlign: 'center', marginTop: isMobile ? 64 : 80, marginBottom: isMobile ? 36 : 48 }}>
-          <Eyebrow>One-time Projects</Eyebrow>
-          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(30px, 10vw, 44px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
-            Build something <em style={{ fontStyle: 'italic', color: '#b8906a' }}>unforgettable.</em>
-          </h2>
-          <p className="fade-up d2" style={{ ...subStyle, fontSize: isMobile ? 15 : subStyle.fontSize, maxWidth: isMobile ? 480 : subStyle.maxWidth, lineHeight: isMobile ? 1.58 : subStyle.lineHeight, margin: '14px auto 0' }}>
-            High-performance websites and web applications built from scratch. Project costs are one-time investments.
-          </p>
-        </div>
+                {/* Featured plan first (Pro), then others as compact rows */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {/* Show popular plan (Growth) featured on mobile */}
+                  <PricingCard plan={plans[1]} delay="d1" isMobile={true} paymentFrequency={selectedFrequency} />
+                  {/* Compact cards for Starter and Pro */}
+                  {[plans[0], plans[2]].map((p, i) => (
+                    <CompactPricingRow key={p.name} plan={p} paymentFrequency={selectedFrequency} />
+                  ))}
+                </div>
+              </>
+            )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
-          {projectPlans.map((p, i) => (
-            <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={isMobile} />
-          ))}
-        </div>
+            {activeTab === 'projects' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {projectPlans.map((p) => (
+                  <CompactProjectRow key={p.name} plan={p} />
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          /* Desktop: Original layout */
+          <>
+            {/* Frequency Toggle */}
+            <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
+              <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 4 }}>
+                {PAYMENT_FREQUENCIES.map((freq) => (
+                  <FrequencyTab
+                    key={freq}
+                    text={freq}
+                    selected={selectedFrequency === freq}
+                    setSelected={setSelectedFrequency}
+                    discount={freq === 'yearly'}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
+              {plans.map((p, i) => (
+                <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={false} paymentFrequency={selectedFrequency} />
+              ))}
+            </div>
+
+            <div className="fade-up" style={{ textAlign: 'center', marginTop: 80, marginBottom: 48 }}>
+              <Eyebrow>One-time Projects</Eyebrow>
+              <h2 className="fade-up d1" style={h2Style}>
+                Build something <em style={{ fontStyle: 'italic', color: '#b8906a' }}>unforgettable.</em>
+              </h2>
+              <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0' }}>
+                High-performance websites and web applications built from scratch. Project costs are one-time investments.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
+              {projectPlans.map((p, i) => (
+                <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={false} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </section>
   )
@@ -188,21 +255,21 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
         background: featured ? '#18181a' : '#faf9f7',
         border: popular ? '2px solid #b8906a' : featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
         borderRadius: 16,
-        padding: isMobile ? '24px 20px' : '30px 26px',
+        padding: isMobile ? '22px 18px' : '30px 26px',
         position: 'relative',
         boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
         overflow: 'hidden',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; if (!featured) e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; if (!featured) e.currentTarget.style.boxShadow = 'none' }}
+      onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-4px)'; if (!featured) e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}}
+      onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; if (!featured) e.currentTarget.style.boxShadow = 'none' }}}
     >
       {/* Background patterns */}
       {featured && <HighlightedBackground />}
       {popular && <PopularBackground />}
 
       {/* Plan name with badge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
         <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888' }}>
           {name}
         </span>
@@ -210,45 +277,47 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
           <span style={{
             fontSize: 10,
             fontWeight: 700,
-            padding: '4px 10px',
+            padding: '3px 9px',
             borderRadius: 100,
             background: 'rgba(184,144,106,0.15)',
             color: '#b8906a',
             whiteSpace: 'nowrap',
             position: 'relative',
             zIndex: 10,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
           }}>
-            🔥 Most Popular
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="#b8906a" stroke="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+            Most Popular
           </span>
         )}
       </div>
 
-      {/* Animated price */}
-      <div style={{ position: 'relative', height: 60, marginBottom: 6 }}>
+      {/* Animated price — fixed alignment */}
+      <div style={{ position: 'relative', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
           <NumberFlow
             value={currentPrice}
             format={{ style: 'currency', currency: 'USD', trailingZeroDisplay: 'stripIfInteger' }}
             style={{
               fontFamily: '"DM Serif Display", serif',
-              fontSize: isMobile ? 46 : 54,
+              fontSize: isMobile ? 40 : 54,
               color: featured ? 'white' : '#18181a',
               letterSpacing: '-2px',
-              lineHeight: 1,
+              lineHeight: 1.1,
             }}
           />
+          <span style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888', fontWeight: 400, marginLeft: 4 }}>/mo</span>
         </div>
-        <p style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', marginTop: -2 }}>
-          Per month
-        </p>
       </div>
 
-      <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 22, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
-      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 18 }} />
+      <div style={{ fontSize: isMobile ? 12 : 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
+      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
 
-      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 26px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 10 }}>
         {features.map(f => (
-          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
+          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: isMobile ? 12 : 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
             <CheckIcon featured={featured} />
             {f}
           </li>
@@ -263,25 +332,26 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
           justifyContent: 'center',
           gap: 8,
           textAlign: 'center',
-          padding: 12,
+          padding: isMobile ? 11 : 12,
           borderRadius: 100,
-          fontSize: 14,
+          fontSize: isMobile ? 13 : 14,
           fontWeight: 500,
           textDecoration: 'none',
           transition: 'all 0.2s',
-          background: featured ? '#b8906a' : 'transparent',
-          border: featured ? '1.5px solid #b8906a' : '1.5px solid rgba(0,0,0,0.08)',
-          color: featured ? 'white' : '#18181a',
-          boxShadow: featured ? '0 4px 14px rgba(184,144,106,0.3)' : 'none',
+          background: featured || popular ? '#b8906a' : 'transparent',
+          border: featured || popular ? '1.5px solid #b8906a' : '1.5px solid rgba(0,0,0,0.08)',
+          color: featured || popular ? 'white' : '#18181a',
+          boxShadow: featured || popular ? '0 4px 14px rgba(184,144,106,0.3)' : 'none',
           position: 'relative',
           zIndex: 10,
+          cursor: 'pointer',
         }}
         onMouseEnter={e => {
-          if (featured) { e.currentTarget.style.background = '#c8a97e'; e.currentTarget.style.transform = 'translateY(-1px)' }
+          if (featured || popular) { e.currentTarget.style.background = '#c8a97e'; e.currentTarget.style.transform = 'translateY(-1px)' }
           else e.currentTarget.style.background = '#edeae5'
         }}
         onMouseLeave={e => {
-          if (featured) { e.currentTarget.style.background = '#b8906a'; e.currentTarget.style.transform = 'none' }
+          if (featured || popular) { e.currentTarget.style.background = '#b8906a'; e.currentTarget.style.transform = 'none' }
           else e.currentTarget.style.background = 'transparent'
         }}
       >
@@ -289,6 +359,67 @@ function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
         <ArrowIcon />
       </a>
     </div>
+  )
+}
+
+/* Compact pricing row for mobile non-featured plans */
+function CompactPricingRow({ plan, paymentFrequency }) {
+  const { name, price, desc, featured } = plan
+  const currentPrice = price[paymentFrequency]
+
+  return (
+    <a
+      href="mailto:richie@vibefoxstudio.com"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: featured ? '#18181a' : '#faf9f7',
+        border: '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 14, padding: '16px 18px',
+        textDecoration: 'none', cursor: 'pointer',
+        transition: 'all 0.2s',
+      }}
+    >
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
+        <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
+      </div>
+      <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16 }}>
+        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 24, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
+          ${currentPrice}
+        </div>
+        <div style={{ fontSize: 10, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888' }}>/mo</div>
+      </div>
+    </a>
+  )
+}
+
+/* Compact project row for mobile */
+function CompactProjectRow({ plan }) {
+  const { name, price, desc, featured } = plan
+
+  return (
+    <a
+      href="mailto:richie@vibefoxstudio.com"
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: featured ? '#18181a' : '#faf9f7',
+        border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 14, padding: '16px 18px',
+        textDecoration: 'none', cursor: 'pointer',
+        transition: 'all 0.2s',
+      }}
+    >
+      <div style={{ flex: 1 }}>
+        <div style={{ fontSize: 14, fontWeight: 600, color: featured ? 'white' : '#18181a', letterSpacing: '-0.2px' }}>{name}</div>
+        <div style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.4)' : '#7a7888', fontWeight: 300, marginTop: 2 }}>{desc}</div>
+      </div>
+      <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 16 }}>
+        <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: price === 'Custom' ? 18 : 24, color: featured ? 'white' : '#18181a', letterSpacing: '-1px', lineHeight: 1 }}>
+          {price === 'Custom' ? 'Custom' : `$${price}`}
+        </div>
+        {price !== 'Custom' && <div style={{ fontSize: 10, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888' }}>starting</div>}
+      </div>
+    </a>
   )
 }
 
@@ -302,7 +433,7 @@ function ProjectCard({ plan, delay, isMobile }) {
         background: featured ? '#18181a' : '#faf9f7',
         border: featured ? 'none' : '1px solid rgba(0,0,0,0.08)',
         borderRadius: 16,
-        padding: isMobile ? '24px 20px' : '30px 26px',
+        padding: '30px 26px',
         position: 'relative',
         boxShadow: featured ? '0 8px 36px rgba(0,0,0,0.15)' : 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
@@ -314,38 +445,39 @@ function ProjectCard({ plan, delay, isMobile }) {
       {/* Background patterns */}
       {featured && <HighlightedBackground />}
 
-      {/* Plan name with badge */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+      {/* Plan name */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
         <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888' }}>
           {name}
         </span>
       </div>
 
-      <div style={{ position: 'relative', height: 60, marginBottom: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-          {price !== 'Custom' && <span style={{ fontSize: 18, fontWeight: 500, color: featured ? 'rgba(255,255,255,0.6)' : '#18181a', marginBottom: 6 }}>$</span>}
+      {/* Price — fixed alignment, no fixed height container */}
+      <div style={{ position: 'relative', marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
+          {price !== 'Custom' && <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 16, fontWeight: 400, color: featured ? 'rgba(255,255,255,0.6)' : '#7a7888' }}>$</span>}
           <span style={{
             fontFamily: '"DM Serif Display", serif',
-            fontSize: price === 'Custom' ? (isMobile ? 38 : 44) : (isMobile ? 46 : 54),
+            fontSize: price === 'Custom' ? 36 : 54,
             color: featured ? 'white' : '#18181a',
             letterSpacing: '-2px',
-            lineHeight: 1,
+            lineHeight: 1.1,
           }}>
-            {price === 'Custom' ? 'Custom Quote' : price}
+            {price === 'Custom' ? 'Custom' : price}
           </span>
-          {price !== 'Custom' && <span style={{ fontSize: 18, fontWeight: 500, color: featured ? 'rgba(255,255,255,0.6)' : '#18181a', marginBottom: 6 }}>+</span>}
+          {price !== 'Custom' && <span style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.3)' : '#7a7888', fontWeight: 400, marginLeft: 4 }}>one-time</span>}
         </div>
-        <p style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', marginTop: price === 'Custom' ? 6 : -2 }}>
-          {requiresGrowthPlan ? 'Starts at price + monthly plan' : 'Project investment'}
+        <p style={{ fontSize: 12, color: featured ? 'rgba(255,255,255,0.32)' : '#7a7888', marginTop: 4 }}>
+          {requiresGrowthPlan ? 'Plus monthly growth plan' : 'Project investment'}
         </p>
       </div>
 
-      <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 22, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
-      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 18 }} />
+      <div style={{ fontSize: 13, color: featured ? 'rgba(255,255,255,0.38)' : '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
+      <div style={{ height: 1, background: featured ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
 
-      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 26px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         {features.map(f => (
-          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
+          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: featured ? 'rgba(255,255,255,0.62)' : '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
             <CheckIcon featured={featured} />
             {f}
           </li>
@@ -372,6 +504,7 @@ function ProjectCard({ plan, delay, isMobile }) {
           boxShadow: featured ? '0 4px 14px rgba(184,144,106,0.3)' : 'none',
           position: 'relative',
           zIndex: 10,
+          cursor: 'pointer',
         }}
         onMouseEnter={e => {
           if (featured) { e.currentTarget.style.background = '#c8a97e'; e.currentTarget.style.transform = 'translateY(-1px)' }

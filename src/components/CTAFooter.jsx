@@ -6,11 +6,11 @@ export function CTA() {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
   return (
-    <div ref={ref} style={{ padding: isMobile ? '56px 18px' : '72px 40px' }}>
+    <div ref={ref} style={{ padding: isMobile ? '36px 18px' : '72px 40px' }}>
       <div className="fade-up" style={{
         maxWidth: 1040, margin: '0 auto',
-        background: '#18181a', borderRadius: 28,
-        padding: isMobile ? '56px 20px' : '80px 60px', textAlign: 'center',
+        background: '#18181a', borderRadius: isMobile ? 22 : 28,
+        padding: isMobile ? '40px 20px' : '80px 60px', textAlign: 'center',
         position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: isMobile ? 320 : 520, height: isMobile ? 220 : 260, background: 'radial-gradient(ellipse, rgba(200,169,126,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />

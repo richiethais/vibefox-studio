@@ -48,11 +48,11 @@ export default function App() {
       <Hero />
       <LogoStrip />
       <Services />
-      <HowItWorks />
       <Work />
+      <Testimonial />
+      <HowItWorks />
       <Comparison />
       <Pricing />
-      <Testimonial />
       <FAQ />
       <Contact />
       <CTA />
