@@ -3,6 +3,7 @@ create table if not exists public.admin_login_links (
   token uuid not null unique default gen_random_uuid(),
   label text,
   action_link text,
+  persist_session boolean not null default true,
   created_by_email text not null,
   expires_at timestamptz not null default (now() + interval '1 hour'),
   used_at timestamptz,

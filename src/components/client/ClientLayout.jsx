@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { clearAuthPersistenceMode, supabase } from '../../lib/supabase'
 import BrandLogo from '../BrandLogo'
 import SEOHead from '../SEOHead'
 import useIsMobile from '../useIsMobile'
@@ -19,6 +19,7 @@ export default function ClientLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   async function signOut() {
+    clearAuthPersistenceMode()
     await supabase.auth.signOut()
     navigate('/client/login')
   }

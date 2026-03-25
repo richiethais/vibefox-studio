@@ -49,8 +49,16 @@ function parseExpiresInMinutes(value: unknown) {
   return parsed
 }
 
-function buildShareUrl(baseUrl: string, token: string) {
-  return `${baseUrl}/admin/access?token=${encodeURIComponent(token)}`
+function parsePersistSession(value: unknown) {
+  if (value === false || value === 'false' || value === 0 || value === '0') {
+    return false
+  }
+
+  return true
+}
+
+function buildShareUrl(baseUrl: string, token: string, persistSession: boolean) {
+  return `${baseUrl}/admin/access?token=${encodeURIComponent(token)}&persist=${persistSession ? '1' : '0'}`
 }
 
 Deno.serve(async request => {
@@ -70,8 +78,9 @@ Deno.serve(async request => {
       const { supabaseAdmin, user } = await requireAdminUser(request)
       const expiresInMinutes = parseExpiresInMinutes(body.expires_in_minutes)
       const label = cleanText(body.label) || null
+      const persistSession = parsePersistSession(body.persist_session)
       const token = crypto.randomUUID()
-      const shareUrl = buildShareUrl(getBaseUrl(request, body), token)
+      const shareUrl = buildShareUrl(getBaseUrl(request, body), token, persistSession)
       const expiresAt = new Date(Date.now() + expiresInMinutes * 60_000).toISOString()
 
       const { data, error } = await supabaseAdmin.auth.admin.generateLink({
@@ -88,6 +97,7 @@ Deno.serve(async request => {
         token,
         label,
         action_link: data.properties.action_link,
+        persist_session: persistSession,
         created_by_email: cleanText(user.email).toLowerCase() || getAdminEmail(),
         expires_at: expiresAt,
       })
@@ -100,6 +110,7 @@ Deno.serve(async request => {
         expires_at: expiresAt,
         label,
         link: shareUrl,
+        persist_session: persistSession,
         token,
       })
     }

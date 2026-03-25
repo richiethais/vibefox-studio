@@ -29,14 +29,14 @@ export default function AdminAccessLinks() {
   const [copiedId, setCopiedId] = useState('')
   const [notice, setNotice] = useState(null)
   const [latestLink, setLatestLink] = useState('')
-  const [form, setForm] = useState({ label: '', expiresInMinutes: 60 })
+  const [form, setForm] = useState({ label: '', expiresInMinutes: 60, persistSession: true })
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://vibefoxstudio.com'
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
       .from('admin_login_links')
-      .select('id, token, label, created_at, expires_at')
+      .select('id, token, label, persist_session, created_at, expires_at')
       .is('used_at', null)
       .order('created_at', { ascending: false })
 
@@ -67,8 +67,8 @@ export default function AdminAccessLinks() {
     [links]
   )
 
-  function buildShareUrl(token) {
-    return `${baseUrl}/admin/access?token=${token}`
+  function buildShareUrl(token, persistSession) {
+    return `${baseUrl}/admin/access?token=${token}&persist=${persistSession ? '1' : '0'}`
   }
 
   async function handleCreate(event) {
@@ -88,6 +88,7 @@ export default function AdminAccessLinks() {
         base_url: baseUrl,
         expires_in_minutes: Number(form.expiresInMinutes),
         label: form.label.trim(),
+        persist_session: form.persistSession,
       },
       headers: { Authorization: `Bearer ${session.access_token}` },
     })
@@ -194,6 +195,18 @@ export default function AdminAccessLinks() {
               </select>
             </label>
 
+            <label style={{ ...fieldStyle, gridTemplateColumns: '20px minmax(0, 1fr)', alignItems: 'start', gap: 12 }}>
+              <input
+                type="checkbox"
+                checked={form.persistSession}
+                onChange={event => setForm(current => ({ ...current, persistSession: event.target.checked }))}
+                style={{ width: 16, height: 16, marginTop: 2, accentColor: '#18181a' }}
+              />
+              <span style={{ fontSize: 13, color: '#374151', lineHeight: 1.55 }}>
+                Keep this browser signed in after the link is used. Turn this off if you want access to end when the browser/tab closes.
+              </span>
+            </label>
+
             <button type="submit" disabled={generating} style={primaryBtnStyle}>
               {generating ? 'Creating…' : 'Create admin access link'}
             </button>
@@ -201,7 +214,7 @@ export default function AdminAccessLinks() {
 
           <div style={{ marginTop: 18, paddingTop: 18, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
             <p style={{ margin: 0, fontSize: 12, lineHeight: 1.6, color: '#6b7280' }}>
-              These links always sign in as your main admin email. They are intended for temporary access, not for permanent secondary admin accounts.
+              These links always sign in as your main admin email. The link itself is one-time, but the resulting browser session can be either persistent or session-only.
             </p>
           </div>
         </section>
@@ -231,7 +244,7 @@ export default function AdminAccessLinks() {
           ) : (
             <div style={{ display: 'grid', gap: 12 }}>
               {links.map(link => {
-                const shareUrl = buildShareUrl(link.token)
+                const shareUrl = buildShareUrl(link.token, link.persist_session)
                 const isExpired = new Date(link.expires_at).getTime() <= Date.now()
 
                 return (
@@ -254,6 +267,16 @@ export default function AdminAccessLinks() {
                             color: isExpired ? '#6b7280' : '#15803d',
                           }}>
                             {isExpired ? 'Expired' : 'Active'}
+                          </span>
+                          <span style={{
+                            borderRadius: 999,
+                            padding: '4px 8px',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            background: link.persist_session ? '#eff6ff' : '#f9fafb',
+                            color: link.persist_session ? '#1d4ed8' : '#6b7280',
+                          }}>
+                            {link.persist_session ? 'Stays signed in' : 'Session only'}
                           </span>
                         </div>
                         <div style={{ marginTop: 8, fontSize: 12, color: '#6b7280', lineHeight: 1.6 }}>

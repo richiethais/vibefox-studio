@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
+import { setAuthPersistenceMode, supabase } from '../../lib/supabase'
 import BrandLogo from '../../components/BrandLogo'
 import useIsMobile from '../../components/useIsMobile'
 
@@ -16,6 +16,7 @@ export default function AdminLogin() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setAuthPersistenceMode('local')
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) { setError(error.message); setLoading(false) }
     else navigate('/admin/dashboard')

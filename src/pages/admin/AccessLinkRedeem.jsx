@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import BrandLogo from '../../components/BrandLogo'
 import useIsMobile from '../../components/useIsMobile'
-import { supabase } from '../../lib/supabase'
+import { setAuthPersistenceMode, supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/useAuth'
 
 const ADMIN_EMAIL = (import.meta.env.VITE_ADMIN_EMAIL || '').trim().toLowerCase()
@@ -22,6 +22,7 @@ export default function AdminAccessLinkRedeem() {
     text: searchParams.get('token') ? 'Opening secure admin access…' : 'This admin access link is invalid.',
   })
   const token = (searchParams.get('token') || '').trim()
+  const persistSession = searchParams.get('persist') !== '0'
   const resolveAttemptedRef = useRef('')
   const consumeAttemptedRef = useRef('')
 
@@ -39,6 +40,8 @@ export default function AdminAccessLinkRedeem() {
       setState({ status: 'error', text: 'This admin access link is invalid.' })
       return
     }
+
+    setAuthPersistenceMode(persistSession ? 'local' : 'session')
 
     if (hashError) {
       setState({ status: 'error', text: hashError })
@@ -112,7 +115,7 @@ export default function AdminAccessLinkRedeem() {
     }
 
     setState({ status: 'loading', text: 'Finishing admin sign-in…' })
-  }, [location.hash, navigate, session, token])
+  }, [location.hash, navigate, persistSession, session, token])
 
   return (
     <div style={{ minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f5f3f0', padding: 20 }}>
@@ -142,7 +145,7 @@ export default function AdminAccessLinkRedeem() {
 
         <div style={{ marginTop: 18, fontSize: 12, color: '#6b7280', lineHeight: 1.65 }}>
           {state.status === 'loading'
-            ? 'Do not close this tab while the sign-in is completing.'
+            ? `Do not close this tab while the sign-in is completing.${persistSession ? ' This browser will stay signed in until someone signs out.' : ' Access will end when this browser/tab is closed.'}`
             : 'If the link expired or was already used, create a new one from the admin CRM.'}
         </div>
 
