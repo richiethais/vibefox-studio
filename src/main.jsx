@@ -8,6 +8,8 @@ import AdminLogin from './pages/admin/Login.jsx'
 import AdminDashboard from './pages/admin/Dashboard.jsx'
 import AdminInquiries from './pages/admin/Inquiries.jsx'
 import AdminClients from './pages/admin/Clients.jsx'
+import AdminAccessLinks from './pages/admin/AccessLinks.jsx'
+import AdminAccessLinkRedeem from './pages/admin/AccessLinkRedeem.jsx'
 import AdminProjects from './pages/admin/Projects.jsx'
 import AdminInvoices from './pages/admin/Invoices.jsx'
 import AdminMessages from './pages/admin/Messages.jsx'
@@ -54,12 +56,14 @@ createRoot(document.getElementById('root')).render(
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/access" element={<AdminAccessLinkRedeem />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="inquiries" element={<AdminInquiries />} />
             <Route path="support" element={<AdminSupport />} />
             <Route path="clients" element={<AdminClients />} />
+            <Route path="access-links" element={<AdminAccessLinks />} />
             <Route path="projects" element={<AdminProjects />} />
             <Route path="invoices" element={<AdminInvoices />} />
             <Route path="messages" element={<AdminMessages />} />
