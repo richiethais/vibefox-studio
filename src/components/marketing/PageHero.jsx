@@ -12,8 +12,8 @@ export default function PageHero({ eyebrow, title, sub }) {
           </div>
         )}
         <h1 style={{
-          fontFamily: '"DM Serif Display", serif',
           fontSize: 'clamp(34px, 5vw, 58px)',
+          fontWeight: 700,
           lineHeight: 1.05,
           color: '#18181a',
           letterSpacing: '-1.4px',

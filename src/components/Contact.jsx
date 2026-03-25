@@ -60,7 +60,7 @@ export default function Contact() {
         <div className="fade-up d1" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#b8906a', marginBottom: 14 }}>
           Get in touch
         </div>
-        <h2 className="fade-up d2" style={{ fontFamily: '"DM Serif Display", serif', fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.08, color: '#18181a', letterSpacing: '-1.2px', margin: '0 0 14px' }}>
+        <h2 className="fade-up d2" style={{ fontSize: 'clamp(32px, 5vw, 48px)', fontWeight: 700, lineHeight: 1.08, color: '#18181a', letterSpacing: '-1.2px', margin: '0 0 14px' }}>
           Start a project
         </h2>
         <p className="fade-up d3" style={{ fontSize: isMobile ? 15 : 16, color: '#7a7888', marginBottom: isMobile ? 30 : 40, fontWeight: 300, lineHeight: 1.6 }}>

@@ -10,7 +10,7 @@ export default function LogoStrip() {
       </div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: isMobile ? 18 : 52, flexWrap: 'wrap', opacity: 0.28 }}>
         {['Bloom & Co', 'Meridian Fit', 'Harlow Studio', 'Cedar & Oak', 'Volta Media'].map(name => (
-          <div key={name} style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 14 : 18, color: '#18181a' }}>{name}</div>
+          <div key={name} style={{ fontSize: isMobile ? 14 : 18, fontWeight: 700, color: '#18181a' }}>{name}</div>
         ))}
       </div>
     </div>

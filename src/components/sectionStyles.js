@@ -1,6 +1,6 @@
 export const h2Style = {
-  fontFamily: '"DM Serif Display", serif',
   fontSize: 'clamp(36px, 5vw, 56px)',
+  fontWeight: 700,
   lineHeight: 1.04,
   color: '#18181a',
   letterSpacing: '-1.5px',

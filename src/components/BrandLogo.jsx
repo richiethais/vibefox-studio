@@ -39,8 +39,8 @@ export default function BrandLogo({
       />
       <span
         style={{
-          fontFamily: '"DM Serif Display", serif',
           fontSize: ui.font,
+          fontWeight: 700,
           letterSpacing: '-0.3px',
           color: textColor,
           lineHeight: 1,

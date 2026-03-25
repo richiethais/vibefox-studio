@@ -25,8 +25,8 @@ const s = {
     fontSize: 11, fontWeight: 600, padding: '3px 11px', borderRadius: 100,
   },
   h1: {
-    fontFamily: '"DM Serif Display", serif',
     fontSize: 'clamp(48px, 8vw, 96px)',
+    fontWeight: 700,
     lineHeight: 1.00, color: '#18181a', letterSpacing: '-2.5px',
     maxWidth: 860, margin: '0 auto',
   },
@@ -138,7 +138,7 @@ function DashboardMockup({ isMobile }) {
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '185px 1fr', minHeight: 250 }}>
         <div style={{ background: '#18181a', padding: '18px 12px', display: isMobile ? 'none' : 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: 13, color: 'rgba(255,255,255,0.88)', padding: '0 8px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: 6 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.88)', padding: '0 8px 14px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: 6 }}>
             Vibefox Studio
           </div>
           {[['Overview', true], ['Projects', false], ['Clients', false], ['Analytics', false]].map(([label, on]) => (

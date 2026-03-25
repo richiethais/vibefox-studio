@@ -15,7 +15,7 @@ export function CTA() {
         border: '1px solid rgba(184,144,106,0.2)',
       }}>
         <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: isMobile ? 320 : 520, height: isMobile ? 220 : 260, background: 'radial-gradient(ellipse, rgba(200,169,126,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <h2 style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 'clamp(31px, 10vw, 42px)' : 'clamp(36px, 5vw, 56px)', lineHeight: 1.04, color: '#18181a', letterSpacing: isMobile ? '-1px' : '-1.5px', margin: '0 0 18px', position: 'relative' }}>
+        <h2 style={{ fontSize: isMobile ? 'clamp(31px, 10vw, 42px)' : 'clamp(36px, 5vw, 56px)', fontWeight: 700, lineHeight: 1.04, color: '#18181a', letterSpacing: isMobile ? '-1px' : '-1.5px', margin: '0 0 18px', position: 'relative' }}>
           Ready to build something {isMobile ? ' ' : <br />}
           <em style={{ fontStyle: 'italic', color: '#b8906a' }}>that works?</em>
         </h2>
