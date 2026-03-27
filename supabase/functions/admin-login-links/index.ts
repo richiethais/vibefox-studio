@@ -36,11 +36,14 @@ function getBaseUrl(request: Request, body: Record<string, unknown>) {
 }
 
 function parseExpiresInMinutes(value: unknown) {
+  // 0 means never expires
   const parsed = Number(value ?? DEFAULT_EXPIRES_MINUTES)
 
   if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
     throw new ValidationError('Expiry time must be a whole number of minutes.')
   }
+
+  if (parsed === 0) return 0
 
   if (parsed < MIN_EXPIRES_MINUTES || parsed > MAX_EXPIRES_MINUTES) {
     throw new ValidationError(`Expiry time must be between ${MIN_EXPIRES_MINUTES} minutes and ${MAX_EXPIRES_MINUTES} minutes.`)
@@ -72,22 +75,15 @@ Deno.serve(async request => {
       const label = cleanText(body.label) || null
       const token = crypto.randomUUID()
       const shareUrl = buildShareUrl(getBaseUrl(request, body), token)
-      const expiresAt = new Date(Date.now() + expiresInMinutes * 60_000).toISOString()
 
-      const { data, error } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'magiclink',
-        email: getAdminEmail(),
-        options: { redirectTo: shareUrl },
-      })
-
-      if (error || !data.properties?.action_link) {
-        return json({ error: error?.message || 'Could not generate an admin login link.' }, 400)
-      }
+      // 0 = never expires, use year 2099
+      const expiresAt = expiresInMinutes === 0
+        ? '2099-12-31T23:59:59.999Z'
+        : new Date(Date.now() + expiresInMinutes * 60_000).toISOString()
 
       const { error: insertError } = await supabaseAdmin.from('admin_login_links').insert({
         token,
         label,
-        action_link: data.properties.action_link,
         created_by_email: cleanText(user.email).toLowerCase() || getAdminEmail(),
         expires_at: expiresAt,
       })
@@ -115,7 +111,7 @@ Deno.serve(async request => {
       const supabaseAdmin = getSupabaseAdminClient()
       const { data: link, error } = await supabaseAdmin
         .from('admin_login_links')
-        .select('action_link, expires_at, used_at, revoked_at')
+        .select('id, expires_at, used_at, revoked_at')
         .eq('token', token)
         .maybeSingle()
 
@@ -125,11 +121,27 @@ Deno.serve(async request => {
 
       const isExpired = !link?.expires_at || new Date(link.expires_at).getTime() <= Date.now()
 
-      if (!link || link.used_at || link.revoked_at || !link.action_link || isExpired) {
+      if (!link || link.used_at || link.revoked_at || isExpired) {
         return json({ error: 'This admin access link is no longer valid.' }, 404)
       }
 
-      return json({ action_link: link.action_link })
+      // Generate a fresh magic link at resolve time so it never arrives expired
+      const baseUrl = normalizeBaseUrl(body.base_url) ||
+        normalizeBaseUrl(Deno.env.get('SITE_URL')) ||
+        DEFAULT_SITE_URL
+      const redirectUrl = buildShareUrl(baseUrl, token)
+
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: 'magiclink',
+        email: getAdminEmail(),
+        options: { redirectTo: redirectUrl },
+      })
+
+      if (linkError || !linkData.properties?.action_link) {
+        return json({ error: linkError?.message || 'Could not generate login link.' }, 500)
+      }
+
+      return json({ action_link: linkData.properties.action_link })
     }
 
     if (action === 'consume') {
@@ -157,10 +169,7 @@ Deno.serve(async request => {
 
       const { error: updateError } = await supabaseAdmin
         .from('admin_login_links')
-        .update({
-          action_link: null,
-          used_at: new Date().toISOString(),
-        })
+        .update({ used_at: new Date().toISOString() })
         .eq('id', link.id)
 
       if (updateError) {

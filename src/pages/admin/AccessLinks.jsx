@@ -9,10 +9,16 @@ const EXPIRY_OPTIONS = [
   { label: '1 hour', value: 60 },
   { label: '4 hours', value: 240 },
   { label: '24 hours', value: 1440 },
+  { label: 'Never', value: 0 },
 ]
+
+function isNeverExpires(value) {
+  return value && new Date(value).getFullYear() >= 2099
+}
 
 function formatDateTime(value) {
   if (!value) return 'Unknown'
+  if (isNeverExpires(value)) return 'Never'
 
   return new Intl.DateTimeFormat(undefined, {
     dateStyle: 'medium',
@@ -188,6 +194,7 @@ export default function AdminAccessLinks() {
     if (link.revoked_at) return { label: 'Logged out', color: '#6b7280', bg: '#f3f4f6' }
     if (link.used_at) return { label: 'Active session', color: '#15803d', bg: '#ecfdf3' }
     if (new Date(link.expires_at).getTime() <= Date.now()) return { label: 'Expired', color: '#6b7280', bg: '#f3f4f6' }
+    if (isNeverExpires(link.expires_at)) return { label: 'Never expires', color: '#1d4ed8', bg: '#eff6ff' }
     return { label: 'Waiting', color: '#d97706', bg: '#fffbeb' }
   }
 
