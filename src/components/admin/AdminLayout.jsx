@@ -10,7 +10,6 @@ const navItems = [
   { to: '/admin/inquiries', label: 'Inquiries' },
   { to: '/admin/support', label: 'Support' },
   { to: '/admin/clients', label: 'Clients' },
-  { to: '/admin/access-links', label: 'Access Links' },
   { to: '/admin/projects', label: 'Projects' },
   { to: '/admin/invoices', label: 'Billing' },
   { to: '/admin/messages', label: 'Messages' },
