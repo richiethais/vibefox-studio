@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { parseFunctionError } from '../../lib/supabaseFunctions'
 import { useAuth } from '../../lib/useAuth'
 import useIsMobile from '../../components/useIsMobile'
 
@@ -110,7 +111,8 @@ export default function AdminAccessLinks() {
     setGenerating(false)
 
     if (error || !data?.link) {
-      setNotice({ type: 'error', text: `Error: ${error?.message || 'Could not create an admin link.'}` })
+      const parsed = await parseFunctionError(error, 'Could not create an admin link.')
+      setNotice({ type: 'error', text: parsed.message })
       return
     }
 
@@ -173,7 +175,8 @@ export default function AdminAccessLinks() {
     setRevokingId('')
 
     if (error) {
-      setNotice({ type: 'error', text: `Error: ${error?.message || 'Could not revoke session.'}` })
+      const parsed = await parseFunctionError(error, 'Could not revoke session.')
+      setNotice({ type: 'error', text: parsed.message })
       return
     }
 
