@@ -98,6 +98,7 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY,
   {
     auth: {
+      flowType: 'implicit',
       persistSession: true,
       storage: authStorage,
     },

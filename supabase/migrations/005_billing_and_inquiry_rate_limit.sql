@@ -35,5 +35,7 @@ create index if not exists inquiry_rate_limits_created_at_idx
 
 alter table public.inquiry_rate_limits enable row level security;
 
+drop policy if exists "admin all" on public.inquiry_rate_limits;
+
 create policy "admin all" on public.inquiry_rate_limits
   for all using (auth.jwt() ->> 'email' = 'richiethais@gmail.com');

@@ -117,9 +117,10 @@ Deno.serve(async request => {
 
     if (action === 'resolve') {
       const token = cleanText(body.token)
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-      if (!token) {
-        throw new ValidationError('Link token is required.')
+      if (!token || !uuidPattern.test(token)) {
+        return json({ error: 'This admin access link is no longer valid.' }, 404)
       }
 
       const supabaseAdmin = getSupabaseAdminClient()

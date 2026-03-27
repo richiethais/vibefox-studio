@@ -100,10 +100,15 @@ export default function AdminAccessLinkRedeem() {
         })
 
         if (error || !data?.action_link) {
-          setState({
-            status: 'error',
-            text: error?.message || 'This admin access link is no longer valid.',
-          })
+          let text = 'This admin access link is no longer valid.'
+          try {
+            const status = error?.context?.status
+            if (status && status >= 400 && status < 500) {
+              const body = await error.context.json()
+              if (body?.error) text = body.error
+            }
+          } catch { /* use default */ }
+          setState({ status: 'error', text })
           resolveAttemptedRef.current = ''
           return
         }
