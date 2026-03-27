@@ -17,6 +17,7 @@ const navItems = [
   { to: '/admin/seo-notes', label: 'SEO Notes' },
   { to: '/admin/calendar', label: 'Calendar' },
   { to: '/admin/blogs', label: 'Blogs' },
+  { to: '/admin/access-links', label: 'Access Links' },
 ]
 
 export default function AdminLayout() {

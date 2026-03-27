@@ -16,6 +16,8 @@ import AdminSeoNotes from './pages/admin/SeoNotes.jsx'
 import AdminCalendar from './pages/admin/Calendar.jsx'
 import AdminBlogs from './pages/admin/Blogs.jsx'
 import AdminSupport from './pages/admin/Support.jsx'
+import AdminAccessLinks from './pages/admin/AccessLinks.jsx'
+import AdminAccessLinkRedeem from './pages/admin/AccessLinkRedeem.jsx'
 import ClientLogin from './pages/client/Login.jsx'
 import ClientDashboard from './pages/client/Dashboard.jsx'
 import ClientProjects from './pages/client/Projects.jsx'
@@ -54,6 +56,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/access" element={<AdminAccessLinkRedeem />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
@@ -67,6 +70,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="seo-notes" element={<AdminSeoNotes />} />
             <Route path="calendar" element={<AdminCalendar />} />
             <Route path="blogs" element={<AdminBlogs />} />
+            <Route path="access-links" element={<AdminAccessLinks />} />
           </Route>
 
           <Route path="/client/login" element={<ClientLogin />} />
