@@ -26,7 +26,7 @@ export default function Testimonial() {
               <span key={idx} style={{ width: 9, height: 9, borderRadius: '50%', background: '#f59e0b', opacity: idx === 4 ? 0.9 : 1 }} />
             ))}
           </div>
-          <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 17 : 22, color: '#18181a', lineHeight: 1.45, letterSpacing: '-0.3px', marginBottom: isMobile ? 20 : 28, position: 'relative' }}>
+          <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 18 : 22, color: '#18181a', lineHeight: 1.5, letterSpacing: '-0.3px', marginBottom: isMobile ? 20 : 28, position: 'relative' }}>
             "We went from zero online presence to ranking on the first page of Google in three months. Our booking requests doubled and we finally have a site we're proud to send people to."
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 13, position: 'relative' }}>

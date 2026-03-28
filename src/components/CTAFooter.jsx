@@ -80,9 +80,9 @@ export function Footer() {
           ))}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 8 : 12 }}>
           <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 300 }}>© 2026 VibefoxStudio. All rights reserved.</span>
-          <a href="mailto:inquiries@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s' }}
+          <a href="mailto:inquiries@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', wordBreak: 'break-all' }}
             onMouseEnter={e => e.target.style.color = '#18181a'}
             onMouseLeave={e => e.target.style.color = '#7a7888'}
           >inquiries@vibefoxstudio.com</a>

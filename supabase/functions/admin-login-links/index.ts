@@ -196,17 +196,6 @@ Deno.serve(async request => {
         return json({ error: updateError.message }, 500)
       }
 
-      // Sign out all other sessions for the admin user
-      const adminEmail = getAdminEmail()
-      const { data: users } = await supabaseAdmin.auth.admin.listUsers()
-      const adminUser = users?.users?.find(
-        (u: { email?: string }) => (u.email || '').toLowerCase() === adminEmail
-      )
-
-      if (adminUser) {
-        await supabaseAdmin.auth.admin.signOut(adminUser.id, 'others')
-      }
-
       return json({ ok: true })
     }
 

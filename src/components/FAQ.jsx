@@ -37,7 +37,7 @@ export default function FAQ() {
               >
                 {faq.q}
                 <span style={{
-                  width: 28, height: 28, borderRadius: '50%',
+                  width: isMobile ? 36 : 28, height: isMobile ? 36 : 28, borderRadius: '50%',
                   border: '1px solid rgba(0,0,0,0.08)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 18, color: open === i ? 'white' : '#7a7888', flexShrink: 0,

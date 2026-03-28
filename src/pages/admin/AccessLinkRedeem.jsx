@@ -82,6 +82,8 @@ export default function AdminAccessLinkRedeem() {
               : undefined,
           })
         } finally {
+          // Store token so AdminLayout can check if this session was revoked
+          try { localStorage.setItem('vf_access_link_token', token) } catch {}
           navigate('/admin/dashboard', { replace: true })
         }
       })()

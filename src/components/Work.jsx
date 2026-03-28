@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import { useFadeUp } from './useFadeUp'
 import Eyebrow from './Eyebrow'
 import { h2Style, subStyle } from './sectionStyles'
@@ -12,6 +13,21 @@ const projects = [
 export default function Work() {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
+  const scrollRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    if (!isMobile || !scrollRef.current) return
+    const el = scrollRef.current
+    const onScroll = () => {
+      const scrollLeft = el.scrollLeft
+      const cardWidth = el.firstChild?.offsetWidth || 1
+      const gap = 12
+      setActiveIndex(Math.round(scrollLeft / (cardWidth + gap)))
+    }
+    el.addEventListener('scroll', onScroll, { passive: true })
+    return () => el.removeEventListener('scroll', onScroll)
+  }, [isMobile])
 
   return (
     <section id="work" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', overflow: 'hidden' }}>
@@ -20,7 +36,7 @@ export default function Work() {
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(26px, 8vw, 36px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
         {!isMobile && <p className="fade-up d2" style={subStyle}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>}
 
-        <div className={isMobile ? 'mobile-scroll' : ''} style={isMobile ? {
+        <div ref={isMobile ? scrollRef : undefined} className={isMobile ? 'mobile-scroll' : ''} style={isMobile ? {
           display: 'flex', gap: 12, marginTop: 24,
           overflowX: 'auto', scrollSnapType: 'x mandatory',
           paddingBottom: 8, WebkitOverflowScrolling: 'touch',
@@ -52,6 +68,19 @@ export default function Work() {
             </div>
           ))}
         </div>
+
+        {/* Scroll indicator dots for mobile */}
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 14 }}>
+            {projects.map((_, i) => (
+              <div key={i} style={{
+                width: activeIndex === i ? 18 : 6, height: 6, borderRadius: 100,
+                background: activeIndex === i ? '#b8906a' : 'rgba(0,0,0,0.12)',
+                transition: 'all 0.3s ease',
+              }} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

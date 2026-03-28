@@ -195,3 +195,16 @@
 .d4 { transition-delay: 0.22s; }
 .d5 { transition-delay: 0.28s; }
 .d6 { transition-delay: 0.34s; }
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .fade-up { opacity: 1; transform: none; transition: none; }
+  .anim-rise-1, .anim-rise-2, .anim-rise-3,
+  .anim-rise-4, .anim-rise-5, .anim-rise-6,
+  .anim-wiggle { animation: none; opacity: 1; transform: none; }
+}
+
+/* Small mobile devices (iPhone SE, etc.) */
+@media (max-width: 374px) {
+  html { font-size: 14px; }
+}

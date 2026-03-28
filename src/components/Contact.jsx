@@ -117,7 +117,8 @@ export default function Contact() {
 }
 
 const inp = {
-  padding: '12px 16px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.1)',
-  fontSize: 14, color: '#18181a', background: 'white', outline: 'none',
+  padding: '14px 16px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.1)',
+  fontSize: 15, color: '#18181a', background: 'white', outline: 'none',
   width: '100%', boxSizing: 'border-box', fontFamily: 'inherit',
+  minHeight: 48,
 }

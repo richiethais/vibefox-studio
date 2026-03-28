@@ -41,17 +41,17 @@ export default function Comparison() {
               <div key={row.feature} style={{
                 background: 'rgba(255,255,255,0.04)',
                 border: '1px solid rgba(255,255,255,0.06)',
-                borderRadius: 12, padding: '14px 16px',
+                borderRadius: 12, padding: '16px 14px',
               }}>
-                <div style={{ fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.5)', marginBottom: 10 }}>{row.feature}</div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Agency</div>
-                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>{row.agency}</div>
+                <div style={{ fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.5)', marginBottom: 10 }}>{row.feature}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                  <div style={{ flex: 1, padding: '8px 10px' }}>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>Agency</div>
+                    <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', fontWeight: 300 }}>{row.agency}</div>
                   </div>
                   <div style={{ flex: 1, background: 'rgba(200,169,126,0.08)', borderRadius: 8, padding: '8px 12px' }}>
-                    <div style={{ fontSize: 10, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Vibefox</div>
-                    <div style={{ fontSize: 13, color: row.usStrong ? '#4ade80' : 'rgba(255,255,255,0.5)', fontWeight: 500 }}>{row.us}</div>
+                    <div style={{ fontSize: 10, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 4 }}>Vibefox</div>
+                    <div style={{ fontSize: 14, color: row.usStrong ? '#4ade80' : 'rgba(255,255,255,0.5)', fontWeight: 500 }}>{row.us}</div>
                   </div>
                 </div>
               </div>

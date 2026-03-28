@@ -45,15 +45,16 @@ function ServiceCard({ iconKey, title, desc, delay, isMobile }) {
         className={`fade-up ${delay}`}
         style={{
           background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)',
-          borderRadius: 12, padding: '16px 14px',
+          borderRadius: 12, padding: '14px 12px',
           display: 'flex', flexDirection: 'column', alignItems: 'center',
-          textAlign: 'center', gap: 8,
+          textAlign: 'center', gap: 6,
         }}
       >
-        <div style={{ width: 34, height: 34, background: '#f5f3f0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.08)' }}>
+        <div style={{ width: 32, height: 32, background: '#f5f3f0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(0,0,0,0.08)' }}>
           <ServiceGlyph iconKey={iconKey} />
         </div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{title}</div>
+        <div style={{ fontSize: 12, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{title}</div>
+        <div style={{ fontSize: 11, color: '#7a7888', lineHeight: 1.4, fontWeight: 300, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{desc}</div>
       </div>
     )
   }

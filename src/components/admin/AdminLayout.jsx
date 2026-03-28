@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { clearAuthPersistenceMode, supabase } from '../../lib/supabase'
 import BrandLogo from '../BrandLogo'
@@ -26,10 +26,41 @@ export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   async function signOut() {
+    try { localStorage.removeItem('vf_access_link_token') } catch {}
     clearAuthPersistenceMode()
     await supabase.auth.signOut()
     navigate('/admin/login')
   }
+
+  // Check if this session was logged in via an access link that has been revoked
+  useEffect(() => {
+    let active = true
+
+    async function checkRevocation() {
+      let token
+      try { token = localStorage.getItem('vf_access_link_token') } catch {}
+      if (!token) return
+
+      const { data } = await supabase
+        .from('admin_login_links')
+        .select('revoked_at')
+        .eq('token', token)
+        .maybeSingle()
+
+      if (!active) return
+
+      if (data?.revoked_at) {
+        try { localStorage.removeItem('vf_access_link_token') } catch {}
+        clearAuthPersistenceMode()
+        await supabase.auth.signOut()
+        navigate('/admin/login')
+      }
+    }
+
+    checkRevocation()
+    const timer = setInterval(checkRevocation, 10_000)
+    return () => { active = false; clearInterval(timer) }
+  }, [navigate])
 
   if (isMobile) {
     return (
