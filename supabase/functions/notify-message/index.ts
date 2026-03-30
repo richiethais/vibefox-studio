@@ -16,7 +16,7 @@ Deno.serve(async request => {
   }
 
   try {
-    // Verify the caller is an authenticated (client) user
+    // Verify the caller is an authenticated user
     const authHeader = request.headers.get('Authorization')
     if (!authHeader?.startsWith('Bearer ')) {
       return json({ error: 'Unauthorized' }, 401)
@@ -41,48 +41,35 @@ Deno.serve(async request => {
       return json({ error: 'Client account not found.' }, 404)
     }
 
-    // Parse and validate form body
+    // Parse body
     const body = await request.json().catch(() => ({}))
-    const title = cleanText(body.title)
-    const description = cleanText(body.description)
+    const message = cleanText(body.body)
 
-    if (title.length > 200) return json({ error: 'Subject must be 200 characters or less.' }, 400)
-    if (description.length > 5000) return json({ error: 'Message must be 5000 characters or less.' }, 400)
+    if (!message) return json({ error: 'Message is required.' }, 400)
+    if (message.length > 5000) return json({ error: 'Message must be 5000 characters or less.' }, 400)
 
-    if (!title) return json({ error: 'Subject is required.' }, 400)
-    if (!description) return json({ error: 'Message is required.' }, 400)
-
-    // Save to requests table
-    const { data: requestRow, error: insertError } = await supabaseAdmin
-      .from('requests')
-      .insert({
-        client_id: client.id,
-        description,
-        status: 'open',
-        title,
-      })
-      .select('id')
-      .single()
+    // Insert the message into the messages table
+    const { error: insertError } = await supabaseAdmin
+      .from('messages')
+      .insert({ client_id: client.id, body: message, from_admin: false })
 
     if (insertError) {
-      return json({ error: insertError.message || 'Could not save support request.' }, 500)
+      return json({ error: insertError.message || 'Could not send message.' }, 500)
     }
 
     // Send email notification (best-effort)
-    const emailWarning = await notifyAdmin({
-      subject: `New support request: ${title}`,
-      from: 'VibeFox Studio <support@vibefoxstudio.com>',
+    await notifyAdmin({
+      subject: `New message from ${client.name || 'a client'}`,
       html: buildNotificationHtml({
         'From': `${client.name || 'Unknown'} <${client.email || user.email || ''}>`,
-        'Subject': title,
-        'Message': description,
+        'Message': message,
       }),
     })
 
-    return json({ id: requestRow.id, ok: true, warning: emailWarning })
+    return json({ ok: true })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unexpected error.'
-    console.error('submit-support error', { message })
+    console.error('notify-message error', { message })
     return json({ error: message }, 500)
   }
 })

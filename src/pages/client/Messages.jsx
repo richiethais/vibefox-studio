@@ -63,12 +63,14 @@ export default function ClientMessages() {
     setSending(true)
     setError('')
 
-    const { error: sendError } = await supabase
-      .from('messages')
-      .insert({ client_id: clientId, body: body.trim(), from_admin: false })
+    const { data: { session: currentSession } } = await supabase.auth.getSession()
+    const res = await supabase.functions.invoke('notify-message', {
+      body: { body: body.trim() },
+      headers: { Authorization: `Bearer ${currentSession?.access_token}` },
+    })
 
-    if (sendError) {
-      setError(sendError.message || 'Message failed to send.')
+    if (res.error || res.data?.error) {
+      setError(res.error?.message || res.data?.error || 'Message failed to send.')
       setSending(false)
       return
     }

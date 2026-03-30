@@ -1,5 +1,6 @@
 import { getSupabaseAdminClient } from '../_shared/auth.ts'
 import { corsHeaders, json } from '../_shared/cors.ts'
+import { notifyAdmin, buildNotificationHtml } from '../_shared/resend.ts'
 
 const RATE_LIMIT_WINDOW_MS = 60_000
 
@@ -107,6 +108,19 @@ Deno.serve(async request => {
     if (limitInsertError) {
       return json({ error: limitInsertError.message || 'Inquiry saved but rate limit log failed.' }, 500)
     }
+
+    // Send email notification (best-effort)
+    await notifyAdmin({
+      subject: `New inquiry from ${name}`,
+      html: buildNotificationHtml({
+        'Name': name,
+        'Email': email,
+        'Company': company || '—',
+        'Service': serviceType,
+        'Budget': budget,
+        'Message': message,
+      }),
+    })
 
     return json({ id: inquiry.id, ok: true })
   } catch (error) {
