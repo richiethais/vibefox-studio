@@ -9,16 +9,16 @@ export default function WorkPage() {
   return (
     <MarketingLayout>
       <SEOHead
-        title="VibefoxStudio Case Studies | Jacksonville Digital Marketing Projects"
-        description="Explore website, SEO, and custom app projects delivered for growth-focused brands. See why clients choose VibefoxStudio in Jacksonville, Florida."
+        title="Our Work | Jacksonville Web Design & SEO Projects | VibefoxStudio"
+        description="See real websites and SEO projects we've built for Jacksonville businesses. From restaurants to food trucks — explore our portfolio of live client work."
         path="/work"
-        keywords="digital marketing case studies jacksonville, web design portfolio jacksonville florida, seo project results, jacksonville florida marketing agency portfolio"
+        keywords="web design portfolio jacksonville, jacksonville website examples, restaurant website design jacksonville florida, seo project results jacksonville, vibefox studio portfolio"
       />
 
       <PageHero
-        eyebrow="Demo Projects"
-        title="A sample of what we can build."
-        sub="From marketing sites to full-stack apps — here's a taste of what's possible when you work with a Jacksonville digital agency that builds everything custom."
+        eyebrow="Our Work"
+        title="Real sites. Real results."
+        sub="Websites we designed, built, and launched for Jacksonville businesses — each one live, fast, and driving real customers."
       />
 
       <Work />

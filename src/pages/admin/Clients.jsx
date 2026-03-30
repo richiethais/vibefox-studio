@@ -24,6 +24,8 @@ export default function AdminClients() {
   const [deletingToken, setDeletingToken] = useState('')
 
   const [invitingClientId, setInvitingClientId] = useState('')
+  const [confirmDeleteClient, setConfirmDeleteClient] = useState(null)
+  const [deletingClient, setDeletingClient] = useState(false)
   const [notice, setNotice] = useState(null)
   const [copied, setCopied] = useState(false)
   const [copiedToken, setCopiedToken] = useState('')
@@ -234,6 +236,20 @@ export default function AdminClients() {
     await load()
   }
 
+  async function handleDeleteClient(id) {
+    setDeletingClient(true)
+    setNotice(null)
+    const { error } = await supabase.from('clients').delete().eq('id', id)
+    setDeletingClient(false)
+    setConfirmDeleteClient(null)
+    if (error) {
+      setNotice({ type: 'error', text: `Error: ${error.message}` })
+      return
+    }
+    setNotice({ type: 'success', text: 'Client deleted.' })
+    await load()
+  }
+
   const set = key => event => setForm(current => ({ ...current, [key]: event.target.value }))
 
   return (
@@ -299,6 +315,7 @@ export default function AdminClients() {
                     <button onClick={() => sendInvite(client)} disabled={invitingClientId === client.id} style={ghostBtn}>
                       {invitingClientId === client.id ? 'Sending…' : 'Invite'}
                     </button>
+                    <button onClick={() => setConfirmDeleteClient(client)} style={deleteGhostBtn}>Delete</button>
                   </td>
                 </tr>
               ))}
@@ -419,6 +436,27 @@ export default function AdminClients() {
         </div>
       )}
 
+      {/* Confirm delete client modal */}
+      {confirmDeleteClient && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 28, maxWidth: 420, width: '100%', textAlign: 'center' }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: '#18181a', marginBottom: 8 }}>Delete client?</div>
+            <div style={{ fontSize: 13, color: '#7a7888', marginBottom: 24, lineHeight: 1.5 }}>
+              This will permanently delete <strong>{confirmDeleteClient.name}</strong> and all their associated projects, invoices, and support requests. This action cannot be undone.
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button onClick={() => setConfirmDeleteClient(null)} disabled={deletingClient} style={{ padding: '10px 20px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer', color: '#18181a' }}>Cancel</button>
+              <button onClick={() => handleDeleteClient(confirmDeleteClient.id)} disabled={deletingClient} style={{ padding: '10px 20px', borderRadius: 100, border: 'none', background: '#dc2626', fontSize: 13, fontWeight: 500, cursor: deletingClient ? 'not-allowed' : 'pointer', color: 'white', opacity: deletingClient ? 0.7 : 1 }}>
+                {deletingClient ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {modal && (
         <div style={overlay}>
           <div style={getModalBox(isMobile)}>
@@ -460,5 +498,6 @@ const badge = { fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius:
 const inp = { padding: '11px 14px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.1)', fontSize: 13, color: '#18181a', background: '#faf9f7', outline: 'none', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }
 const darkBtn = { padding: '9px 18px', borderRadius: 100, border: 'none', background: '#18181a', color: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer' }
 const ghostBtn = { padding: '8px 14px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', color: '#18181a', fontSize: 12, cursor: 'pointer' }
+const deleteGhostBtn = { padding: '8px 14px', borderRadius: 100, border: '1px solid #fecaca', background: '#fef2f2', color: '#dc2626', fontSize: 12, cursor: 'pointer' }
 const overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100 }
 const getModalBox = isMobile => ({ background: 'white', borderRadius: 18, padding: isMobile ? 20 : 32, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', margin: isMobile ? 16 : 0 })

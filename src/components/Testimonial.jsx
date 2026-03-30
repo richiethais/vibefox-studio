@@ -23,17 +23,21 @@ export default function Testimonial() {
           <div style={{ position: 'absolute', top: -20, left: isMobile ? 8 : 36, fontSize: isMobile ? 90 : 180, lineHeight: 1, color: 'rgba(200,169,126,0.10)', fontFamily: '"DM Serif Display", serif', pointerEvents: 'none', userSelect: 'none' }}>"</div>
           <div style={{ display: 'inline-flex', gap: 5, marginBottom: 18, position: 'relative' }}>
             {Array.from({ length: 5 }, (_, idx) => (
-              <span key={idx} style={{ width: 9, height: 9, borderRadius: '50%', background: '#f59e0b', opacity: idx === 4 ? 0.9 : 1 }} />
+              <span key={idx} style={{ width: 9, height: 9, borderRadius: '50%', background: '#f59e0b' }} />
             ))}
           </div>
           <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 18 : 22, color: '#18181a', lineHeight: 1.5, letterSpacing: '-0.3px', marginBottom: isMobile ? 20 : 28, position: 'relative' }}>
-            "We went from zero online presence to ranking on the first page of Google in three months. Our booking requests doubled and we finally have a site we're proud to send people to."
+            "Vibefox Studio built us a beautiful website that really captures the feel of our restaurant. We went from having no online presence to getting new customers every week who found us through Google. The whole process was fast, easy, and they genuinely cared about getting it right."
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 13, position: 'relative' }}>
-            <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #c8a97e, #b8906a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, fontWeight: 600, color: 'white', flexShrink: 0 }}>M</div>
+            <div style={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid rgba(200,169,126,0.3)' }}>
+              <img src="/olympia-cafe-hero.webp" alt="Olympia Cafe" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a' }}>Maria Chen</div>
-              <div style={{ fontSize: 13, color: '#7a7888', marginTop: 1, fontWeight: 300 }}>Owner, Meridian Fitness Studio</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a' }}>Olympia Cafe</div>
+              <div style={{ fontSize: 13, color: '#7a7888', marginTop: 1, fontWeight: 300 }}>
+                Greek Restaurant · <a href="https://olympia-cafe.com" target="_blank" rel="noopener noreferrer" style={{ color: '#b8906a', textDecoration: 'none' }}>olympia-cafe.com</a>
+              </div>
             </div>
           </div>
         </div>

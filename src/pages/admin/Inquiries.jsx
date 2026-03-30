@@ -11,6 +11,8 @@ const STATUS_COLORS = {
 export default function AdminInquiries() {
   const [rows, setRows] = useState([])
   const [selected, setSelected] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const isMobile = useIsMobile(768)
 
   const load = useCallback(async () => {
@@ -18,16 +20,21 @@ export default function AdminInquiries() {
     setRows(data ?? [])
   }, [])
 
-  useEffect(() => {
-    supabase.from('inquiries').select('*').order('created_at', { ascending: false }).then(({ data }) => {
-      setRows(data ?? [])
-    })
-  }, [])
+  useEffect(() => { load() }, [load])
 
   async function setStatus(id, status) {
     await supabase.from('inquiries').update({ status }).eq('id', id)
     await load()
     setSelected(s => s?.id === id ? { ...s, status } : s)
+  }
+
+  async function handleDelete(id) {
+    setDeleting(true)
+    await supabase.from('inquiries').delete().eq('id', id)
+    setConfirmDelete(null)
+    setSelected(null)
+    setDeleting(false)
+    await load()
   }
 
   return (
@@ -40,7 +47,7 @@ export default function AdminInquiries() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-                {['Name', 'Email', 'Service', 'Budget', 'Status', 'Date'].map(h => (
+                {['Name', 'Email', 'Service', 'Budget', 'Status', 'Date', ''].map(h => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{h}</th>
                 ))}
               </tr>
@@ -60,6 +67,15 @@ export default function AdminInquiries() {
                     <span style={{ ...badge, background: STATUS_COLORS[r.status]?.bg, color: STATUS_COLORS[r.status]?.text }}>{r.status}</span>
                   </td>
                   <td style={{ padding: '12px 16px', color: '#7a7888' }}>{new Date(r.created_at).toLocaleDateString()}</td>
+                  <td style={{ padding: '12px 16px' }}>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setConfirmDelete(r) }}
+                      title="Delete inquiry"
+                      style={deleteIconBtn}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /><line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" /></svg>
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -67,6 +83,7 @@ export default function AdminInquiries() {
           </div>
         </div>
 
+        {/* Mobile detail drawer */}
         {selected && isMobile && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
             <div style={{ background: 'white', borderRadius: '20px 20px 0 0', padding: 24, width: '100%', maxHeight: '80vh', overflowY: 'auto' }}>
@@ -95,10 +112,12 @@ export default function AdminInquiries() {
                   ))}
                 </div>
               </div>
+              <button onClick={() => setConfirmDelete(selected)} style={deleteBtnStyle}>Delete inquiry</button>
             </div>
           </div>
         )}
 
+        {/* Desktop detail panel */}
         {selected && !isMobile && (
           <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', padding: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
@@ -126,9 +145,31 @@ export default function AdminInquiries() {
                 ))}
               </div>
             </div>
+            <button onClick={() => setConfirmDelete(selected)} style={deleteBtnStyle}>Delete inquiry</button>
           </div>
         )}
       </div>
+
+      {/* Confirm delete modal */}
+      {confirmDelete && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 28, maxWidth: 400, width: '100%', textAlign: 'center' }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: '#18181a', marginBottom: 8 }}>Delete inquiry?</div>
+            <div style={{ fontSize: 13, color: '#7a7888', marginBottom: 24, lineHeight: 1.5 }}>
+              This will permanently delete the inquiry from <strong>{confirmDelete.name}</strong>. This action cannot be undone.
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button onClick={() => setConfirmDelete(null)} disabled={deleting} style={{ padding: '10px 20px', borderRadius: 100, border: '1px solid rgba(0,0,0,0.1)', background: 'white', fontSize: 13, fontWeight: 500, cursor: 'pointer', color: '#18181a' }}>Cancel</button>
+              <button onClick={() => handleDelete(confirmDelete.id)} disabled={deleting} style={{ padding: '10px 20px', borderRadius: 100, border: 'none', background: '#dc2626', fontSize: 13, fontWeight: 500, cursor: deleting ? 'not-allowed' : 'pointer', color: 'white', opacity: deleting ? 0.7 : 1 }}>
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -143,3 +184,14 @@ function Detail({ label, value }) {
 }
 
 const badge = { fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 100, textTransform: 'capitalize' }
+
+const deleteIconBtn = {
+  background: 'none', border: 'none', cursor: 'pointer', color: '#b0adb8', padding: 6, borderRadius: 8,
+  display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.15s',
+}
+
+const deleteBtnStyle = {
+  marginTop: 20, padding: '10px 20px', borderRadius: 100, border: '1px solid #fecaca',
+  background: '#fef2f2', color: '#dc2626', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+  width: '100%', transition: 'all 0.15s',
+}

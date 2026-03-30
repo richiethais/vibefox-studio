@@ -5,114 +5,159 @@ import { h2Style, subStyle } from './sectionStyles'
 import useIsMobile from './useIsMobile'
 
 const projects = [
-  { tag: 'Web App', title: 'Fitness Booking Platform', desc: 'Class scheduling, membership tiers, trainer dashboards, and real-time availability — all in one seamless app.', iconKey: 'calendar', label: 'Booking System', sub: 'Fitness & Wellness', bg: 'linear-gradient(135deg, #f0ebff 0%, #e2d8f8 100%)' },
-  { tag: 'Website', title: 'Real Estate Marketing Site', desc: 'Property listings with advanced search, virtual tours, lead capture forms, and ongoing SEO content strategy.', iconKey: 'home', label: 'Marketing Site', sub: 'Real Estate', bg: 'linear-gradient(135deg, #ebf2ff 0%, #d8e8ff 100%)' },
-  { tag: 'Custom App', title: 'Spa & Salon Client Portal', desc: 'Online booking, intake forms, appointment history, file uploads, and a staff-facing admin dashboard.', iconKey: 'portal', label: 'Client Portal', sub: 'Beauty & Wellness', bg: 'linear-gradient(135deg, #fff5eb 0%, #fae3cc 100%)' },
+  {
+    tag: 'Website',
+    title: 'Olympia Cafe',
+    url: 'https://olympia-cafe.com',
+    desc: 'A full custom website for a beloved Jacksonville Greek cafe — featuring their menu, story, and location with a warm, inviting design that drives foot traffic.',
+    heroImg: '/olympia-cafe-hero.webp',
+    foodImgs: ['/olympia-gyro.webp', '/olympia-philly.webp', '/olympia-wings.webp'],
+    label: 'Restaurant Website',
+    sub: 'Greek Cafe · Jacksonville, FL',
+    bg: 'linear-gradient(135deg, #e8f0fe 0%, #d4e4ff 100%)',
+    accent: '#1a5276',
+  },
+  {
+    tag: 'Website',
+    title: 'Fatboy Fried Rice',
+    url: 'https://fatboyfriedrice.com',
+    desc: 'A bold, vibrant website for Jacksonville\'s favorite Asian fusion food truck — complete with online ordering, catering info, team showcase, and a menu that pops.',
+    heroImg: '/fatboy-fried-rice-hero.webp',
+    foodImgs: ['/fatboy-sisig.webp', '/fatboy-teriyaki.webp', '/fatboy-team.webp'],
+    label: 'Food Truck Website',
+    sub: 'Asian Fusion · Jacksonville, FL',
+    bg: 'linear-gradient(135deg, #fff0e6 0%, #ffe0cc 100%)',
+    accent: '#c0392b',
+  },
 ]
 
 export default function Work() {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
-  const scrollRef = useRef(null)
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  useEffect(() => {
-    if (!isMobile || !scrollRef.current) return
-    const el = scrollRef.current
-    const onScroll = () => {
-      const scrollLeft = el.scrollLeft
-      const cardWidth = el.firstChild?.offsetWidth || 1
-      const gap = 12
-      setActiveIndex(Math.round(scrollLeft / (cardWidth + gap)))
-    }
-    el.addEventListener('scroll', onScroll, { passive: true })
-    return () => el.removeEventListener('scroll', onScroll)
-  }, [isMobile])
 
   return (
     <section id="work" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', overflow: 'hidden' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow>Demo Projects</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(26px, 8vw, 36px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>What we can <em style={{ fontStyle: 'italic', color: '#b8906a' }}>build.</em></h2>
-        {!isMobile && <p className="fade-up d2" style={subStyle}>A glimpse of what's possible — from marketing sites to full-stack custom apps.</p>}
+        <Eyebrow>Our Work</Eyebrow>
+        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(26px, 8vw, 36px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
+          Real sites for real <em style={{ fontStyle: 'italic', color: '#b8906a' }}>businesses.</em>
+        </h2>
+        {!isMobile && <p className="fade-up d2" style={subStyle}>Websites we designed, built, and launched for Jacksonville businesses.</p>}
 
-        <div ref={isMobile ? scrollRef : undefined} className={isMobile ? 'mobile-scroll' : ''} style={isMobile ? {
-          display: 'flex', gap: 12, marginTop: 24,
-          overflowX: 'auto', scrollSnapType: 'x mandatory',
-          paddingBottom: 8, WebkitOverflowScrolling: 'touch',
-          width: '100%', maxWidth: '100%',
-        } : {
-          display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 18, marginTop: 52,
-        }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 24 : 40, marginTop: isMobile ? 24 : 52 }}>
           {projects.map((project, i) => (
-            <div
-              key={project.title}
-              className={`fade-up d${i + 1}`}
-              style={{ background: '#faf9f7', border: '1px solid rgba(0,0,0,0.08)', borderRadius: isMobile ? 14 : 16, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.25s cubic-bezier(0.22,1,0.36,1)', minWidth: isMobile ? '78vw' : undefined, scrollSnapAlign: isMobile ? 'start' : undefined, flexShrink: isMobile ? 0 : undefined }}
-              onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-5px)'; e.currentTarget.style.boxShadow = '0 16px 40px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(200,169,126,0.25)' }}}
-              onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)' }}}
-            >
-              <div style={{ background: project.bg, aspectRatio: isMobile ? '16/10' : '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <div style={{ background: 'white', borderRadius: 11, padding: isMobile ? '14px 18px' : '12px 16px', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 4px 16px rgba(0,0,0,0.09)', textAlign: 'center', fontSize: 13, fontWeight: 600, color: '#18181a', lineHeight: 1.4 }}>
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                    <WorkGlyph iconKey={project.iconKey} /> {project.label}
-                  </div>
-                  <div style={{ fontSize: 11, color: '#7a7888', fontWeight: 400, marginTop: 3 }}>{project.sub}</div>
-                </div>
-              </div>
-              <div style={{ padding: isMobile ? '16px 18px 20px' : '18px 20px' }}>
-                <div style={{ display: 'inline-block', background: 'rgba(200,169,126,0.15)', color: '#b8906a', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100, marginBottom: 8 }}>{project.tag}</div>
-                <div style={{ fontSize: isMobile ? 16 : 15, fontWeight: 600, color: '#18181a', letterSpacing: '-0.3px' }}>{project.title}</div>
-                <div style={{ fontSize: isMobile ? 14 : 13, color: '#7a7888', marginTop: 6, lineHeight: 1.55, fontWeight: 300 }}>{project.desc}</div>
-              </div>
-            </div>
+            <ProjectCard key={project.title} project={project} index={i} isMobile={isMobile} />
           ))}
         </div>
-
-        {/* Scroll indicator dots for mobile */}
-        {isMobile && (
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 14 }}>
-            {projects.map((_, i) => (
-              <div key={i} style={{
-                width: activeIndex === i ? 18 : 6, height: 6, borderRadius: 100,
-                background: activeIndex === i ? '#b8906a' : 'rgba(0,0,0,0.12)',
-                transition: 'all 0.3s ease',
-              }} />
-            ))}
-          </div>
-        )}
       </div>
     </section>
   )
 }
 
-function WorkGlyph({ iconKey }) {
-  const common = { width: 15, height: 15, viewBox: '0 0 24 24', fill: 'none', stroke: '#b8906a', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round' }
-
-  if (iconKey === 'calendar') {
-    return (
-      <svg {...common}>
-        <rect x="3" y="5" width="18" height="16" rx="2" />
-        <path d="M3 9h18M8 3v4M16 3v4" />
-        <path d="M8 13h3M13 13h3M8 17h3" />
-      </svg>
-    )
-  }
-
-  if (iconKey === 'home') {
-    return (
-      <svg {...common}>
-        <path d="M4 11l8-7 8 7" />
-        <path d="M6 10.5V20h12v-9.5" />
-        <path d="M10 20v-5h4v5" />
-      </svg>
-    )
-  }
+function ProjectCard({ project, index, isMobile }) {
+  const { tag, title, url, desc, heroImg, foodImgs, label, sub, bg, accent } = project
 
   return (
-    <svg {...common}>
-      <rect x="4" y="4" width="16" height="16" rx="3" />
-      <path d="M8 12h8M12 8v8" />
-    </svg>
+    <div
+      className={`fade-up d${index + 1}`}
+      style={{
+        background: '#faf9f7',
+        border: '1px solid rgba(0,0,0,0.08)',
+        borderRadius: isMobile ? 16 : 20,
+        overflow: 'hidden',
+        transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
+      }}
+      onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 20px 50px rgba(0,0,0,0.08)'; e.currentTarget.style.borderColor = 'rgba(200,169,126,0.25)' }}}
+      onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)' }}}
+    >
+      {/* Top: Visit site banner + hero screenshot */}
+      <a href={url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', display: 'block' }}>
+        <div style={{ background: bg, padding: isMobile ? '16px 16px 0' : '24px 24px 0', position: 'relative' }}>
+          {/* Visit site pill */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(8px)',
+            padding: '6px 14px 6px 10px', borderRadius: 100,
+            fontSize: 12, fontWeight: 600, color: accent,
+            marginBottom: isMobile ? 12 : 16,
+            border: '1px solid rgba(0,0,0,0.06)',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Visit {title}
+          </div>
+
+          {/* Browser mockup with screenshot */}
+          <div style={{
+            background: 'white',
+            borderRadius: '12px 12px 0 0',
+            overflow: 'hidden',
+            border: '1px solid rgba(0,0,0,0.08)',
+            borderBottom: 'none',
+            boxShadow: '0 -4px 20px rgba(0,0,0,0.06)',
+          }}>
+            <div style={{ background: '#f0eeeb', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+              {['#ff5f57','#febc2e','#28c840'].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />)}
+              <div style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.7)', borderRadius: 100, padding: '3px 12px', fontSize: 10, color: '#7a7888', maxWidth: 200, margin: '0 auto', border: '1px solid rgba(0,0,0,0.06)' }}>
+                {url.replace('https://', '')}
+              </div>
+            </div>
+            <img
+              src={heroImg}
+              alt={`${title} website screenshot`}
+              loading="lazy"
+              style={{ width: '100%', display: 'block', aspectRatio: '16/9', objectFit: 'cover', objectPosition: 'top' }}
+            />
+          </div>
+        </div>
+      </a>
+
+      {/* Bottom: Info + food/brand images */}
+      <div style={{ padding: isMobile ? '18px 16px 20px' : '24px 28px 28px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, flexWrap: 'wrap' }}>
+          <span style={{ display: 'inline-block', background: 'rgba(200,169,126,0.15)', color: '#b8906a', fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100 }}>{tag}</span>
+          <span style={{ fontSize: 12, color: '#7a7888', fontWeight: 400 }}>{sub}</span>
+        </div>
+        <div style={{ fontSize: isMobile ? 18 : 20, fontWeight: 700, color: '#18181a', letterSpacing: '-0.4px', marginBottom: 8 }}>{title}</div>
+        <div style={{ fontSize: isMobile ? 14 : 14, color: '#7a7888', lineHeight: 1.6, fontWeight: 300, marginBottom: 18, maxWidth: 600 }}>{desc}</div>
+
+        {/* Food/brand image gallery */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: isMobile ? 8 : 10 }}>
+          {foodImgs.map((img, i) => (
+            <div key={i} style={{ borderRadius: isMobile ? 10 : 12, overflow: 'hidden', aspectRatio: '1', border: '1px solid rgba(0,0,0,0.06)' }}>
+              <img
+                src={img}
+                alt={`${title} showcase ${i + 1}`}
+                loading="lazy"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* CTA link */}
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            marginTop: 18, fontSize: 14, fontWeight: 500,
+            color: accent, textDecoration: 'none',
+            transition: 'opacity 0.2s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = '0.7' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+        >
+          View live site
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
   )
 }
