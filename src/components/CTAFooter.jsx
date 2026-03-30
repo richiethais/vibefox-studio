@@ -1,6 +1,16 @@
 import { useFadeUp } from './useFadeUp'
 import BrandLogo from './BrandLogo'
 import useIsMobile from './useIsMobile'
+import { useAuth } from '../lib/useAuth'
+
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
+
+function useDashboardLink() {
+  const session = useAuth()
+  if (!session) return '/client/login'
+  if (session.user?.email === ADMIN_EMAIL) return '/admin'
+  return '/client'
+}
 
 export function CTA() {
   const ref = useFadeUp()
@@ -47,6 +57,7 @@ export function CTA() {
 
 export function Footer() {
   const isMobile = useIsMobile()
+  const dashboardLink = useDashboardLink()
 
   return (
     <footer style={{ padding: isMobile ? '48px 24px 32px' : '56px 40px 36px', borderTop: '1px solid rgba(0,0,0,0.08)', background: '#faf9f7' }}>
@@ -61,7 +72,7 @@ export function Footer() {
 
           {[
             { heading: 'Services', links: [['Landing Pages','/services'],['Business Websites','/services'],['Custom Web Apps','/services'],['SEO & Content','/services']] },
-            { heading: 'Plans', links: [['Starter — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blogs','/blogs']] },
+            { heading: 'Plans', links: [['Essential — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blogs','/blogs']] },
             { heading: 'Contact', links: [['inquiries@vibefoxstudio.com','mailto:inquiries@vibefoxstudio.com'],['Jacksonville, FL','/services'],['FAQ','/faq']] },
           ].map(col => (
             <div key={col.heading}>
@@ -82,10 +93,21 @@ export function Footer() {
 
         <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 8 : 12 }}>
           <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 300 }}>© 2026 VibefoxStudio. All rights reserved.</span>
-          <a href="mailto:inquiries@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', wordBreak: 'break-all' }}
-            onMouseEnter={e => e.target.style.color = '#18181a'}
-            onMouseLeave={e => e.target.style.color = '#7a7888'}
-          >inquiries@vibefoxstudio.com</a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 16 : 20, flexWrap: 'wrap' }}>
+            <a href={dashboardLink} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', fontWeight: 300 }}
+              onMouseEnter={e => e.currentTarget.style.color = '#18181a'}
+              onMouseLeave={e => e.currentTarget.style.color = '#7a7888'}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+              </svg>
+              Dashboard
+            </a>
+            <a href="mailto:inquiries@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', wordBreak: 'break-all', fontWeight: 300 }}
+              onMouseEnter={e => e.target.style.color = '#18181a'}
+              onMouseLeave={e => e.target.style.color = '#7a7888'}
+            >inquiries@vibefoxstudio.com</a>
+          </div>
         </div>
       </div>
     </footer>

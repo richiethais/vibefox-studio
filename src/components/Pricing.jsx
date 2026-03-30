@@ -10,7 +10,7 @@ const PAYMENT_FREQUENCIES = ['monthly', 'yearly']
 
 const plans = [
   {
-    name: 'Starter',
+    name: 'Essential',
     price: { monthly: 200, yearly: 170 },
     desc: 'Keep your site running reliably.',
     features: ['Hosting & SSL certificate', 'Uptime monitoring', 'Security updates', 'Database management', 'Minor content updates', '48-hour support response'],
@@ -21,7 +21,7 @@ const plans = [
     name: 'Growth',
     price: { monthly: 500, yearly: 425 },
     desc: 'For businesses that want to grow.',
-    features: ['Everything in Starter', 'SEO optimization', '2 blog posts per month', 'Search Console monitoring', 'Monthly performance report', 'Minor design updates', '24-hour priority support'],
+    features: ['Everything in Essential', 'SEO optimization', '2 blog posts per month', 'Search Console monitoring', 'Monthly performance report', 'Minor design updates', '24-hour priority support'],
     featured: false,
     popular: true,
   },
@@ -106,32 +106,29 @@ export default function Pricing() {
               ))}
             </div>
 
-            {activeTab === 'growth' && (
-              <>
-                {/* Frequency Toggle */}
-                <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-                  <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3 }}>
-                    {PAYMENT_FREQUENCIES.map((freq) => (
-                      <FrequencyTab
-                        key={freq}
-                        text={freq}
-                        selected={selectedFrequency === freq}
-                        setSelected={setSelectedFrequency}
-                        discount={freq === 'yearly'}
-                      />
-                    ))}
-                  </div>
-                </div>
+            {/* Frequency Toggle — always visible */}
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+              <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3 }}>
+                {PAYMENT_FREQUENCIES.map((freq) => (
+                  <FrequencyTab
+                    key={freq}
+                    text={freq}
+                    selected={selectedFrequency === freq}
+                    setSelected={setSelectedFrequency}
+                    discount={freq === 'yearly'}
+                  />
+                ))}
+              </div>
+            </div>
 
-                {/* Horizontal slider for plans on mobile */}
-                <div style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', margin: '0 -24px', paddingLeft: 24, paddingRight: 24, paddingBottom: 8 }}>
-                  {plans.map((p) => (
-                    <div key={p.name} style={{ flex: '0 0 85%', scrollSnapAlign: 'start' }}>
-                      <PricingCard plan={p} delay="" isMobile={true} paymentFrequency={selectedFrequency} noFade />
-                    </div>
-                  ))}
-                </div>
-              </>
+            {activeTab === 'growth' && (
+              <div style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', margin: '0 -24px', paddingLeft: 24, paddingRight: 24, paddingBottom: 8 }}>
+                {plans.map((p) => (
+                  <div key={p.name} style={{ flex: '0 0 85%', scrollSnapAlign: 'start' }}>
+                    <PricingCard plan={p} delay="" isMobile={true} paymentFrequency={selectedFrequency} noFade />
+                  </div>
+                ))}
+              </div>
             )}
 
             {activeTab === 'projects' && (

@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { motion as Motion, AnimatePresence } from 'framer-motion'
 import BrandLogo from './BrandLogo'
+import { useAuth } from '../lib/useAuth'
+
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
+
+function useDashboardLink() {
+  const session = useAuth()
+  if (!session) return '/client/login'
+  if (session.user?.email === ADMIN_EMAIL) return '/admin'
+  return '/client'
+}
 
 const links = [
   ['Home', '/'],
@@ -12,11 +22,20 @@ const links = [
   ['Blogs', '/blogs'],
 ]
 
+function DashboardIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+    </svg>
+  )
+}
+
 export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const dashboardLink = useDashboardLink()
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24)
@@ -327,6 +346,31 @@ export default function Nav() {
                 }}
               >
                 Get in touch →
+              </Link>
+            </Motion.div>
+
+            {/* Dashboard button */}
+            <Motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: links.length * 0.05 + 0.2, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              style={{ position: 'absolute', bottom: 32, left: 0, right: 0, display: 'flex', justifyContent: 'center' }}
+            >
+              <Link
+                to={dashboardLink}
+                onClick={() => setMenuOpen(false)}
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  color: '#7a7888',
+                  padding: '10px 20px', borderRadius: 100,
+                  fontSize: 13, fontWeight: 500,
+                  textDecoration: 'none',
+                  border: '1px solid rgba(0,0,0,0.1)',
+                  background: 'rgba(250,249,247,0.8)',
+                  transition: 'all 0.2s',
+                }}
+              >
+                <DashboardIcon /> Dashboard
               </Link>
             </Motion.div>
           </Motion.div>
