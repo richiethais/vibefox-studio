@@ -36,7 +36,7 @@ export default function Work() {
   const isMobile = useIsMobile()
 
   return (
-    <section id="work" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', overflow: 'hidden' }}>
+    <section id="work" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px', overflow: 'hidden' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow>Our Work</Eyebrow>
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(26px, 8vw, 36px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>
@@ -44,7 +44,7 @@ export default function Work() {
         </h2>
         {!isMobile && <p className="fade-up d2" style={subStyle}>Websites we designed, built, and launched for Jacksonville businesses.</p>}
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 24 : 40, marginTop: isMobile ? 24 : 52 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? 32 : 40, marginTop: isMobile ? 28 : 52 }}>
           {projects.map((project, i) => (
             <ProjectCard key={project.title} project={project} index={i} isMobile={isMobile} />
           ))}

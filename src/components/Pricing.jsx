@@ -69,9 +69,9 @@ export default function Pricing() {
   const [activeTab, setActiveTab] = useState('growth')
 
   return (
-    <section id="pricing" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section id="pricing" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 24 : 48 }}>
+        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 28 : 48 }}>
           <Eyebrow>Pricing</Eyebrow>
           <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
             Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
@@ -123,22 +123,19 @@ export default function Pricing() {
                   </div>
                 </div>
 
-                {/* Featured plan first (Pro), then others as compact rows */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {/* Show popular plan (Growth) featured on mobile */}
-                  <PricingCard plan={plans[1]} delay="d1" isMobile={true} paymentFrequency={selectedFrequency} />
-                  {/* Compact cards for Starter and Pro */}
-                  {[plans[0], plans[2]].map((p, i) => (
-                    <CompactPricingRow key={p.name} plan={p} paymentFrequency={selectedFrequency} />
+                {/* All plans as full cards on mobile */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {plans.map((p, i) => (
+                    <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={true} paymentFrequency={selectedFrequency} />
                   ))}
                 </div>
               </>
             )}
 
             {activeTab === 'projects' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {projectPlans.map((p) => (
-                  <CompactProjectRow key={p.name} plan={p} />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {projectPlans.map((p, i) => (
+                  <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={true} />
                 ))}
               </div>
             )}
@@ -434,14 +431,14 @@ function ProjectCard({ plan, delay, isMobile }) {
         background: '#faf9f7',
         border: featured ? '2px solid #b8906a' : '1px solid rgba(0,0,0,0.08)',
         borderRadius: 16,
-        padding: '30px 26px',
+        padding: isMobile ? '22px 18px' : '30px 26px',
         position: 'relative',
         boxShadow: 'none',
         transition: 'all 0.3s cubic-bezier(0.22,1,0.36,1)',
         overflow: 'hidden',
       }}
-      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}
-      onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
+      onMouseEnter={e => { if (!isMobile) { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 14px 40px rgba(0,0,0,0.07)' }}}
+      onMouseLeave={e => { if (!isMobile) { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}}
     >
       {/* Background patterns */}
       {featured && <PopularBackground />}
@@ -459,7 +456,7 @@ function ProjectCard({ plan, delay, isMobile }) {
           {price !== 'Custom' && <span style={{ fontFamily: '"DM Serif Display", serif', fontSize: 16, fontWeight: 400, color: '#7a7888' }}>$</span>}
           <span style={{
             fontFamily: '"DM Serif Display", serif',
-            fontSize: price === 'Custom' ? 36 : 54,
+            fontSize: isMobile ? (price === 'Custom' ? 28 : 40) : (price === 'Custom' ? 36 : 54),
             color: '#18181a',
             letterSpacing: '-2px',
             lineHeight: 1.1,
@@ -473,12 +470,12 @@ function ProjectCard({ plan, delay, isMobile }) {
         </p>
       </div>
 
-      <div style={{ fontSize: 13, color: '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
+      <div style={{ fontSize: isMobile ? 12 : 13, color: '#7a7888', marginBottom: 18, lineHeight: 1.5, fontWeight: 300 }}>{desc}</div>
       <div style={{ height: 1, background: 'rgba(0,0,0,0.08)', marginBottom: 16 }} />
 
-      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 22px', display: 'flex', flexDirection: 'column', gap: isMobile ? 8 : 10 }}>
         {features.map(f => (
-          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 13, color: '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
+          <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: isMobile ? 12 : 13, color: '#3a3840', lineHeight: 1.4, fontWeight: 300 }}>
             <CheckIcon featured={false} />
             {f}
           </li>
@@ -493,9 +490,9 @@ function ProjectCard({ plan, delay, isMobile }) {
           justifyContent: 'center',
           gap: 8,
           textAlign: 'center',
-          padding: 12,
+          padding: isMobile ? 11 : 12,
           borderRadius: 100,
-          fontSize: 14,
+          fontSize: isMobile ? 13 : 14,
           fontWeight: 500,
           textDecoration: 'none',
           transition: 'all 0.2s',

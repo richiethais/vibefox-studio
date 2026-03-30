@@ -68,27 +68,28 @@ export default function Hero() {
   return (
     <section style={{
       ...s.section,
-      minHeight: isMobile ? 'auto' : s.section.minHeight,
-      padding: isMobile ? '110px 18px 48px' : s.section.padding,
+      minHeight: isMobile ? '100svh' : s.section.minHeight,
+      padding: isMobile ? '120px 24px 56px' : s.section.padding,
+      justifyContent: isMobile ? 'center' : s.section.justifyContent,
     }}>
-      <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 11 : s.pill.fontSize, marginBottom: isMobile ? 18 : s.pill.marginBottom, padding: isMobile ? '5px 12px 5px 7px' : s.pill.padding }}>
+      <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 12 : s.pill.fontSize, marginBottom: isMobile ? 24 : s.pill.marginBottom, padding: isMobile ? '6px 14px 6px 8px' : s.pill.padding }}>
         <span style={s.chip}>2026</span>
         Jacksonville, FL growth partner
       </div>
 
-      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(28px, 8vw, 38px)' : s.h1.fontSize, letterSpacing: isMobile ? '-0.8px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(32px, 9vw, 44px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
         Your business deserves a site that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>
 
-      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 15 : s.sub.fontSize, margin: isMobile ? '14px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.55 : s.sub.lineHeight }}>
+      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 16 : s.sub.fontSize, margin: isMobile ? '20px auto 0' : s.sub.margin, maxWidth: isMobile ? 380 : s.sub.maxWidth, lineHeight: isMobile ? 1.6 : s.sub.lineHeight }}>
         Fast, high-converting websites and SEO systems for Jacksonville businesses ready to scale.
       </p>
 
-      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 22 : s.btns.marginTop, gap: isMobile ? 8 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
+      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 32 : s.btns.marginTop, gap: isMobile ? 12 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
         <a
           href="/contact"
-          style={{ ...s.btnDark, width: isMobile ? 'min(280px, 100%)' : 'auto', justifyContent: 'center', padding: isMobile ? '12px 24px' : s.btnDark.padding, fontSize: isMobile ? 14 : s.btnDark.fontSize }}
+          style={{ ...s.btnDark, width: isMobile ? '100%' : 'auto', maxWidth: isMobile ? 320 : undefined, justifyContent: 'center', padding: isMobile ? '16px 28px' : s.btnDark.padding, fontSize: isMobile ? 15 : s.btnDark.fontSize }}
           onMouseEnter={e => { e.currentTarget.style.background = '#2a2830'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)' }}
           onMouseLeave={e => { e.currentTarget.style.background = '#18181a'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none' }}
         >
@@ -96,7 +97,7 @@ export default function Hero() {
         </a>
         <a
           href="#pricing"
-          style={{ ...s.btnGhost, width: isMobile ? 'min(280px, 100%)' : 'auto', justifyContent: 'center', padding: isMobile ? '12px 20px' : s.btnGhost.padding, fontSize: isMobile ? 14 : s.btnGhost.fontSize }}
+          style={{ ...s.btnGhost, width: isMobile ? '100%' : 'auto', maxWidth: isMobile ? 320 : undefined, justifyContent: 'center', padding: isMobile ? '16px 24px' : s.btnGhost.padding, fontSize: isMobile ? 15 : s.btnGhost.fontSize }}
           onMouseEnter={e => { e.currentTarget.style.background = '#edeae5' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'rgba(250,249,247,0.8)' }}
         >
@@ -104,7 +105,7 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 12 : s.trust.gap, marginTop: isMobile ? 20 : s.trust.marginTop, fontSize: isMobile ? 11 : s.trust.fontSize }}>
+      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 28 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
         {['Fast turnaround', 'Local SEO', 'Growth plans'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot} /> {t}
@@ -112,7 +113,7 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ marginTop: isMobile ? 32 : 72, width: '100%', maxWidth: isMobile ? '100%' : 820 }}>
+      <div className="anim-rise-6" style={{ marginTop: isMobile ? 40 : 72, width: '100%', maxWidth: isMobile ? '100%' : 820 }}>
         <DashboardMockup isMobile={isMobile} />
       </div>
     </section>
@@ -135,13 +136,13 @@ function DashboardMockup({ isMobile }) {
             vibefoxstudio.com
           </div>
         </div>
-        <div style={{ padding: 12, background: '#f8f6f2', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+        <div style={{ padding: 14, background: '#f8f6f2', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {[['Load Time','0.8s','↑ 3×'],['SEO Score','96','Top 5%'],['Uptime','99.9%','All time']].map(([l,v,s]) => (
-              <div key={l} style={{ background: 'white', borderRadius: 8, padding: '10px 8px', border: '1px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
-                <div style={{ fontSize: 9, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{l}</div>
-                <div style={{ fontSize: 17, fontWeight: 600, color: '#18181a', marginTop: 2, letterSpacing: '-0.5px' }}>{v}</div>
-                <div style={{ fontSize: 9, color: '#16a34a', marginTop: 1 }}>{s}</div>
+              <div key={l} style={{ background: 'white', borderRadius: 10, padding: '12px 10px', border: '1px solid rgba(0,0,0,0.08)', textAlign: 'center' }}>
+                <div style={{ fontSize: 10, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.3px' }}>{l}</div>
+                <div style={{ fontSize: 20, fontWeight: 600, color: '#18181a', marginTop: 3, letterSpacing: '-0.5px' }}>{v}</div>
+                <div style={{ fontSize: 10, color: '#16a34a', marginTop: 2 }}>{s}</div>
               </div>
             ))}
           </div>

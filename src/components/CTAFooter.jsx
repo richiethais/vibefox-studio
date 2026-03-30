@@ -6,7 +6,7 @@ export function CTA() {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
   return (
-    <div ref={ref} style={{ padding: isMobile ? '36px 18px' : '72px 40px' }}>
+    <div ref={ref} style={{ padding: isMobile ? '48px 24px' : '72px 40px' }}>
       <div className="fade-up" style={{
         maxWidth: 1040, margin: '0 auto',
         background: '#f3efe9', borderRadius: isMobile ? 22 : 28,
@@ -49,7 +49,7 @@ export function Footer() {
   const isMobile = useIsMobile()
 
   return (
-    <footer style={{ padding: isMobile ? '44px 18px 28px' : '56px 40px 36px', borderTop: '1px solid rgba(0,0,0,0.08)', background: '#faf9f7' }}>
+    <footer style={{ padding: isMobile ? '48px 24px 32px' : '56px 40px 36px', borderTop: '1px solid rgba(0,0,0,0.08)', background: '#faf9f7' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr 1fr 1fr', gap: isMobile ? 28 : 40, marginBottom: isMobile ? 30 : 44 }}>
           <div>

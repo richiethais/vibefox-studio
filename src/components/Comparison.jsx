@@ -16,7 +16,7 @@ export default function Comparison() {
   const isMobile = useIsMobile()
 
   return (
-    <section ref={ref} style={{ background: '#18181a', padding: isMobile ? '48px 18px' : '96px 40px' }}>
+    <section ref={ref} style={{ background: '#18181a', padding: isMobile ? '64px 24px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 500, color: '#c8a97e', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: 18 }}>
           <span style={{ width: 20, height: 20, background: 'rgba(200,169,126,0.15)', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -36,7 +36,7 @@ export default function Comparison() {
 
         {isMobile ? (
           /* Card-based comparison for mobile */
-          <div className="fade-up d2" style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="fade-up d2" style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 10 }}>
             {rows.map(row => (
               <div key={row.feature} style={{
                 background: 'rgba(255,255,255,0.04)',

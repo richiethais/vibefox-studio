@@ -14,7 +14,7 @@ export default function HowItWorks() {
   const isMobile = useIsMobile()
 
   return (
-    <section id="how" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', background: '#faf9f7' }}>
+    <section id="how" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px', background: '#faf9f7' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
         <Eyebrow>How it works</Eyebrow>
         <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>3 simple steps to <em style={{ fontStyle: 'italic', color: '#b8906a' }}>effortless delivery.</em></h2>
@@ -22,7 +22,7 @@ export default function HowItWorks() {
 
         {isMobile ? (
           /* Compact vertical timeline for mobile */
-          <div className="fade-up d2" style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 0 }}>
+          <div className="fade-up d2" style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 0 }}>
             {steps.map((step, i) => (
               <div key={step.num} style={{ display: 'flex', gap: 14, position: 'relative' }}>
                 {/* Timeline line + dot */}

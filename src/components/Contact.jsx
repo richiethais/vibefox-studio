@@ -55,7 +55,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" ref={ref} style={{ padding: isMobile ? '48px 18px' : '96px 40px', background: '#faf9f7' }}>
+    <section id="contact" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px', background: '#faf9f7' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <div className="fade-up d1" style={{ fontSize: 11, fontWeight: 700, letterSpacing: '1.2px', textTransform: 'uppercase', color: '#b8906a', marginBottom: 14 }}>
           Get in touch

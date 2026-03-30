@@ -12,6 +12,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #f0ebff, #e2d8f8)',
     desc: 'High-converting single pages designed to capture leads and drive action. Built for speed, optimized for results, and ready to launch in days — not months.',
     includes: ['Custom design', 'Mobile-optimized layout', 'SEO-ready structure', 'Contact form with lead capture'],
+    image: '/olympia-cafe-hero.webp',
+    imageAlt: 'Olympia Cafe landing page built by VibeFox Studio',
   },
   {
     icon: 'website',
@@ -19,6 +21,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #ebf2ff, #d8e8ff)',
     desc: 'Multi-page sites that tell your story, build trust, and turn visitors into customers. Easy to update, impossible to outgrow.',
     includes: ['Up to 8 custom pages', 'CMS for content updates', 'Google Business integration', 'Analytics tracking'],
+    image: null,
+    imageAlt: null,
   },
   {
     icon: 'app',
@@ -26,6 +30,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #fff5eb, #fae3cc)',
     desc: 'Booking systems, client portals, and dashboards with real logins, live data, and seamless workflows tailored to your operations.',
     includes: ['User authentication', 'Real-time database', 'Admin dashboard', 'API integrations'],
+    image: '/service-crm.webp',
+    imageAlt: 'VibeFox Studio CRM and invoicing dashboard',
   },
   {
     icon: 'seo',
@@ -33,6 +39,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
     desc: 'Organic traffic that compounds over time. We handle keyword strategy, content creation, and ongoing optimization so you rank where it matters.',
     includes: ['Keyword research', 'Blog posts published', 'Search Console monitoring', 'Monthly reports'],
+    image: '/service-seo-blog.webp',
+    imageAlt: 'VibeFox Studio blog and SEO content platform',
   },
   {
     icon: 'security',
@@ -40,6 +48,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #fef2f2, #fecaca)',
     desc: 'Managed hosting with enterprise-grade security so your site stays fast, safe, and online. All handled for you.',
     includes: ['99.9% uptime', 'SSL included', 'Daily backups', 'Security monitoring'],
+    image: '/service-hosting.webp',
+    imageAlt: 'Server hosting and security infrastructure',
   },
   {
     icon: 'support',
@@ -47,6 +57,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #fffbeb, #fef3c7)',
     desc: 'Quick updates, real communication, and a partner who actually cares about your growth. No tickets, no waiting.',
     includes: ['48-hour turnaround', 'Direct communication', 'Priority on growth plans', 'Quarterly reviews'],
+    image: '/service-support.webp',
+    imageAlt: 'Customer support and ongoing maintenance',
   },
 ]
 
@@ -132,28 +144,54 @@ function ServiceSection({ service, index, isMobile }) {
       style={{
         background: service.gradient,
         borderRadius: 20,
-        padding: isMobile ? '48px 24px' : '64px 40px',
+        padding: service.image ? (isMobile ? '20px 16px' : '28px 24px') : (isMobile ? '48px 24px' : '64px 40px'),
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: isMobile ? 200 : 280,
         order: isMobile ? 0 : (isOdd ? 1 : 0),
+        overflow: 'hidden',
       }}
     >
-      <div
-        style={{
-          background: '#fff',
-          borderRadius: 100,
-          padding: '12px 24px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
-        }}
-      >
-        <ServiceIcon iconKey={service.icon} />
-        <span style={{ fontSize: 14, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px' }}>{service.title}</span>
-      </div>
+      {service.image ? (
+        <div style={{
+          width: '100%',
+          background: 'white',
+          borderRadius: 12,
+          overflow: 'hidden',
+          border: '1px solid rgba(0,0,0,0.08)',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+        }}>
+          <div style={{ background: '#f0eeeb', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            {['#ff5f57','#febc2e','#28c840'].map(c => <div key={c} style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />)}
+            <div style={{ flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.7)', borderRadius: 100, padding: '3px 12px', fontSize: 10, color: '#7a7888', maxWidth: 180, margin: '0 auto', border: '1px solid rgba(0,0,0,0.06)' }}>
+              vibefoxstudio.com
+            </div>
+          </div>
+          <img
+            src={service.image}
+            alt={service.imageAlt}
+            loading="lazy"
+            style={{ width: '100%', display: 'block', aspectRatio: '16/9', objectFit: 'cover', objectPosition: 'top' }}
+          />
+        </div>
+      ) : (
+        <div
+          style={{
+            background: '#fff',
+            borderRadius: 100,
+            padding: '12px 24px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+          }}
+        >
+          <ServiceIcon iconKey={service.icon} />
+          <span style={{ fontSize: 14, fontWeight: 600, color: '#18181a', letterSpacing: '-0.2px' }}>{service.title}</span>
+        </div>
+      )}
     </div>
   )
 
