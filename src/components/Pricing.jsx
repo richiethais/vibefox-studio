@@ -123,19 +123,23 @@ export default function Pricing() {
                   </div>
                 </div>
 
-                {/* All plans as full cards on mobile */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                  {plans.map((p, i) => (
-                    <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={true} paymentFrequency={selectedFrequency} />
+                {/* Horizontal slider for plans on mobile */}
+                <div style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', margin: '0 -24px', paddingLeft: 24, paddingRight: 24, paddingBottom: 8 }}>
+                  {plans.map((p) => (
+                    <div key={p.name} style={{ flex: '0 0 85%', scrollSnapAlign: 'start' }}>
+                      <PricingCard plan={p} delay="" isMobile={true} paymentFrequency={selectedFrequency} noFade />
+                    </div>
                   ))}
                 </div>
               </>
             )}
 
             {activeTab === 'projects' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                {projectPlans.map((p, i) => (
-                  <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={true} />
+              <div style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', margin: '0 -24px', paddingLeft: 24, paddingRight: 24, paddingBottom: 8 }}>
+                {projectPlans.map((p) => (
+                  <div key={p.name} style={{ flex: '0 0 85%', scrollSnapAlign: 'start' }}>
+                    <ProjectCard plan={p} delay="" isMobile={true} noFade />
+                  </div>
                 ))}
               </div>
             )}
@@ -242,13 +246,13 @@ function FrequencyTab({ text, selected, setSelected, discount = false }) {
   )
 }
 
-function PricingCard({ plan, delay, isMobile, paymentFrequency }) {
+function PricingCard({ plan, delay, isMobile, paymentFrequency, noFade }) {
   const { name, price, desc, features, featured, popular } = plan
   const currentPrice = price[paymentFrequency]
 
   return (
     <div
-      className={`fade-up ${delay}`}
+      className={noFade ? '' : `fade-up ${delay}`}
       style={{
         background: '#faf9f7',
         border: popular ? '2px solid #b8906a' : featured ? '2px solid #b8906a' : '1px solid rgba(0,0,0,0.08)',
@@ -421,12 +425,12 @@ function CompactProjectRow({ plan }) {
   )
 }
 
-function ProjectCard({ plan, delay, isMobile }) {
+function ProjectCard({ plan, delay, isMobile, noFade }) {
   const { name, price, desc, features, featured, requiresGrowthPlan } = plan
 
   return (
     <div
-      className={`fade-up ${delay}`}
+      className={noFade ? '' : `fade-up ${delay}`}
       style={{
         background: '#faf9f7',
         border: featured ? '2px solid #b8906a' : '1px solid rgba(0,0,0,0.08)',

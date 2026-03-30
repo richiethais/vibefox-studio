@@ -69,7 +69,7 @@ export default function Hero() {
     <section style={{
       ...s.section,
       minHeight: isMobile ? 'auto' : s.section.minHeight,
-      padding: isMobile ? '140px 24px 48px' : s.section.padding,
+      padding: isMobile ? '140px 16px 48px' : s.section.padding,
       justifyContent: isMobile ? 'flex-start' : s.section.justifyContent,
     }}>
       <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 12 : s.pill.fontSize, marginBottom: isMobile ? 28 : s.pill.marginBottom, padding: isMobile ? '6px 14px 6px 8px' : s.pill.padding }}>
