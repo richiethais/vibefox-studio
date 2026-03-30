@@ -24,6 +24,7 @@ import ClientProjects from './pages/client/Projects.jsx'
 import ClientInvoices from './pages/client/Invoices.jsx'
 import ClientMessages from './pages/client/Messages.jsx'
 import ClientSupport from './pages/client/Support.jsx'
+import Login from './pages/Login.jsx'
 import Join from './pages/Join.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
@@ -52,10 +53,11 @@ createRoot(document.getElementById('root')).render(
           <Route path="/blogs/:slug" element={<BlogPostPage />} />
           <Route path="/blog" element={<Navigate to="/blogs" replace />} />
           <Route path="/blog/:slug" element={<BlogPostPage />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/join" element={<Join />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
-          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/login" element={<Navigate to="/login" replace />} />
           <Route path="/admin/access" element={<AdminAccessLinkRedeem />} />
           <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} />
@@ -73,7 +75,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="access-links" element={<AdminAccessLinks />} />
           </Route>
 
-          <Route path="/client/login" element={<ClientLogin />} />
+          <Route path="/client/login" element={<Navigate to="/login" replace />} />
           <Route path="/client" element={<ClientRoute><ClientLayout /></ClientRoute>}>
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<ClientDashboard />} />

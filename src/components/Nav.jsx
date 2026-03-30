@@ -8,7 +8,7 @@ const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
 
 function useDashboardLink() {
   const session = useAuth()
-  if (!session) return '/client/login'
+  if (!session) return '/login'
   if (session.user?.email === ADMIN_EMAIL) return '/admin'
   return '/client'
 }
