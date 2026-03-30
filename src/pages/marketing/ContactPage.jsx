@@ -71,7 +71,7 @@ export default function ContactPage() {
     name: '',
     email: '',
     company: '',
-    service: '',
+    service_type: '',
     budget: '',
     message: '',
   })
@@ -208,10 +208,10 @@ export default function ContactPage() {
                   style={inputStyle}
                 />
                 <select
-                  value={form.service}
-                  onChange={update('service')}
+                  value={form.service_type}
+                  onChange={update('service_type')}
                   required
-                  style={{ ...inputStyle, color: form.service ? '#111' : '#888', appearance: 'none' }}
+                  style={{ ...inputStyle, color: form.service_type ? '#111' : '#888', appearance: 'none' }}
                 >
                   <option value="" disabled>Service</option>
                   {SERVICES.map((s) => (
