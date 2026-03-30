@@ -113,9 +113,11 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ marginTop: isMobile ? 40 : 72, width: '100%', maxWidth: isMobile ? '100%' : 820 }}>
-        <DashboardMockup isMobile={isMobile} />
-      </div>
+      {!isMobile && (
+        <div className="anim-rise-6" style={{ marginTop: 72, width: '100%', maxWidth: 820 }}>
+          <DashboardMockup isMobile={false} />
+        </div>
+      )}
     </section>
   )
 }
