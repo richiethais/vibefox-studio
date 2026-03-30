@@ -68,25 +68,25 @@ export default function Hero() {
   return (
     <section style={{
       ...s.section,
-      minHeight: isMobile ? '100svh' : s.section.minHeight,
-      padding: isMobile ? '120px 24px 56px' : s.section.padding,
-      justifyContent: isMobile ? 'center' : s.section.justifyContent,
+      minHeight: isMobile ? 'auto' : s.section.minHeight,
+      padding: isMobile ? '140px 24px 48px' : s.section.padding,
+      justifyContent: isMobile ? 'flex-start' : s.section.justifyContent,
     }}>
-      <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 12 : s.pill.fontSize, marginBottom: isMobile ? 24 : s.pill.marginBottom, padding: isMobile ? '6px 14px 6px 8px' : s.pill.padding }}>
+      <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 12 : s.pill.fontSize, marginBottom: isMobile ? 28 : s.pill.marginBottom, padding: isMobile ? '6px 14px 6px 8px' : s.pill.padding }}>
         <span style={s.chip}>2026</span>
         Jacksonville, FL growth partner
       </div>
 
-      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(32px, 9vw, 44px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1px' : s.h1.letterSpacing, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(42px, 12vw, 56px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.5px' : s.h1.letterSpacing, lineHeight: isMobile ? 1.05 : s.h1.lineHeight, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
         Your business deserves a site that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>
 
-      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 16 : s.sub.fontSize, margin: isMobile ? '20px auto 0' : s.sub.margin, maxWidth: isMobile ? 380 : s.sub.maxWidth, lineHeight: isMobile ? 1.6 : s.sub.lineHeight }}>
+      <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 17 : s.sub.fontSize, margin: isMobile ? '28px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.65 : s.sub.lineHeight }}>
         Fast, high-converting websites and SEO systems for Jacksonville businesses ready to scale.
       </p>
 
-      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 32 : s.btns.marginTop, gap: isMobile ? 12 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
+      <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 36 : s.btns.marginTop, gap: isMobile ? 12 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
         <a
           href="/contact"
           style={{ ...s.btnDark, width: isMobile ? '100%' : 'auto', maxWidth: isMobile ? 320 : undefined, justifyContent: 'center', padding: isMobile ? '16px 28px' : s.btnDark.padding, fontSize: isMobile ? 15 : s.btnDark.fontSize }}
@@ -105,7 +105,7 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 28 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
+      <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 32 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
         {['Fast turnaround', 'Local SEO', 'Growth plans'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot} /> {t}
@@ -113,11 +113,9 @@ export default function Hero() {
         ))}
       </div>
 
-      {!isMobile && (
-        <div className="anim-rise-6" style={{ marginTop: 72, width: '100%', maxWidth: 820 }}>
-          <DashboardMockup isMobile={false} />
-        </div>
-      )}
+      <div className="anim-rise-6" style={{ marginTop: isMobile ? 40 : 72, width: '100%', maxWidth: isMobile ? '100%' : 820 }}>
+        <DashboardMockup isMobile={isMobile} />
+      </div>
     </section>
   )
 }
