@@ -60,8 +60,8 @@ const trustCards = [
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       </svg>
     ),
-    title: 'No pressure',
-    description: 'Just a real conversation about your goals. No sales pitch.',
+    title: 'Straightforward process',
+    description: "We'll discuss your goals and outline a clear plan — no obligations.",
   },
 ]
 
@@ -134,7 +134,7 @@ export default function ContactPage() {
           }}
         >
           {/* Trust signals */}
-          <div style={{ order: isMobile ? -1 : 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={{ order: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
             {trustCards.map((card) => (
               <div
                 key={card.title}
@@ -171,7 +171,7 @@ export default function ContactPage() {
           </div>
 
           {/* Form */}
-          <div style={{ order: isMobile ? 0 : 0 }}>
+          <div style={{ order: 0 }}>
             {sent ? (
               <div style={{ textAlign: 'center', padding: '64px 24px' }}>
                 <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#e6f4ea', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>

@@ -9,18 +9,18 @@ import Pricing from './components/Pricing'
 import Testimonial from './components/Testimonial'
 import FAQ from './components/FAQ'
 import Contact from './components/Contact'
-import { CTA, Footer } from './components/CTAFooter'
+import { Footer } from './components/CTAFooter'
 import SEOHead from './components/SEOHead'
 
 export default function App() {
   const localBusinessSchema = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
-    '@id': 'https://vibefoxstudio.com/#localbusiness',
+    '@id': 'https://www.vibefoxstudio.com/#localbusiness',
     name: 'VibefoxStudio',
     alternateName: 'Vibefox Studio',
-    image: 'https://vibefoxstudio.com/seo-preview.png',
-    url: 'https://vibefoxstudio.com',
+    image: 'https://www.vibefoxstudio.com/seo-preview.png',
+    url: 'https://www.vibefoxstudio.com',
     areaServed: 'Jacksonville, Florida',
     email: 'inquiries@vibefoxstudio.com',
     slogan: 'Jacksonville Web Design & SEO Services',
@@ -40,7 +40,7 @@ export default function App() {
         description="Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth."
         path="/"
         appendBrand={false}
-        image="https://vibefoxstudio.com/seo-preview.png"
+        image="https://www.vibefoxstudio.com/seo-preview.png"
         keywords="best digital marketing agency in jacksonville florida, jacksonville seo agency, website design jacksonville fl, local seo jacksonville, digital marketing jacksonville beach, lead generation agency jacksonville"
         structuredData={localBusinessSchema}
       />
@@ -55,7 +55,6 @@ export default function App() {
       <Pricing />
       <FAQ />
       <Contact />
-      <CTA />
       <Footer />
     </>
   )

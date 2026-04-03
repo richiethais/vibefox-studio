@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 
 const DEFAULT_SITE_NAME = 'VibefoxStudio'
 const DEFAULT_DISPLAY_NAME = 'Vibefox Studio'
-const DEFAULT_IMAGE = 'https://vibefoxstudio.com/seo-preview.png'
-const DEFAULT_LOGO = 'https://vibefoxstudio.com/logo-mark.png'
+const DEFAULT_IMAGE = 'https://www.vibefoxstudio.com/seo-preview.png'
+const DEFAULT_LOGO = 'https://www.vibefoxstudio.com/logo-mark.png'
 const GLOBAL_KEYWORDS = [
   'vibefoxstudio',
   'vibefox studio',
@@ -59,17 +59,17 @@ export default function SEOHead({
 }) {
   useEffect(() => {
     const pageTitle = title || DEFAULT_SITE_NAME
-    const canonicalUrl = `https://vibefoxstudio.com${path}`
+    const canonicalUrl = `https://www.vibefoxstudio.com${path}`
     const titleHasBrand = [DEFAULT_SITE_NAME, DEFAULT_DISPLAY_NAME].some(brand => pageTitle.includes(brand))
     const fullTitle = appendBrand && !titleHasBrand ? `${pageTitle} | ${DEFAULT_SITE_NAME}` : pageTitle
 
     const defaultOrganizationSchema = {
       '@context': 'https://schema.org',
       '@type': 'Organization',
-      '@id': 'https://vibefoxstudio.com/#organization',
+      '@id': 'https://www.vibefoxstudio.com/#organization',
       name: DEFAULT_DISPLAY_NAME,
       alternateName: DEFAULT_SITE_NAME,
-      url: 'https://vibefoxstudio.com',
+      url: 'https://www.vibefoxstudio.com',
       logo: DEFAULT_LOGO,
       areaServed: 'Jacksonville, Florida',
       description: 'Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth.',

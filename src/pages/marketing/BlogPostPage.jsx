@@ -71,10 +71,10 @@ export default function BlogPostPage() {
       name: 'VibefoxStudio',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://vibefoxstudio.com/favicon-512x512.png',
+        url: 'https://www.vibefoxstudio.com/favicon-512x512.png',
       },
     },
-    mainEntityOfPage: `https://vibefoxstudio.com/blogs/${activePost.slug}`,
+    mainEntityOfPage: `https://www.vibefoxstudio.com/blogs/${activePost.slug}`,
   }
 
   return (

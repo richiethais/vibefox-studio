@@ -4,4 +4,4 @@ Disallow: /admin/
 Disallow: /client/
 Disallow: /join
 
-Sitemap: https://vibefoxstudio.com/sitemap.xml
+Sitemap: https://www.vibefoxstudio.com/sitemap.xml

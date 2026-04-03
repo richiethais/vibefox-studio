@@ -22,12 +22,12 @@ export default function BlogPage() {
     '@context': 'https://schema.org',
     '@type': 'Blog',
     name: 'VibefoxStudio Blogs',
-    url: 'https://vibefoxstudio.com/blogs',
+    url: 'https://www.vibefoxstudio.com/blogs',
     blogPost: posts.map(post => ({
       '@type': 'BlogPosting',
       headline: post.title,
       datePublished: post.publishedAt,
-      url: `https://vibefoxstudio.com/blogs/${post.slug}`,
+      url: `https://www.vibefoxstudio.com/blogs/${post.slug}`,
     })),
   }
 

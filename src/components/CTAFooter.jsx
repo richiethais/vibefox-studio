@@ -30,7 +30,7 @@ export function CTA() {
           <em style={{ fontStyle: 'italic', color: '#b8906a' }}>that works?</em>
         </h2>
         <p style={{ fontSize: isMobile ? 15 : 17, color: '#7a7888', maxWidth: 400, margin: '0 auto', fontWeight: 300, lineHeight: isMobile ? 1.58 : 1.68, position: 'relative' }}>
-          No pressure, no sales pitch, just a real conversation with a Jacksonville SEO and digital marketing team.
+          Tell us about your project and we'll outline a clear path to growth — tailored to your business.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: isMobile ? 30 : 40, flexWrap: 'wrap', position: 'relative', flexDirection: isMobile ? 'column' : 'row', alignItems: 'center' }}>
           <a
@@ -57,6 +57,7 @@ export function CTA() {
 
 export function Footer() {
   const isMobile = useIsMobile()
+  const session = useAuth()
   const dashboardLink = useDashboardLink()
 
   return (
@@ -73,7 +74,7 @@ export function Footer() {
           {[
             { heading: 'Services', links: [['Landing Pages','/services'],['Business Websites','/services'],['Custom Web Apps','/services'],['SEO & Content','/services']] },
             { heading: 'Plans', links: [['Essential — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blogs','/blogs']] },
-            { heading: 'Contact', links: [['inquiries@vibefoxstudio.com','mailto:inquiries@vibefoxstudio.com'],['Jacksonville, FL','/services'],['FAQ','/faq']] },
+            { heading: 'Contact', links: [['inquiries@vibefoxstudio.com','mailto:inquiries@vibefoxstudio.com'],['Jacksonville, FL','/contact'],['FAQ','/faq']] },
           ].map(col => (
             <div key={col.heading}>
               <div style={{ fontSize: 11.5, fontWeight: 700, color: '#18181a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 13 }}>{col.heading}</div>
@@ -94,15 +95,17 @@ export function Footer() {
         <div style={{ display: 'flex', alignItems: isMobile ? 'flex-start' : 'center', justifyContent: 'space-between', paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 8 : 12 }}>
           <span style={{ fontSize: 13, color: '#7a7888', fontWeight: 300 }}>© 2026 VibefoxStudio. All rights reserved.</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 16 : 20, flexWrap: 'wrap' }}>
-            <a href={dashboardLink} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', fontWeight: 300 }}
-              onMouseEnter={e => e.currentTarget.style.color = '#18181a'}
-              onMouseLeave={e => e.currentTarget.style.color = '#7a7888'}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
-              </svg>
-              Dashboard
-            </a>
+            {session && (
+              <a href={dashboardLink} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', fontWeight: 300 }}
+                onMouseEnter={e => e.currentTarget.style.color = '#18181a'}
+                onMouseLeave={e => e.currentTarget.style.color = '#7a7888'}
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
+                </svg>
+                Dashboard
+              </a>
+            )}
             <a href="mailto:inquiries@vibefoxstudio.com" style={{ fontSize: 13, color: '#7a7888', textDecoration: 'none', transition: 'color 0.18s', wordBreak: 'break-all', fontWeight: 300 }}
               onMouseEnter={e => e.target.style.color = '#18181a'}
               onMouseLeave={e => e.target.style.color = '#7a7888'}

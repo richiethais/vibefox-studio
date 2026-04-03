@@ -2,11 +2,13 @@ import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const SITE_URL = 'https://vibefoxstudio.com'
+const SITE_URL = 'https://www.vibefoxstudio.com'
 const TODAY = new Date().toISOString().slice(0, 10)
 
 const staticRoutes = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
+  { path: '/services', changefreq: 'monthly', priority: '0.85' },
+  { path: '/contact', changefreq: 'monthly', priority: '0.8' },
   { path: '/work', changefreq: 'weekly', priority: '0.85' },
   { path: '/pricing', changefreq: 'weekly', priority: '0.8' },
   { path: '/faq', changefreq: 'monthly', priority: '0.75' },

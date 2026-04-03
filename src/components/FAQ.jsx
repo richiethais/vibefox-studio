@@ -12,7 +12,7 @@ const faqs = [
   { q: "Can you build something with user login and a database?", a: "Yes. We build full-stack apps with user auth, real-time data, file uploads, and secure per-user access. Booking systems, client portals, internal tools — all in scope. Custom app quotes start at $4,000." },
 ]
 
-export default function FAQ() {
+export default function FAQ({ hideHeader }) {
   const [open, setOpen] = useState(null)
   const ref = useFadeUp()
   const isMobile = useIsMobile()
@@ -20,8 +20,12 @@ export default function FAQ() {
   return (
     <section id="faq" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <Eyebrow>Common questions</Eyebrow>
-        <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
+        {!hideHeader && (
+          <>
+            <Eyebrow>FAQ</Eyebrow>
+            <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-1px' : h2Style.letterSpacing }}>Everything you need <em style={{ fontStyle: 'italic', color: '#b8906a' }}>to know.</em></h2>
+          </>
+        )}
 
         <div className="fade-up d2" style={{ marginTop: isMobile ? 28 : 52, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
           {faqs.map((faq, i) => (

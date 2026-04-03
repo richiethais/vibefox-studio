@@ -274,7 +274,7 @@ export default function ServicesPage() {
       name: 'VibefoxStudio',
       alternateName: 'Vibefox Studio',
       areaServed: 'Jacksonville, Florida',
-      url: 'https://vibefoxstudio.com/services',
+      url: 'https://www.vibefoxstudio.com/services',
     },
     areaServed: {
       '@type': 'City',
@@ -399,7 +399,7 @@ export default function ServicesPage() {
               marginBottom: 28,
             }}
           >
-            No pressure. Just a real conversation about your goals.
+            Tell us about your goals and we'll put together a plan that works for your business.
           </p>
           <Link
             to="/contact"

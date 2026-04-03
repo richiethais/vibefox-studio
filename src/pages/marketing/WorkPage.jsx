@@ -3,7 +3,6 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import Work from '../../components/Work'
 import Testimonial from '../../components/Testimonial'
-import Contact from '../../components/Contact'
 
 export default function WorkPage() {
   return (
@@ -21,9 +20,8 @@ export default function WorkPage() {
         sub="Websites we designed, built, and launched for Jacksonville businesses — each one live, fast, and driving real customers."
       />
 
-      <Work />
+      <Work hideHeader />
       <Testimonial />
-      <Contact />
     </MarketingLayout>
   )
 }

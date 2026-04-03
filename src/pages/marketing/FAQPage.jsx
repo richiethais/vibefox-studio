@@ -2,7 +2,6 @@ import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import FAQ from '../../components/FAQ'
-import Contact from '../../components/Contact'
 
 export default function FAQPage() {
   const faqSchema = {
@@ -44,8 +43,7 @@ export default function FAQPage() {
         sub="Clear answers about SEO, web strategy, timelines, and support from a Jacksonville-focused VibefoxStudio digital marketing team."
       />
 
-      <FAQ />
-      <Contact />
+      <FAQ hideHeader />
     </MarketingLayout>
   )
 }

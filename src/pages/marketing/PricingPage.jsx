@@ -3,7 +3,6 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import Pricing from '../../components/Pricing'
 import FAQ from '../../components/FAQ'
-import Contact from '../../components/Contact'
 
 export default function PricingPage() {
   return (
@@ -21,9 +20,8 @@ export default function PricingPage() {
         sub="Choose a monthly plan for ongoing SEO, website support, and lead generation. Built for businesses comparing the best digital marketing agencies in Jacksonville, Florida."
       />
 
-      <Pricing />
-      <FAQ />
-      <Contact />
+      <Pricing hideHeader />
+      <FAQ hideHeader />
     </MarketingLayout>
   )
 }

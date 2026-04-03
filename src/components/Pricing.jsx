@@ -62,7 +62,7 @@ const projectPlans = [
   },
 ]
 
-export default function Pricing() {
+export default function Pricing({ hideHeader }) {
   const ref = useFadeUp()
   const isMobile = useIsMobile()
   const [selectedFrequency, setSelectedFrequency] = useState('monthly')
@@ -71,17 +71,19 @@ export default function Pricing() {
   return (
     <section id="pricing" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 28 : 48 }}>
-          <Eyebrow>Pricing</Eyebrow>
-          <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
-            Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
-          </h2>
-          {!isMobile && (
-            <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0' }}>
-              Month-to-month. No contracts. Cancel anytime. Project quotes separate.
-            </p>
-          )}
-        </div>
+        {!hideHeader && (
+          <div className="fade-up" style={{ textAlign: 'center', marginBottom: isMobile ? 28 : 48 }}>
+            <Eyebrow>Pricing</Eyebrow>
+            <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
+              Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
+            </h2>
+            {!isMobile && (
+              <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0' }}>
+                Month-to-month. No contracts. Cancel anytime. Project quotes separate.
+              </p>
+            )}
+          </div>
+        )}
 
         {isMobile ? (
           /* Mobile: Tabbed pricing interface */
