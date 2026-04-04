@@ -1,8 +1,28 @@
 {
   "rewrites": [
     {
+      "source": "/admin/:path*",
+      "destination": "/spa.html"
+    },
+    {
+      "source": "/client/:path*",
+      "destination": "/spa.html"
+    },
+    {
+      "source": "/login",
+      "destination": "/spa.html"
+    },
+    {
+      "source": "/join",
+      "destination": "/spa.html"
+    },
+    {
+      "source": "/reset-password",
+      "destination": "/spa.html"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/spa.html"
     }
   ]
 }

@@ -1,5 +1,5 @@
 import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { createRoot, hydrateRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import { AuthProvider } from './lib/auth'
@@ -38,7 +38,8 @@ import BlogPage from './pages/marketing/BlogPage.jsx'
 import BlogPostPage from './pages/marketing/BlogPostPage.jsx'
 import ContactPage from './pages/marketing/ContactPage.jsx'
 
-createRoot(document.getElementById('root')).render(
+const container = document.getElementById('root')
+const app = (
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
@@ -89,3 +90,10 @@ createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </StrictMode>
 )
+
+// Hydrate if prerendered HTML exists, otherwise client-render
+if (container.children.length > 0) {
+  hydrateRoot(container, app)
+} else {
+  createRoot(container).render(app)
+}

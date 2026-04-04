@@ -77,6 +77,31 @@ export default function BlogPostPage() {
     mainEntityOfPage: `https://www.vibefoxstudio.com/blogs/${activePost.slug}`,
   }
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: 'https://www.vibefoxstudio.com/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Blogs',
+        item: 'https://www.vibefoxstudio.com/blogs',
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: activePost.title,
+        item: `https://www.vibefoxstudio.com/blogs/${activePost.slug}`,
+      },
+    ],
+  }
+
   return (
     <MarketingLayout>
       <SEOHead
@@ -87,7 +112,7 @@ export default function BlogPostPage() {
         type="article"
         publishedTime={activePost.publishedAt}
         modifiedTime={activePost.publishedAt}
-        structuredData={schema}
+        structuredData={[schema, breadcrumbSchema]}
       />
 
       <article style={{ padding: isMobile ? '34px 18px 72px' : '44px 40px 86px' }}>

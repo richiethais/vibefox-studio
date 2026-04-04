@@ -1,15 +1,14 @@
 import { useEffect, useState } from 'react'
 
 export default function useIsMobile(breakpoint = 920) {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < breakpoint
-  })
+  // Always start false for SSR hydration compatibility — useEffect syncs on client
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth < breakpoint)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
+    const check = () => setIsMobile(window.innerWidth < breakpoint)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
   }, [breakpoint])
 
   return isMobile
