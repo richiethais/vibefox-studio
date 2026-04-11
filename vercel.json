@@ -1,8 +1,15 @@
 {
+  "redirects": [
+    { "source": "/blog/:slug", "destination": "/blogs/:slug", "permanent": true },
+    { "source": "/blog", "destination": "/blogs", "permanent": true }
+  ],
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/blogs/:slug", "destination": "/api/blog-meta?slug=:slug" },
+    { "source": "/admin/:path*", "destination": "/index.html" },
+    { "source": "/client/:path*", "destination": "/index.html" },
+    { "source": "/login", "destination": "/index.html" },
+    { "source": "/join", "destination": "/index.html" },
+    { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
