@@ -63,10 +63,10 @@ const projectPlans = [
 ]
 
 export default function Pricing({ hideHeader }) {
-  const ref = useFadeUp()
   const isMobile = useIsMobile()
   const [selectedFrequency, setSelectedFrequency] = useState('monthly')
-  const [activeTab, setActiveTab] = useState('growth')
+  const [activeTab, setActiveTab] = useState('projects')
+  const ref = useFadeUp([activeTab])
 
   return (
     <section id="pricing" ref={ref} style={{ padding: isMobile ? '64px 24px' : '96px 40px' }}>
@@ -77,52 +77,58 @@ export default function Pricing({ hideHeader }) {
             <h2 className="fade-up d1" style={{ ...h2Style, fontSize: isMobile ? 'clamp(24px, 7.5vw, 34px)' : h2Style.fontSize, letterSpacing: isMobile ? '-0.8px' : h2Style.letterSpacing }}>
               Simple, honest <em style={{ fontStyle: 'italic', color: '#b8906a' }}>pricing.</em>
             </h2>
-            {!isMobile && (
-              <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0' }}>
-                Month-to-month. No contracts. Cancel anytime. Project quotes separate.
-              </p>
-            )}
+            <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0', fontSize: isMobile ? 'clamp(12px, 3.5vw, 14px)' : subStyle.fontSize }}>
+              One-time projects or ongoing plans. No contracts. Cancel anytime.
+            </p>
           </div>
         )}
 
-        {isMobile ? (
-          /* Mobile: Tabbed pricing interface */
-          <>
-            {/* Section toggle: Growth Plans / One-time */}
-            <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3, marginBottom: 20, width: '100%' }}>
-              {[['growth', 'Monthly Plans'], ['projects', 'One-time Projects']].map(([key, label]) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  style={{
-                    flex: 1, padding: '10px 6px', fontSize: 12, fontWeight: 600,
-                    background: activeTab === key ? '#faf9f7' : 'transparent',
-                    boxShadow: activeTab === key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
-                    border: 'none', borderRadius: 100, cursor: 'pointer',
-                    color: '#18181a', transition: 'all 0.2s',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {label}
-                </button>
+        {/* Section toggle: One-time Projects / Monthly Plans */}
+        <div className="fade-up d2" style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: isMobile ? 3 : 4, marginBottom: isMobile ? 20 : 28, width: isMobile ? '100%' : 'auto', maxWidth: isMobile ? 'none' : 360, margin: isMobile ? '0 0 20px' : '0 auto 28px' }}>
+          {[['projects', 'One-time Projects'], ['growth', 'Monthly Plans']].map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              style={{
+                flex: 1, padding: isMobile ? '10px 6px' : '10px 20px', fontSize: isMobile ? 12 : 13, fontWeight: 600,
+                background: activeTab === key ? '#faf9f7' : 'transparent',
+                boxShadow: activeTab === key ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                border: 'none', borderRadius: 100, cursor: 'pointer',
+                color: '#18181a', transition: 'all 0.2s',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Frequency Toggle — only visible for monthly plans */}
+        {activeTab === 'growth' && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: isMobile ? 16 : 36 }}>
+            <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: isMobile ? 3 : 4 }}>
+              {PAYMENT_FREQUENCIES.map((freq) => (
+                <FrequencyTab
+                  key={freq}
+                  text={freq}
+                  selected={selectedFrequency === freq}
+                  setSelected={setSelectedFrequency}
+                  discount={freq === 'yearly'}
+                />
               ))}
             </div>
+          </div>
+        )}
 
-            {/* Frequency Toggle — always visible */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-              <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 3 }}>
-                {PAYMENT_FREQUENCIES.map((freq) => (
-                  <FrequencyTab
-                    key={freq}
-                    text={freq}
-                    selected={selectedFrequency === freq}
-                    setSelected={setSelectedFrequency}
-                    discount={freq === 'yearly'}
-                  />
-                ))}
-              </div>
-            </div>
+        {/* One-time projects note */}
+        {activeTab === 'projects' && (
+          <p className="fade-up" style={{ textAlign: 'center', fontSize: isMobile ? 12 : 14, color: '#7a7888', fontWeight: 400, marginBottom: isMobile ? 16 : 28, lineHeight: 1.5, maxWidth: 480, marginLeft: 'auto', marginRight: 'auto' }}>
+            Every project includes a custom plan outlining scope, timeline, and deliverables — so you know exactly what to expect.
+          </p>
+        )}
 
+        {isMobile ? (
+          <>
             {activeTab === 'growth' && (
               <div style={{ display: 'flex', gap: 14, overflowX: 'auto', scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch', margin: '0 -24px', paddingLeft: 24, paddingRight: 24, paddingBottom: 8 }}>
                 {plans.map((p) => (
@@ -144,44 +150,22 @@ export default function Pricing({ hideHeader }) {
             )}
           </>
         ) : (
-          /* Desktop: Original layout */
           <>
-            {/* Frequency Toggle */}
-            <div className="fade-up d3" style={{ display: 'flex', justifyContent: 'center', marginBottom: 36 }}>
-              <div style={{ display: 'flex', background: '#edeae5', borderRadius: 100, padding: 4 }}>
-                {PAYMENT_FREQUENCIES.map((freq) => (
-                  <FrequencyTab
-                    key={freq}
-                    text={freq}
-                    selected={selectedFrequency === freq}
-                    setSelected={setSelectedFrequency}
-                    discount={freq === 'yearly'}
-                  />
+            {activeTab === 'growth' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
+                {plans.map((p, i) => (
+                  <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={false} paymentFrequency={selectedFrequency} />
                 ))}
               </div>
-            </div>
+            )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
-              {plans.map((p, i) => (
-                <PricingCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={false} paymentFrequency={selectedFrequency} />
-              ))}
-            </div>
-
-            <div className="fade-up" style={{ textAlign: 'center', marginTop: 80, marginBottom: 48 }}>
-              <Eyebrow>One-time Projects</Eyebrow>
-              <h2 className="fade-up d1" style={h2Style}>
-                Build something <em style={{ fontStyle: 'italic', color: '#b8906a' }}>unforgettable.</em>
-              </h2>
-              <p className="fade-up d2" style={{ ...subStyle, margin: '14px auto 0' }}>
-                High-performance websites and web applications built from scratch. Project costs are one-time investments.
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
-              {projectPlans.map((p, i) => (
-                <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={false} />
-              ))}
-            </div>
+            {activeTab === 'projects' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14, alignItems: 'start' }}>
+                {projectPlans.map((p, i) => (
+                  <ProjectCard key={p.name} plan={p} delay={`d${i + 1}`} isMobile={false} />
+                ))}
+              </div>
+            )}
           </>
         )}
       </div>

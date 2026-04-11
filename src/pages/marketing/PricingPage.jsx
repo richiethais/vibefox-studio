@@ -17,7 +17,7 @@ export default function PricingPage() {
       <PageHero
         eyebrow="Pricing"
         title="Simple pricing for serious business growth."
-        sub="Choose a monthly plan for ongoing SEO, website support, and lead generation. Built for businesses comparing the best digital marketing agencies in Jacksonville, Florida."
+        sub="One-time projects or ongoing monthly plans — no contracts, cancel anytime. Built for businesses comparing the best digital marketing agencies in Jacksonville, Florida."
       />
 
       <Pricing hideHeader />
