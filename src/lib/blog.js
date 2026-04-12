@@ -4,6 +4,7 @@ import {
   mergePublishedPosts,
   normalizePublishedPost,
 } from './publishedPosts'
+import { getBlogSlugCandidates } from './blogSlugs.js'
 
 export async function publishDueScheduledPosts() {
   try {
@@ -39,15 +40,23 @@ export async function fetchPublishedPosts() {
 
 export async function fetchPostBySlug(slug) {
   await publishDueScheduledPosts()
+  const slugCandidates = getBlogSlugCandidates(slug).filter(Boolean)
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('blog_posts')
     .select('*')
-    .eq('slug', slug)
     .eq('status', 'published')
+
+  query = slugCandidates.length === 1
+    ? query.eq('slug', slugCandidates[0])
+    : query.in('slug', slugCandidates)
+
+  const { data, error } = await query
+    .order('published_at', { ascending: false })
+    .limit(1)
     .maybeSingle()
 
   if (!error && data) return normalizeRow(data)
-  const fallback = fallbackPosts().find(post => post.slug === slug)
+  const fallback = fallbackPosts().find(post => slugCandidates.includes(post.slug))
   return fallback || null
 }

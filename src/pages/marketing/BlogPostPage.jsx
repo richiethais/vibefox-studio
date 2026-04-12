@@ -56,6 +56,10 @@ export default function BlogPostPage({ initialPost, initialRelated }) {
     return <Navigate to="/blogs" replace />
   }
 
+  if (post?.slug && post.slug !== slug) {
+    return <Navigate to={`/blogs/${post.slug}`} replace state={{ preloadedPost: post }} />
+  }
+
   const seo = getBlogPostSeo(activePost)
 
   return (

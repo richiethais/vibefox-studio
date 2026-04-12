@@ -1,4 +1,5 @@
 import { getAllBlogPosts } from '../content/blogPosts.js'
+import { getBlogSlugCandidates, getCanonicalBlogSlug, getLegacyBlogSlugs } from './blogSlugs.js'
 
 function toBodyList(value) {
   if (Array.isArray(value)) return value.filter(Boolean)
@@ -10,10 +11,13 @@ function toBodyList(value) {
 
 export function normalizePublishedPost(row = {}) {
   const body = toBodyList(row.body ?? row.content)
+  const canonicalSlug = getCanonicalBlogSlug(row.slug)
 
   return {
     id: row.id,
-    slug: row.slug,
+    slug: canonicalSlug,
+    sourceSlug: row.slug,
+    legacySlugs: row.slug && row.slug !== canonicalSlug ? [row.slug, ...getLegacyBlogSlugs(canonicalSlug)] : getLegacyBlogSlugs(canonicalSlug),
     title: row.title,
     excerpt: row.excerpt,
     publishedAt: row.published_at || row.publishedAt || row.created_at,
@@ -103,12 +107,13 @@ export async function fetchSupabasePublishedPostBySlug(
   if (!slug) return null
 
   try {
+    const candidates = getBlogSlugCandidates(slug).filter(Boolean)
     const rows = await fetchSupabaseRows(
       supabaseUrl,
       supabaseAnonKey,
       {
         select: '*',
-        slug: `eq.${slug}`,
+        slug: candidates.length === 1 ? `eq.${candidates[0]}` : `in.(${candidates.join(',')})`,
         status: 'eq.published',
         limit: '1',
       },

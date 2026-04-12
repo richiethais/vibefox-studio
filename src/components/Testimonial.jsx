@@ -27,7 +27,7 @@ export default function Testimonial() {
             ))}
           </div>
           <div style={{ fontFamily: '"DM Serif Display", serif', fontSize: isMobile ? 18 : 22, color: '#18181a', lineHeight: 1.5, letterSpacing: '-0.3px', marginBottom: isMobile ? 20 : 28, position: 'relative' }}>
-            "Vibefox Studio built us a beautiful website that really captures the feel of our restaurant. We went from having no online presence to getting new customers every week who found us through Google. The whole process was fast, easy, and they genuinely cared about getting it right."
+            "Vibefox Studio built us a beautiful website that really captures the feel of our restaurant. We went from having no online presence to getting new customers every week who found us through Google. The site is easier for guests to use, the menu is finally clear on mobile, and the whole process felt fast, thoughtful, and genuinely focused on getting the details right."
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 13, position: 'relative' }}>
             <div style={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid rgba(200,169,126,0.3)' }}>

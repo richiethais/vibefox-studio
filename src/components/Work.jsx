@@ -1,4 +1,3 @@
-import { useState, useRef, useEffect } from 'react'
 import { useFadeUp } from './useFadeUp'
 import Eyebrow from './Eyebrow'
 import { h2Style, subStyle } from './sectionStyles'
@@ -9,7 +8,7 @@ const projects = [
     tag: 'Website',
     title: 'Olympia Cafe',
     url: 'https://olympia-cafe.com',
-    desc: 'A full custom website for a beloved Jacksonville Greek cafe — featuring their menu, story, and location with a warm, inviting design that drives foot traffic.',
+    desc: 'A full custom website for a beloved Jacksonville Greek cafe, built to showcase the menu, tell the brand story, and make the location easy to find on mobile. The experience focuses on fast load times, clear calls to action, and a warm visual identity that helps turn nearby searchers into in-person diners.',
     heroImg: '/olympia-cafe-hero.webp',
     foodImgs: ['/olympia-gyro.webp', '/olympia-philly.webp', '/olympia-wings.webp'],
     label: 'Restaurant Website',
@@ -21,7 +20,7 @@ const projects = [
     tag: 'Website',
     title: 'Fatboy Fried Rice',
     url: 'https://fatboyfriedrice.com',
-    desc: 'A bold, vibrant website for Jacksonville\'s favorite Asian fusion food truck — complete with online ordering, catering info, team showcase, and a menu that pops.',
+    desc: 'A bold website for Jacksonville\'s favorite Asian fusion food truck, complete with online ordering, catering details, team highlights, and menu content that is easy to browse on the go. We structured the page to support branded search, local discovery, and fast decision-making for hungry customers ready to order.',
     heroImg: '/fatboy-fried-rice-hero.webp',
     foodImgs: ['/fatboy-sisig.webp', '/fatboy-teriyaki.webp', '/fatboy-team.webp'],
     label: 'Food Truck Website',
@@ -59,7 +58,7 @@ export default function Work({ hideHeader }) {
 }
 
 function ProjectCard({ project, index, isMobile }) {
-  const { tag, title, url, desc, heroImg, foodImgs, label, sub, bg, accent } = project
+  const { tag, title, url, desc, heroImg, foodImgs, sub, bg, accent } = project
 
   return (
     <div

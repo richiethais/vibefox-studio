@@ -43,7 +43,7 @@ const trustCards = [
       </svg>
     ),
     title: 'Quick response',
-    description: 'We typically reply within 24 hours — often same day.',
+    description: 'We typically reply within 24 hours, often the same day, with a clear next step based on your goals, timeline, and budget.',
   },
   {
     icon: (
@@ -53,7 +53,7 @@ const trustCards = [
       </svg>
     ),
     title: 'Jacksonville, FL',
-    description: 'Local team. We know the market and the businesses here.',
+    description: 'Local team with experience supporting Jacksonville restaurants, service businesses, and small brands that need websites and SEO that actually convert.',
   },
   {
     icon: (
@@ -62,7 +62,7 @@ const trustCards = [
       </svg>
     ),
     title: 'Straightforward process',
-    description: "We'll discuss your goals and outline a clear plan — no obligations.",
+    description: "We'll discuss your goals, current marketing gaps, and the fastest path to launch or improve your site, with no pressure and no vague proposals.",
   },
 ]
 
@@ -123,7 +123,7 @@ export default function ContactPage() {
             Let's build something <em style={{ fontStyle: 'italic', color: '#b8906a' }}>great.</em>
           </h1>
           <p className="anim-rise-3" style={{ fontSize: isMobile ? 15 : 17, color: '#666', maxWidth: 500, margin: '0 auto' }}>
-            Tell us about your project and we'll get back to you within 24 hours.
+            Tell us what you are building, what is not working with your current site, and what kind of growth you want next. We help Jacksonville businesses with web design, SEO, content, and custom builds, and we will get back to you within 24 hours.
           </p>
         </div>
 
@@ -188,6 +188,9 @@ export default function ContactPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <p style={{ fontSize: 14, color: '#666', lineHeight: 1.6, margin: '0 0 4px' }}>
+                  Share a little context so we can recommend the right scope, whether you need a landing page, a full business website, ongoing SEO support, or a custom web app.
+                </p>
                 <input
                   type="text"
                   placeholder="Name"
@@ -262,6 +265,9 @@ export default function ContactPage() {
                 >
                   {loading ? 'Sending...' : 'Send message'}
                 </button>
+                <p style={{ fontSize: 12, color: '#7a7888', lineHeight: 1.5, margin: 0 }}>
+                  Most inquiries receive a personal response with suggested next steps, timeline guidance, and whether your project is a fit for our current schedule.
+                </p>
               </form>
             )}
           </div>

@@ -1,5 +1,6 @@
 {
   "redirects": [
+    { "source": "/blogs/restaurant-seo-guide-2026-1", "destination": "/blogs/restaurant-seo-guide-2026", "permanent": true },
     { "source": "/blog/:slug", "destination": "/blogs/:slug", "permanent": true },
     { "source": "/blog", "destination": "/blogs", "permanent": true }
   ],

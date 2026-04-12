@@ -21,7 +21,7 @@ export default function WorkPage() {
       <PageHero
         eyebrow="Our Work"
         title="Real sites. Real results."
-        sub="Websites we designed, built, and launched for Jacksonville businesses — each one live, fast, and driving real customers."
+        sub="Websites we designed, built, and launched for Jacksonville businesses. Each project balances brand personality, mobile performance, local SEO foundations, and clear conversion paths so the site does more than look good after launch."
       />
 
       <Work hideHeader />

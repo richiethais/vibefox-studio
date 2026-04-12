@@ -31,11 +31,11 @@ export const PUBLIC_ROUTE_SEO = {
       'digital marketing services jacksonville florida, seo services jacksonville, web design and seo agency jacksonville, best digital marketing agency in jacksonville florida, local marketing company jacksonville',
   },
   '/work': {
-    title: 'Jacksonville Web Design Portfolio | Vibefox Studio',
+    title: 'Our Work: Jacksonville Web Design Portfolio | Vibefox Studio',
     description:
-      "See real websites and SEO projects we've built for Jacksonville businesses. From restaurants to food trucks, explore our portfolio of live client work.",
+      "Explore our work for Jacksonville businesses, including restaurant websites, food truck sites, and SEO-focused builds designed to turn visits into leads.",
     keywords:
-      'web design portfolio jacksonville, jacksonville website examples, restaurant website design jacksonville florida, seo project results jacksonville, vibefox studio portfolio',
+      'our work, web design portfolio jacksonville, jacksonville website examples, restaurant website design jacksonville florida, seo project results jacksonville, vibefox studio portfolio',
   },
   '/pricing': {
     title: 'Jacksonville SEO Pricing | Vibefox Studio',
@@ -58,11 +58,11 @@ export const PUBLIC_ROUTE_SEO = {
       'contact jacksonville digital marketing agency, web design inquiry jacksonville florida',
   },
   '/blogs': {
-    title: 'Jacksonville SEO Blog | Vibefox Studio',
+    title: 'Jacksonville SEO Blogs | Vibefox Studio',
     description:
-      'Weekly blog posts on SEO, local search, conversion optimization, and digital growth for Jacksonville, Florida businesses.',
+      'Browse our SEO blogs for Jacksonville businesses, with practical guidance on local search, content strategy, website performance, and digital growth.',
     keywords:
-      'jacksonville digital marketing blog, seo tips jacksonville florida, local seo blog, best digital marketing agency in jacksonville florida',
+      'jacksonville seo blogs, digital marketing blogs jacksonville florida, seo tips jacksonville florida, local seo blogs, best digital marketing agency in jacksonville florida',
   },
 }
 
@@ -73,6 +73,8 @@ const BLOG_TITLE_OVERRIDES_BY_SLUG = {
     'Jacksonville Local SEO Strategy for SMBs | Vibefox Studio',
   'seo-blogging-calendar-for-lead-generation':
     'SEO Blog Calendar for Qualified Leads | Vibefox Studio',
+  'restaurant-seo-guide-2026':
+    'Restaurant SEO Guide for 2026 | Vibefox Studio',
   'website-speed-and-conversion-optimization-jacksonville':
     'Jacksonville Speed & Conversion Tips | Vibefox Studio',
 }
