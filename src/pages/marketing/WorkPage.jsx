@@ -3,15 +3,19 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import Work from '../../components/Work'
 import Testimonial from '../../components/Testimonial'
+import { getPublicRouteSeo } from '../../lib/publicSeo'
 
 export default function WorkPage() {
+  const seo = getPublicRouteSeo('/work')
+
   return (
     <MarketingLayout>
       <SEOHead
-        title="Our Work | Jacksonville Web Design & SEO Projects | VibefoxStudio"
-        description="See real websites and SEO projects we've built for Jacksonville businesses. From restaurants to food trucks — explore our portfolio of live client work."
-        path="/work"
-        keywords="web design portfolio jacksonville, jacksonville website examples, restaurant website design jacksonville florida, seo project results jacksonville, vibefox studio portfolio"
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        appendBrand={false}
+        keywords={seo.keywords}
       />
 
       <PageHero

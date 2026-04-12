@@ -4,6 +4,7 @@ import SEOHead from '../../components/SEOHead'
 import useIsMobile from '../../components/useIsMobile'
 import { supabase } from '../../lib/supabase'
 import { parseFunctionError } from '../../lib/supabaseFunctions'
+import { getPublicRouteSeo } from '../../lib/publicSeo'
 
 const SERVICES = [
   'Landing Page',
@@ -67,6 +68,7 @@ const trustCards = [
 
 export default function ContactPage() {
   const isMobile = useIsMobile()
+  const seo = getPublicRouteSeo('/contact')
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -104,9 +106,11 @@ export default function ContactPage() {
   return (
     <MarketingLayout hideCTA>
       <SEOHead
-        title="Contact VibefoxStudio | Jacksonville Digital Marketing Agency"
-        description="Get in touch with Vibefox Studio. We typically respond within 24 hours."
-        path="/contact"
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        appendBrand={false}
+        keywords={seo.keywords}
       />
 
       <section style={{ padding: isMobile ? '128px 18px 72px' : '160px 40px 96px', maxWidth: 1100, margin: '0 auto' }}>

@@ -5,11 +5,12 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import { fetchPublishedPosts } from '../../lib/blog'
 import useIsMobile from '../../components/useIsMobile'
+import { getBlogIndexStructuredData, getPublicRouteSeo } from '../../lib/publicSeo'
 
-export default function BlogPage() {
+export default function BlogPage({ initialPosts }) {
   const isMobile = useIsMobile()
-  const [posts, setPosts] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [posts, setPosts] = useState(initialPosts || [])
+  const [loading, setLoading] = useState(!initialPosts?.length)
 
   useEffect(() => {
     fetchPublishedPosts().then(data => {
@@ -18,26 +19,17 @@ export default function BlogPage() {
     })
   }, [])
 
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'Blog',
-    name: 'VibefoxStudio Blogs',
-    url: 'https://www.vibefoxstudio.com/blogs',
-    blogPost: posts.map(post => ({
-      '@type': 'BlogPosting',
-      headline: post.title,
-      datePublished: post.publishedAt,
-      url: `https://www.vibefoxstudio.com/blogs/${post.slug}`,
-    })),
-  }
+  const seo = getPublicRouteSeo('/blogs')
+  const schema = getBlogIndexStructuredData(posts)
 
   return (
     <MarketingLayout>
       <SEOHead
-        title="VibefoxStudio Blogs | Jacksonville SEO Tips & Digital Marketing Insights"
-        description="Weekly blog posts on SEO, local search, conversion optimization, and digital growth for Jacksonville, Florida businesses."
-        path="/blogs"
-        keywords="jacksonville digital marketing blog, seo tips jacksonville florida, local seo blog, best digital marketing agency in jacksonville florida"
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        appendBrand={false}
+        keywords={seo.keywords}
         structuredData={schema}
       />
 

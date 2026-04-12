@@ -5,15 +5,16 @@ import SEOHead from '../../components/SEOHead'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import { fetchPostBySlug, fetchPublishedPosts } from '../../lib/blog'
 import useIsMobile from '../../components/useIsMobile'
+import { getBlogPostSeo } from '../../lib/publicSeo'
 
 marked.setOptions({ breaks: true, gfm: true })
 
-export default function BlogPostPage() {
+export default function BlogPostPage({ initialPost, initialRelated }) {
   const isMobile = useIsMobile()
   const { slug } = useParams()
   const location = useLocation()
-  const [post, setPost] = useState(undefined)
-  const [related, setRelated] = useState([])
+  const [post, setPost] = useState(initialPost)
+  const [related, setRelated] = useState(initialRelated || [])
   const preloadedPost = location.state?.preloadedPost
   const matchingPreloadedPost = preloadedPost?.slug === slug ? preloadedPost : null
   const matchingFetchedPost = post?.slug === slug ? post : null
@@ -55,39 +56,21 @@ export default function BlogPostPage() {
     return <Navigate to="/blogs" replace />
   }
 
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'BlogPosting',
-    headline: activePost.title,
-    datePublished: activePost.publishedAt,
-    dateModified: activePost.publishedAt,
-    description: activePost.excerpt,
-    author: {
-      '@type': 'Organization',
-      name: 'VibefoxStudio',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'VibefoxStudio',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://www.vibefoxstudio.com/favicon-512x512.png',
-      },
-    },
-    mainEntityOfPage: `https://www.vibefoxstudio.com/blogs/${activePost.slug}`,
-  }
+  const seo = getBlogPostSeo(activePost)
 
   return (
     <MarketingLayout>
       <SEOHead
-        title={activePost.title}
-        description={activePost.excerpt}
-        path={`/blogs/${activePost.slug}`}
-        keywords={activePost.keywords}
-        type="article"
-        publishedTime={activePost.publishedAt}
-        modifiedTime={activePost.publishedAt}
-        structuredData={schema}
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        appendBrand={false}
+        keywords={seo.keywords}
+        type={seo.type}
+        image={seo.image}
+        publishedTime={seo.publishedTime}
+        modifiedTime={seo.modifiedTime}
+        structuredData={seo.structuredData}
       />
 
       <article style={{ padding: isMobile ? '34px 18px 72px' : '44px 40px 86px' }}>

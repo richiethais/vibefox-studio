@@ -4,6 +4,7 @@ import Comparison from '../../components/Comparison'
 import useIsMobile from '../../components/useIsMobile'
 import { useFadeUp } from '../../components/useFadeUp'
 import { Link } from 'react-router-dom'
+import { getPublicRouteSeo, getServicesStructuredData } from '../../lib/publicSeo'
 
 const serviceDetails = [
   {
@@ -264,31 +265,17 @@ function ServiceSection({ service, index, isMobile }) {
 export default function ServicesPage() {
   const heroRef = useFadeUp()
   const isMobile = useIsMobile()
-
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'Service',
-    serviceType: 'Digital Marketing and Web Development',
-    provider: {
-      '@type': 'LocalBusiness',
-      name: 'VibefoxStudio',
-      alternateName: 'Vibefox Studio',
-      areaServed: 'Jacksonville, Florida',
-      url: 'https://www.vibefoxstudio.com/services',
-    },
-    areaServed: {
-      '@type': 'City',
-      name: 'Jacksonville',
-    },
-  }
+  const seo = getPublicRouteSeo('/services')
+  const schema = getServicesStructuredData()
 
   return (
     <MarketingLayout>
       <SEOHead
-        title="VibefoxStudio Services | Jacksonville SEO, Web Design & Growth"
-        description="Jacksonville-focused SEO, websites, content strategy, and conversion-focused digital marketing services from VibefoxStudio."
-        path="/services"
-        keywords="digital marketing services jacksonville florida, seo services jacksonville, web design and seo agency jacksonville, best digital marketing agency in jacksonville florida, local marketing company jacksonville"
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        appendBrand={false}
+        keywords={seo.keywords}
         structuredData={schema}
       />
 

@@ -1,5 +1,9 @@
 import { supabase } from './supabase'
-import { getAllBlogPosts } from '../content/blogPosts'
+import {
+  getFallbackPublishedPosts,
+  mergePublishedPosts,
+  normalizePublishedPost,
+} from './publishedPosts'
 
 export async function publishDueScheduledPosts() {
   try {
@@ -10,32 +14,11 @@ export async function publishDueScheduledPosts() {
 }
 
 function normalizeRow(row) {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    excerpt: row.excerpt,
-    publishedAt: row.published_at || row.publishedAt || row.created_at,
-    readTime: row.read_time || row.readTime || '6 min read',
-    category: row.category || 'Digital Marketing',
-    keywords: row.keywords || '',
-    coverImageUrl: row.cover_image_url || row.coverImageUrl || '',
-    body: Array.isArray(row.body)
-      ? row.body
-      : String(row.content || '').split('\n\n').map(p => p.trim()).filter(Boolean),
-    content: row.content || (Array.isArray(row.body) ? row.body.join('\n\n') : ''),
-  }
+  return normalizePublishedPost(row)
 }
 
 function fallbackPosts() {
-  return getAllBlogPosts().map(post => normalizeRow({
-    ...post,
-    content: Array.isArray(post.body) ? post.body.join('\n\n') : '',
-    cover_image_url: '',
-    status: 'published',
-    published_at: post.publishedAt,
-    read_time: post.readTime,
-  }))
+  return getFallbackPublishedPosts()
 }
 
 export async function fetchPublishedPosts() {
@@ -51,9 +34,7 @@ export async function fetchPublishedPosts() {
   if (error || !data || data.length === 0) return legacy
 
   const dbPosts = data.map(normalizeRow)
-  const dbSlugs = new Set(dbPosts.map(post => post.slug))
-  const merged = [...dbPosts, ...legacy.filter(post => !dbSlugs.has(post.slug))]
-  return merged.sort((a, b) => new Date(b.publishedAt || 0).getTime() - new Date(a.publishedAt || 0).getTime())
+  return mergePublishedPosts(dbPosts, legacy)
 }
 
 export async function fetchPostBySlug(slug) {

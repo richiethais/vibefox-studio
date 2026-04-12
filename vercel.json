@@ -4,7 +4,13 @@
     { "source": "/blog", "destination": "/blogs", "permanent": true }
   ],
   "rewrites": [
-    { "source": "/blogs/:slug", "destination": "/api/blog-meta?slug=:slug" },
+    { "source": "/services", "destination": "/services/index.html" },
+    { "source": "/work", "destination": "/work/index.html" },
+    { "source": "/pricing", "destination": "/pricing/index.html" },
+    { "source": "/faq", "destination": "/faq/index.html" },
+    { "source": "/contact", "destination": "/contact/index.html" },
+    { "source": "/blogs", "destination": "/blogs/index.html" },
+    { "source": "/blogs/:slug", "destination": "/blogs/:slug/index.html" },
     { "source": "/admin/:path*", "destination": "/index.html" },
     { "source": "/client/:path*", "destination": "/index.html" },
     { "source": "/login", "destination": "/index.html" },

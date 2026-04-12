@@ -3,8 +3,6 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import './index.css'
 import { AuthProvider } from './lib/auth'
-import App from './App.jsx'
-import AdminLogin from './pages/admin/Login.jsx'
 import AdminDashboard from './pages/admin/Dashboard.jsx'
 import AdminInquiries from './pages/admin/Inquiries.jsx'
 import AdminClients from './pages/admin/Clients.jsx'
@@ -18,7 +16,6 @@ import AdminBlogs from './pages/admin/Blogs.jsx'
 import AdminSupport from './pages/admin/Support.jsx'
 import AdminAccessLinks from './pages/admin/AccessLinks.jsx'
 import AdminAccessLinkRedeem from './pages/admin/AccessLinkRedeem.jsx'
-import ClientLogin from './pages/client/Login.jsx'
 import ClientDashboard from './pages/client/Dashboard.jsx'
 import ClientProjects from './pages/client/Projects.jsx'
 import ClientInvoices from './pages/client/Invoices.jsx'
@@ -30,29 +27,14 @@ import ResetPassword from './pages/ResetPassword.jsx'
 import AdminLayout from './components/admin/AdminLayout.jsx'
 import ClientLayout from './components/client/ClientLayout.jsx'
 import { AdminRoute, ClientRoute } from './components/ProtectedRoute.jsx'
-import ServicesPage from './pages/marketing/ServicesPage.jsx'
-import WorkPage from './pages/marketing/WorkPage.jsx'
-import PricingPage from './pages/marketing/PricingPage.jsx'
-import FAQPage from './pages/marketing/FAQPage.jsx'
-import BlogPage from './pages/marketing/BlogPage.jsx'
-import BlogPostPage from './pages/marketing/BlogPostPage.jsx'
-import ContactPage from './pages/marketing/ContactPage.jsx'
+import { PublicRoutes } from './routes/PublicRoutes.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<App />} />
-          <Route path="/services" element={<ServicesPage />} />
-          <Route path="/work" element={<WorkPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/faq" element={<FAQPage />} />
-          <Route path="/contact" element={<ContactPage />} />
-          <Route path="/blogs" element={<BlogPage />} />
-          <Route path="/blogs/:slug" element={<BlogPostPage />} />
-          <Route path="/blog" element={<Navigate to="/blogs" replace />} />
-          <Route path="/blog/:slug" element={<BlogPostPage />} />
+          {PublicRoutes()}
           <Route path="/login" element={<Login />} />
           <Route path="/join" element={<Join />} />
           <Route path="/reset-password" element={<ResetPassword />} />

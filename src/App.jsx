@@ -11,37 +11,21 @@ import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import { Footer } from './components/CTAFooter'
 import SEOHead from './components/SEOHead'
+import { getLocalBusinessSchema, getPublicRouteSeo } from './lib/publicSeo'
 
 export default function App() {
-  const localBusinessSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'LocalBusiness',
-    '@id': 'https://www.vibefoxstudio.com/#localbusiness',
-    name: 'VibefoxStudio',
-    alternateName: 'Vibefox Studio',
-    image: 'https://www.vibefoxstudio.com/seo-preview.png',
-    url: 'https://www.vibefoxstudio.com',
-    areaServed: 'Jacksonville, Florida',
-    email: 'inquiries@vibefoxstudio.com',
-    slogan: 'Jacksonville Web Design & SEO Services',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'Jacksonville',
-      addressRegion: 'FL',
-      addressCountry: 'US',
-    },
-    description: 'Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth.',
-  }
+  const seo = getPublicRouteSeo('/')
+  const localBusinessSchema = getLocalBusinessSchema()
 
   return (
     <>
       <SEOHead
-        title="Jacksonville Web Design & SEO Services | Vibefox Studio"
-        description="Build a website that actually works. Vibefox Studio delivers fast, high-converting websites and SEO systems for Jacksonville businesses ready for measurable growth."
-        path="/"
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
         appendBrand={false}
-        image="https://www.vibefoxstudio.com/seo-preview.png"
-        keywords="best digital marketing agency in jacksonville florida, jacksonville seo agency, website design jacksonville fl, local seo jacksonville, digital marketing jacksonville beach, lead generation agency jacksonville"
+        image={seo.image}
+        keywords={seo.keywords}
         structuredData={localBusinessSchema}
       />
       <Nav />

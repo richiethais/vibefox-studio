@@ -93,14 +93,56 @@ const authStorage = {
   },
 }
 
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  {
+function createNoopSupabaseClient() {
+  const noopResult = async () => ({ data: null, error: null })
+  const noopBuilder = () => ({
+    select: noopBuilder,
+    eq: noopBuilder,
+    order: noopBuilder,
+    limit: noopBuilder,
+    maybeSingle: noopResult,
+    single: noopResult,
+    then: undefined,
+  })
+
+  return {
     auth: {
-      flowType: 'implicit',
-      persistSession: true,
-      storage: authStorage,
+      async getSession() {
+        return { data: { session: null }, error: null }
+      },
+      onAuthStateChange() {
+        return {
+          data: {
+            subscription: {
+              unsubscribe() {},
+            },
+          },
+        }
+      },
+    },
+    from() {
+      return noopBuilder()
+    },
+    rpc: noopResult,
+    functions: {
+      invoke: noopResult,
     },
   }
-)
+}
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const supabase = supabaseUrl && supabaseAnonKey
+  ? createClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      auth: {
+        flowType: 'implicit',
+        persistSession: true,
+        storage: authStorage,
+      },
+    },
+  )
+  : createNoopSupabaseClient()

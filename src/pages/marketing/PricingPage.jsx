@@ -3,15 +3,19 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import PageHero from '../../components/marketing/PageHero'
 import Pricing from '../../components/Pricing'
 import FAQ from '../../components/FAQ'
+import { getPublicRouteSeo } from '../../lib/publicSeo'
 
 export default function PricingPage() {
+  const seo = getPublicRouteSeo('/pricing')
+
   return (
     <MarketingLayout>
       <SEOHead
-        title="VibefoxStudio Pricing | Jacksonville SEO & Digital Marketing Plans"
-        description="Transparent monthly digital marketing and SEO pricing for Jacksonville businesses. Flexible plans for websites, content, and ongoing growth from VibefoxStudio."
-        path="/pricing"
-        keywords="digital marketing pricing jacksonville florida, seo packages jacksonville, website maintenance plans, jacksonville digital marketing growth plan"
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        appendBrand={false}
+        keywords={seo.keywords}
       />
 
       <PageHero

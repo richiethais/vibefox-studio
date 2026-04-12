@@ -1,18 +1,11 @@
 import { useEffect } from 'react'
-
-const DEFAULT_SITE_NAME = 'VibefoxStudio'
-const DEFAULT_DISPLAY_NAME = 'Vibefox Studio'
-const DEFAULT_IMAGE = 'https://www.vibefoxstudio.com/seo-preview.png'
-const DEFAULT_LOGO = 'https://www.vibefoxstudio.com/logo-mark.png'
-const GLOBAL_KEYWORDS = [
-  'vibefoxstudio',
-  'vibefox studio',
-  'best digital marketing agency in jacksonville florida',
-  'jacksonville digital marketing agency',
-  'seo agency jacksonville fl',
-  'website design jacksonville florida',
-  'local seo jacksonville',
-]
+import {
+  DEFAULT_DISPLAY_NAME,
+  DEFAULT_IMAGE,
+  DEFAULT_LOGO,
+  DEFAULT_SITE_NAME,
+  mergeKeywords,
+} from '../lib/publicSeo'
 
 function upsertMeta(selector, attrs, content) {
   let tag = document.head.querySelector(selector)
@@ -37,11 +30,6 @@ function upsertLink(selector, attrs, href) {
 function removeTag(selector) {
   const tag = document.head.querySelector(selector)
   if (tag) tag.remove()
-}
-
-function mergeKeywords(customKeywords) {
-  const all = [...GLOBAL_KEYWORDS, ...(customKeywords ? customKeywords.split(',') : [])]
-  return [...new Set(all.map(item => item.trim().toLowerCase()).filter(Boolean))].join(', ')
 }
 
 export default function SEOHead({
