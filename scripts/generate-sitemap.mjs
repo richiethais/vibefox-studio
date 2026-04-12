@@ -8,6 +8,8 @@ const TODAY = new Date().toISOString().slice(0, 10)
 
 const staticRoutes = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
+  { path: '/web-design-jacksonville-fl', changefreq: 'monthly', priority: '0.95' },
+  { path: '/seo-services-jacksonville-fl', changefreq: 'monthly', priority: '0.95' },
   { path: '/services', changefreq: 'monthly', priority: '0.85' },
   { path: '/contact', changefreq: 'monthly', priority: '0.8' },
   { path: '/work', changefreq: 'weekly', priority: '0.85' },

@@ -73,17 +73,17 @@ export default function Hero() {
       justifyContent: isMobile ? 'flex-start' : s.section.justifyContent,
     }}>
       <div className="anim-rise-1" style={{ ...s.pill, fontSize: isMobile ? 12 : s.pill.fontSize, marginBottom: isMobile ? 28 : s.pill.marginBottom, padding: isMobile ? '6px 14px 6px 8px' : s.pill.padding }}>
-        <span style={s.chip}>2026</span>
-        Jacksonville, FL growth partner
+        <span style={s.chip}>Jacksonville, FL</span>
+        Web Design & SEO Company
       </div>
 
-      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(42px, 12vw, 56px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.5px' : s.h1.letterSpacing, lineHeight: isMobile ? 1.05 : s.h1.lineHeight, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
-        Your business deserves a site that{' '}
+      <h1 className="anim-rise-2" style={{ ...s.h1, fontSize: isMobile ? 'clamp(38px, 11vw, 52px)' : s.h1.fontSize, letterSpacing: isMobile ? '-1.5px' : s.h1.letterSpacing, lineHeight: isMobile ? 1.05 : s.h1.lineHeight, maxWidth: isMobile ? '100%' : s.h1.maxWidth, wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+        Jacksonville web design & SEO that{' '}
         <em style={{ fontStyle: 'italic', color: '#b8906a' }}>actually works.</em>
       </h1>
 
       <p className="anim-rise-3" style={{ ...s.sub, fontSize: isMobile ? 17 : s.sub.fontSize, margin: isMobile ? '28px auto 0' : s.sub.margin, maxWidth: isMobile ? 340 : s.sub.maxWidth, lineHeight: isMobile ? 1.65 : s.sub.lineHeight }}>
-        Fast, high-converting websites and SEO systems for Jacksonville businesses ready to scale.
+        Fast, high-converting websites and local SEO for Jacksonville, FL businesses ready to get found on Google and grow.
       </p>
 
       <div className="anim-rise-4" style={{ ...s.btns, marginTop: isMobile ? 36 : s.btns.marginTop, gap: isMobile ? 12 : s.btns.gap, flexDirection: isMobile ? 'column' : s.btns.flexDirection, width: isMobile ? '100%' : undefined, alignItems: isMobile ? 'center' : undefined }}>
@@ -106,7 +106,13 @@ export default function Hero() {
       </div>
 
       <div className="anim-rise-5" style={{ ...s.trust, gap: isMobile ? 16 : s.trust.gap, marginTop: isMobile ? 32 : s.trust.marginTop, fontSize: isMobile ? 12 : s.trust.fontSize }}>
-        {['Fast turnaround', 'Local SEO', 'Growth plans'].map(t => (
+        <div style={{ ...s.trustItem, gap: 5 }}>
+          {[1,2,3,4,5].map(i => (
+            <span key={i} style={{ fontSize: 11, color: '#f59e0b' }}>★</span>
+          ))}
+          <span style={{ marginLeft: 4 }}>5-star rated</span>
+        </div>
+        {['Fast delivery', 'Local SEO experts', 'Jacksonville-based'].map(t => (
           <div key={t} style={s.trustItem}>
             <span style={s.dot} /> {t}
           </div>
