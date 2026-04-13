@@ -10,12 +10,15 @@ import {
   SITE_URL,
   getBlogIndexStructuredData,
   getBlogPostSeo,
+  getCityPageSeo,
+  getCityStructuredData,
   getFaqStructuredData,
   getLocalBusinessSchema,
   getPublicRouteSeo,
   getServicesStructuredData,
   mergeKeywords,
 } from '../src/lib/publicSeo.js'
+import { cities } from '../src/data/cities.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DIST_DIR = path.resolve(__dirname, '../dist')
@@ -189,7 +192,22 @@ async function main() {
     console.log(`[prerender] /blogs/${post.slug}`)
   }
 
-  console.log(`[prerender] Done — ${STATIC_ROUTES.length + publishedPosts.length} pages prerendered`)
+  for (const city of cities) {
+    const seo = getCityPageSeo(city.slug)
+    const routePath = `/${city.slug}-digital-marketing-agency`
+    const appHtml = renderPublicApp({ url: routePath })
+    const html = replaceMeta(
+      injectAppHtml(template, appHtml),
+      seo,
+      [getLocalBusinessSchema(), getCityStructuredData(city.slug)],
+    )
+    const outputPath = path.join(DIST_DIR, `${city.slug}-digital-marketing-agency`, 'index.html')
+    await mkdir(path.dirname(outputPath), { recursive: true })
+    await writeFile(outputPath, html, 'utf8')
+    console.log(`[prerender] ${routePath}`)
+  }
+
+  console.log(`[prerender] Done — ${STATIC_ROUTES.length + publishedPosts.length + cities.length} pages prerendered`)
 }
 
 main().catch((error) => {

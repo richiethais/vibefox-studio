@@ -3,13 +3,12 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getMergedPublishedPosts } from '../src/lib/publishedPosts.js'
 import { SITE_URL } from '../src/lib/publicSeo.js'
+import { cities } from '../src/data/cities.js'
 
 const TODAY = new Date().toISOString().slice(0, 10)
 
 const staticRoutes = [
   { path: '/', changefreq: 'weekly', priority: '1.0' },
-  { path: '/web-design-jacksonville-fl', changefreq: 'monthly', priority: '0.95' },
-  { path: '/seo-services-jacksonville-fl', changefreq: 'monthly', priority: '0.95' },
   { path: '/services', changefreq: 'monthly', priority: '0.85' },
   { path: '/contact', changefreq: 'monthly', priority: '0.8' },
   { path: '/work', changefreq: 'weekly', priority: '0.85' },
@@ -17,6 +16,12 @@ const staticRoutes = [
   { path: '/faq', changefreq: 'monthly', priority: '0.75' },
   { path: '/blogs', changefreq: 'weekly', priority: '0.95' },
 ]
+
+const cityRoutes = cities.map(city => ({
+  path: `/${city.slug}-digital-marketing-agency`,
+  changefreq: 'monthly',
+  priority: '0.90',
+}))
 
 function escapeXml(value = '') {
   return String(value)
@@ -72,12 +77,13 @@ async function main() {
     supabaseAnonKey: process.env.VITE_SUPABASE_ANON_KEY,
   })
 
-  const xml = buildXml(staticRoutes, blogEntries)
+  const allStaticRoutes = [...staticRoutes, ...cityRoutes]
+  const xml = buildXml(allStaticRoutes, blogEntries)
   const rootDir = path.dirname(fileURLToPath(import.meta.url))
   const outputPath = path.resolve(rootDir, '../public/sitemap.xml')
   await writeFile(outputPath, xml, 'utf8')
 
-  console.log(`[sitemap] Generated ${staticRoutes.length + blogEntries.length} URLs (${blogEntries.length} blog URLs)`)
+  console.log(`[sitemap] Generated ${allStaticRoutes.length + blogEntries.length} URLs (${cityRoutes.length} city, ${blogEntries.length} blog)`)
 }
 
 main().catch(error => {

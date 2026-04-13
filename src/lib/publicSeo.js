@@ -1,3 +1,5 @@
+import { cities } from '../data/cities.js'
+
 export const SITE_URL = 'https://www.vibefoxstudio.com'
 export const DEFAULT_SITE_NAME = 'VibefoxStudio'
 export const DEFAULT_DISPLAY_NAME = 'Vibefox Studio'
@@ -8,12 +10,11 @@ export const MAX_SEO_TITLE_LENGTH = 65
 export const GLOBAL_KEYWORDS = [
   'vibefoxstudio',
   'vibefox studio',
-  'web design jacksonville fl',
-  'jacksonville web design company',
-  'seo services jacksonville fl',
-  'jacksonville seo company',
-  'local seo jacksonville',
-  'website design jacksonville florida',
+  'digital marketing agency',
+  'web design company',
+  'seo services',
+  'local seo',
+  'website design',
 ]
 
 export const PUBLIC_ROUTE_SEO = {
@@ -30,20 +31,6 @@ export const PUBLIC_ROUTE_SEO = {
       'Full-service web design, local SEO, custom web apps, and ongoing support for Jacksonville, FL businesses. Transparent pricing, fast delivery, real results.',
     keywords:
       'web design services jacksonville fl, seo services jacksonville florida, jacksonville web design agency, local seo services jacksonville, digital marketing services jacksonville florida',
-  },
-  '/web-design-jacksonville-fl': {
-    title: 'Jacksonville Web Design Company | Vibefox Studio',
-    description:
-      'Vibefox Studio builds fast, high-converting websites for Jacksonville, FL businesses. Custom web design that ranks on Google and turns visitors into customers. Get a free proposal.',
-    keywords:
-      'web design jacksonville fl, jacksonville web design company, website design jacksonville florida, best web designer jacksonville fl, affordable web design jacksonville, jacksonville website design',
-  },
-  '/seo-services-jacksonville-fl': {
-    title: 'Jacksonville SEO Company | Local SEO Services FL | Vibefox Studio',
-    description:
-      'Vibefox Studio is a Jacksonville SEO company helping local businesses rank higher on Google. Local SEO, content strategy, and monthly reporting. Get a free SEO proposal.',
-    keywords:
-      'jacksonville seo company, seo services jacksonville fl, local seo jacksonville florida, jacksonville seo agency, best seo company jacksonville fl, seo for small business jacksonville',
   },
   '/work': {
     title: 'Our Work: Jacksonville Web Design Portfolio | Vibefox Studio',
@@ -138,6 +125,41 @@ export function getPublicRouteSeo(path) {
   return route ? { ...route, path } : null
 }
 
+export function getCityPageSeo(citySlug) {
+  const city = cities.find(c => c.slug === citySlug)
+  if (!city) return null
+  const path = `/${city.slug}-digital-marketing-agency`
+  return {
+    title: `${city.name} Digital Marketing Agency | ${DEFAULT_DISPLAY_NAME}`,
+    description: city.description,
+    keywords: `digital marketing agency ${city.name.toLowerCase()}, ${city.name.toLowerCase()} web design, seo services ${city.name.toLowerCase()} ${city.state.toLowerCase()}, web design ${city.name.toLowerCase()} ${city.state.toLowerCase()}`,
+    path,
+  }
+}
+
+export function getCityStructuredData(citySlug) {
+  const city = cities.find(c => c.slug === citySlug)
+  if (!city) return null
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `Digital Marketing Agency ${city.name} ${city.state}`,
+    serviceType: 'Digital Marketing',
+    provider: {
+      '@type': 'LocalBusiness',
+      name: DEFAULT_DISPLAY_NAME,
+      url: SITE_URL,
+    },
+    areaServed: {
+      '@type': 'City',
+      name: city.name,
+      containedInPlace: { '@type': 'State', name: city.stateFullName },
+    },
+    url: `${SITE_URL}/${city.slug}-digital-marketing-agency`,
+    description: city.description,
+  }
+}
+
 export function getLocalBusinessSchema() {
   return {
     '@context': 'https://schema.org',
@@ -164,106 +186,6 @@ export function getLocalBusinessSchema() {
       bestRating: '5',
     },
   }
-}
-
-export function getWebDesignJaxSchema() {
-  return [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Service',
-      name: 'Web Design Jacksonville FL',
-      serviceType: 'Web Design',
-      provider: {
-        '@type': 'LocalBusiness',
-        name: DEFAULT_DISPLAY_NAME,
-        url: SITE_URL,
-        areaServed: 'Jacksonville, Florida',
-      },
-      areaServed: { '@type': 'City', name: 'Jacksonville', containedInPlace: { '@type': 'State', name: 'Florida' } },
-      url: `${SITE_URL}/web-design-jacksonville-fl`,
-      description: PUBLIC_ROUTE_SEO['/web-design-jacksonville-fl'].description,
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: 'How much does web design cost in Jacksonville, FL?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Web design in Jacksonville typically ranges from $1,500 for a landing page to $8,000+ for a full custom business website. Vibefox Studio offers transparent flat-rate pricing starting at $1,500.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'How long does it take to build a website in Jacksonville?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Most websites are delivered within 1–2 weeks. Landing pages can launch in as few as 5 business days.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'Do you build websites that rank on Google in Jacksonville?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Yes. Every website we build includes on-page SEO, fast load times, and local SEO structure to help your Jacksonville business rank on Google.',
-          },
-        },
-      ],
-    },
-  ]
-}
-
-export function getSeoJaxSchema() {
-  return [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'Service',
-      name: 'SEO Services Jacksonville FL',
-      serviceType: 'Search Engine Optimization',
-      provider: {
-        '@type': 'LocalBusiness',
-        name: DEFAULT_DISPLAY_NAME,
-        url: SITE_URL,
-        areaServed: 'Jacksonville, Florida',
-      },
-      areaServed: { '@type': 'City', name: 'Jacksonville', containedInPlace: { '@type': 'State', name: 'Florida' } },
-      url: `${SITE_URL}/seo-services-jacksonville-fl`,
-      description: PUBLIC_ROUTE_SEO['/seo-services-jacksonville-fl'].description,
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'FAQPage',
-      mainEntity: [
-        {
-          '@type': 'Question',
-          name: 'How long does SEO take in Jacksonville?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Most Jacksonville businesses start seeing measurable SEO results within 3–6 months. Local SEO for a specific neighborhood can move faster, often within 60–90 days.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'What does local SEO include for Jacksonville businesses?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Local SEO includes Google Business Profile optimization, on-page keyword targeting for Jacksonville searches, local citation building, and monthly blog content to build authority.',
-          },
-        },
-        {
-          '@type': 'Question',
-          name: 'How much do SEO services cost in Jacksonville FL?',
-          acceptedAnswer: {
-            '@type': 'Answer',
-            text: 'Vibefox Studio SEO packages for Jacksonville businesses start at $299/month, including keyword strategy, monthly blog posts, on-page optimization, and reporting.',
-          },
-        },
-      ],
-    },
-  ]
 }
 
 export function getServicesStructuredData() {
