@@ -22,8 +22,8 @@ const links = [
 ]
 
 const servicesDropdown = [
-  { label: 'Web Design Jacksonville', href: '/web-design-jacksonville-fl', desc: 'Fast, converting websites' },
-  { label: 'SEO Services Jacksonville', href: '/seo-services-jacksonville-fl', desc: 'Local SEO & content' },
+  { label: 'Web Design', href: '/services', desc: 'Fast, converting websites' },
+  { label: 'SEO & Local Search', href: '/services', desc: 'Local SEO & content' },
   { label: 'All Services', href: '/services', desc: 'Full service overview' },
 ]
 
@@ -157,7 +157,7 @@ export default function Nav() {
               <button
                 style={{
                   textDecoration: 'none',
-                  color: ['/services', '/web-design-jacksonville-fl', '/seo-services-jacksonville-fl'].includes(location.pathname) ? '#18181a' : '#7a7888',
+                  color: ['/services'].includes(location.pathname) ? '#18181a' : '#7a7888',
                   fontSize: 14, fontWeight: 400,
                   padding: '7px 14px', borderRadius: 100,
                   display: 'flex', alignItems: 'center', gap: 5,
@@ -166,7 +166,7 @@ export default function Nav() {
                 }}
                 onMouseEnter={e => { e.currentTarget.style.color = '#18181a' }}
                 onMouseLeave={e => {
-                  if (!['/services', '/web-design-jacksonville-fl', '/seo-services-jacksonville-fl'].includes(location.pathname)) {
+                  if (!['/services'].includes(location.pathname)) {
                     e.currentTarget.style.color = '#7a7888'
                   }
                 }}
