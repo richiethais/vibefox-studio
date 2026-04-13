@@ -2,7 +2,9 @@
   "redirects": [
     { "source": "/blogs/restaurant-seo-guide-2026-1", "destination": "/blogs/restaurant-seo-guide-2026", "permanent": true },
     { "source": "/blog/:slug", "destination": "/blogs/:slug", "permanent": true },
-    { "source": "/blog", "destination": "/blogs", "permanent": true }
+    { "source": "/blog", "destination": "/blogs", "permanent": true },
+    { "source": "/web-design-jacksonville-fl", "destination": "/jacksonville-digital-marketing-agency", "permanent": true },
+    { "source": "/seo-services-jacksonville-fl", "destination": "/jacksonville-digital-marketing-agency", "permanent": true }
   ],
   "rewrites": [
     { "source": "/services", "destination": "/services/index.html" },
@@ -17,6 +19,7 @@
     { "source": "/login", "destination": "/index.html" },
     { "source": "/join", "destination": "/index.html" },
     { "source": "/reset-password", "destination": "/index.html" },
+    { "source": "/:slug-digital-marketing-agency", "destination": "/:slug-digital-marketing-agency/index.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
