@@ -1,8 +1,7 @@
 import { Navigate, Route } from 'react-router-dom'
 import App from '../App.jsx'
 import ServicesPage from '../pages/marketing/ServicesPage.jsx'
-import WebDesignJacksonvillePage from '../pages/marketing/WebDesignJacksonvillePage.jsx'
-import SeoServicesJacksonvillePage from '../pages/marketing/SeoServicesJacksonvillePage.jsx'
+import CityLandingPage from '../pages/marketing/CityLandingPage.jsx'
 import WorkPage from '../pages/marketing/WorkPage.jsx'
 import PricingPage from '../pages/marketing/PricingPage.jsx'
 import FAQPage from '../pages/marketing/FAQPage.jsx'
@@ -15,8 +14,7 @@ export function PublicRoutes({ initialPosts, initialPost, initialRelated } = {})
     <>
       <Route path="/" element={<App />} />
       <Route path="/services" element={<ServicesPage />} />
-      <Route path="/web-design-jacksonville-fl" element={<WebDesignJacksonvillePage />} />
-      <Route path="/seo-services-jacksonville-fl" element={<SeoServicesJacksonvillePage />} />
+      <Route path="/:citySlug" element={<CityLandingPage />} />
       <Route path="/work" element={<WorkPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/faq" element={<FAQPage />} />
