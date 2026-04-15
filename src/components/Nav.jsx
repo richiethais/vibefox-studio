@@ -16,15 +16,10 @@ function useDashboardLink() {
 const links = [
   ['Home', '/'],
   ['Work', '/work'],
+  ['Services', '/services'],
   ['Pricing', '/pricing'],
   ['FAQ', '/faq'],
   ['Blogs', '/blogs'],
-]
-
-const servicesDropdown = [
-  { label: 'Web Design', href: '/services', desc: 'Fast, converting websites' },
-  { label: 'SEO & Local Search', href: '/services', desc: 'Local SEO & content' },
-  { label: 'All Services', href: '/services', desc: 'Full service overview' },
 ]
 
 function DashboardIcon() {
@@ -39,7 +34,6 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [servicesOpen, setServicesOpen] = useState(false)
   const location = useLocation()
   const dashboardLink = useDashboardLink()
 
@@ -148,78 +142,6 @@ export default function Nav() {
           </div>
         ) : (
           <ul style={{ display: 'flex', alignItems: 'center', gap: 2, listStyle: 'none', margin: 0, padding: 0 }}>
-            {/* Services dropdown */}
-            <li
-              style={{ position: 'relative' }}
-              onMouseEnter={() => setServicesOpen(true)}
-              onMouseLeave={() => setServicesOpen(false)}
-            >
-              <button
-                style={{
-                  textDecoration: 'none',
-                  color: ['/services'].includes(location.pathname) ? '#18181a' : '#7a7888',
-                  fontSize: 14, fontWeight: 400,
-                  padding: '7px 14px', borderRadius: 100,
-                  display: 'flex', alignItems: 'center', gap: 5,
-                  cursor: 'pointer', background: 'transparent', border: 'none',
-                  transition: 'color 0.18s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.color = '#18181a' }}
-                onMouseLeave={e => {
-                  if (!['/services'].includes(location.pathname)) {
-                    e.currentTarget.style.color = '#7a7888'
-                  }
-                }}
-              >
-                Services
-                <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"
-                  style={{ transition: 'transform 0.2s', transform: servicesOpen ? 'rotate(180deg)' : 'none' }}>
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-              <AnimatePresence>
-                {servicesOpen && (
-                  <Motion.div
-                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 4, scale: 0.97 }}
-                    transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
-                    style={{
-                      position: 'absolute', top: 'calc(100% + 10px)', left: '50%',
-                      transform: 'translateX(-50%)',
-                      background: 'rgba(250,249,247,0.97)',
-                      backdropFilter: 'blur(20px)',
-                      WebkitBackdropFilter: 'blur(20px)',
-                      border: '1px solid rgba(0,0,0,0.08)',
-                      borderRadius: 16, padding: '8px',
-                      minWidth: 260,
-                      boxShadow: '0 8px 32px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.05)',
-                      zIndex: 300,
-                    }}
-                  >
-                    {servicesDropdown.map(item => (
-                      <Link
-                        key={item.href}
-                        to={item.href}
-                        style={{
-                          display: 'flex', flexDirection: 'column',
-                          padding: '10px 14px', borderRadius: 10,
-                          textDecoration: 'none',
-                          transition: 'background 0.15s',
-                          background: location.pathname === item.href ? 'rgba(184,144,106,0.08)' : 'transparent',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(0,0,0,0.04)' }}
-                        onMouseLeave={e => { e.currentTarget.style.background = location.pathname === item.href ? 'rgba(184,144,106,0.08)' : 'transparent' }}
-                      >
-                        <span style={{ fontSize: 13.5, fontWeight: 500, color: '#18181a', letterSpacing: '-0.1px' }}>{item.label}</span>
-                        <span style={{ fontSize: 12, color: '#7a7888', marginTop: 1, fontWeight: 300 }}>{item.desc}</span>
-                      </Link>
-                    ))}
-                  </Motion.div>
-                )}
-              </AnimatePresence>
-            </li>
-
             {links.map(([label, to]) => {
               const isLampActive = to === '/' ? location.pathname === '/' : location.pathname === to
               return (
@@ -374,41 +296,12 @@ export default function Nav() {
 
             {/* Nav links — staggered animation */}
             <nav style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              {/* Service landing page links */}
-              {servicesDropdown.map((item, i) => (
-                <Motion.div
-                  key={item.href}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <Link
-                    to={item.href}
-                    onClick={() => setMenuOpen(false)}
-                    style={{
-                      textDecoration: 'none',
-                      fontFamily: '"DM Serif Display", serif',
-                      fontSize: location.pathname === item.href ? 26 : 22,
-                      color: location.pathname === item.href ? '#b8906a' : '#18181a',
-                      fontWeight: 400,
-                      padding: '6px 24px',
-                      display: 'block',
-                      textAlign: 'center',
-                      letterSpacing: '-0.5px',
-                      transition: 'color 0.18s',
-                    }}
-                  >
-                    {item.label}
-                  </Link>
-                </Motion.div>
-              ))}
-              <div style={{ width: 32, height: 1, background: 'rgba(0,0,0,0.08)', margin: '8px 0' }} />
               {links.map(([label, to], i) => (
                 <Motion.div
                   key={label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: (i + servicesDropdown.length) * 0.05, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ delay: i * 0.05, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 >
                   <NavLink
                     to={to}
