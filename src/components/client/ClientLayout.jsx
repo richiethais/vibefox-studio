@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { clearAuthPersistenceMode, supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/useAuth'
 import BrandLogo from '../BrandLogo'
 import SEOHead from '../SEOHead'
 import useIsMobile from '../useIsMobile'
@@ -14,9 +15,31 @@ const navItems = [
 ]
 
 export default function ClientLayout() {
+  const session = useAuth()
   const navigate = useNavigate()
   const isMobile = useIsMobile(768)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  useEffect(() => {
+    if (!session) return
+    supabase
+      .from('clients')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) return
+        const email = session.user.email ?? ''
+        const name = session.user.user_metadata?.name || email.split('@')[0]
+        supabase.from('clients').insert({
+          user_id: session.user.id,
+          email,
+          name,
+          plan: 'starter',
+          status: 'active',
+        })
+      })
+  }, [session])
 
   async function signOut() {
     clearAuthPersistenceMode()
