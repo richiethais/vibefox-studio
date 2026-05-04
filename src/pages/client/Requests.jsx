@@ -45,10 +45,15 @@ export default function ClientRequests() {
         .from('clients')
         .select('id')
         .eq('user_id', session.user.id)
-        .single()
+        .maybeSingle()
 
-      if (error || !data) {
-        setNotice({ type: 'error', text: error?.message || 'Client account not found.' })
+      if (error) {
+        setNotice({ type: 'error', text: error.message })
+        setLoading(false)
+        return
+      }
+
+      if (!data) {
         setLoading(false)
         return
       }

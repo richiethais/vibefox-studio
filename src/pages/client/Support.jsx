@@ -70,10 +70,15 @@ export default function ClientSupport() {
         .from('clients')
         .select('id')
         .eq('user_id', session.user.id)
-        .single()
+        .maybeSingle()
 
-      if (error || !data) {
-        setNotice({ text: error?.message || 'Client account not found.', type: 'error' })
+      if (error) {
+        setNotice({ text: error.message, type: 'error' })
+        setLoading(false)
+        return
+      }
+
+      if (!data) {
         setLoading(false)
         return
       }

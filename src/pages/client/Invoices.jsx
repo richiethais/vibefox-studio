@@ -17,7 +17,7 @@ export default function ClientInvoices() {
 
   useEffect(() => {
     if (!session) return
-    supabase.from('clients').select('id').eq('user_id', session.user.id).single().then(({ data: client }) => {
+    supabase.from('clients').select('id').eq('user_id', session.user.id).maybeSingle().then(({ data: client }) => {
       if (!client) return
       supabase.from('invoices').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).then(({ data }) => setInvoices(data ?? []))
     })

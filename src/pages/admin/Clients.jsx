@@ -38,6 +38,11 @@ export default function AdminClients() {
     [clients]
   )
 
+  const pendingInviteLinks = useMemo(
+    () => inviteLinks.filter(link => !link.used && !registeredEmails.has((link.email || '').trim().toLowerCase())),
+    [inviteLinks, registeredEmails]
+  )
+
   const load = useCallback(async () => {
     const [clientsRes, linksRes] = await Promise.all([
       supabase.from('clients').select('*').order('created_at', { ascending: false }),
@@ -281,7 +286,7 @@ export default function AdminClients() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-                {['Name', 'Email', 'Company', 'Plan', 'Status', 'Actions'].map(header => (
+                {['Name', 'Email', 'Company', 'Plan', 'Status', 'Joined', 'Actions'].map(header => (
                   <th key={header} style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 500, color: '#7a7888', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{header}</th>
                 ))}
               </tr>
@@ -289,13 +294,13 @@ export default function AdminClients() {
             <tbody>
               {loading && (
                 <tr>
-                  <td colSpan={6} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>Loading clients…</td>
+                  <td colSpan={7} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>Loading clients…</td>
                 </tr>
               )}
 
               {!loading && clients.length === 0 && (
                 <tr>
-                  <td colSpan={6} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>No clients yet.</td>
+                  <td colSpan={7} style={{ padding: '16px', color: '#7a7888', fontSize: 13 }}>No clients yet.</td>
                 </tr>
               )}
 
@@ -309,6 +314,9 @@ export default function AdminClients() {
                   </td>
                   <td style={{ padding: '12px 16px' }}>
                     <span style={{ ...badge, background: client.status === 'active' ? '#dcfce7' : '#f3f4f6', color: client.status === 'active' ? '#16a34a' : '#6b7280' }}>{client.status}</span>
+                  </td>
+                  <td style={{ padding: '12px 16px', color: '#7a7888' }}>
+                    {client.created_at ? new Date(client.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                   </td>
                   <td style={{ padding: '12px 16px', display: 'flex', gap: 8 }}>
                     <button onClick={() => openEdit(client)} style={ghostBtn}>Edit</button>
@@ -327,7 +335,7 @@ export default function AdminClients() {
       <div style={{ marginTop: 24, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#18181a' }}>Invite links</h2>
-          <span style={{ fontSize: 12, color: '#7a7888' }}>{inviteLinks.length} total</span>
+          <span style={{ fontSize: 12, color: '#7a7888' }}>{pendingInviteLinks.length} total</span>
         </div>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -339,7 +347,7 @@ export default function AdminClients() {
               </tr>
             </thead>
             <tbody>
-              {inviteLinks.map(link => {
+              {pendingInviteLinks.map(link => {
                 const status = getLinkStatus(link)
                 const url = buildInviteLink(link.token)
                 return (
@@ -383,10 +391,10 @@ export default function AdminClients() {
                 )
               })}
 
-              {inviteLinks.length === 0 && (
+              {pendingInviteLinks.length === 0 && (
                 <tr>
                   <td colSpan={6} style={{ padding: '18px 16px', color: '#7a7888', fontSize: 13 }}>
-                    No invite links generated yet.
+                    No pending invite links.
                   </td>
                 </tr>
               )}

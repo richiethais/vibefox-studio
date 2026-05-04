@@ -42,10 +42,15 @@ export default function ClientMessages() {
         .from('clients')
         .select('id')
         .eq('user_id', session.user.id)
-        .single()
+        .maybeSingle()
 
-      if (clientError || !data) {
-        setError(clientError?.message || 'Client account not found.')
+      if (clientError) {
+        setError(clientError.message)
+        setLoadingMessages(false)
+        return
+      }
+
+      if (!data) {
         setLoadingMessages(false)
         return
       }
