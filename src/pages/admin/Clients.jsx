@@ -244,6 +244,16 @@ export default function AdminClients() {
   async function handleDeleteClient(id) {
     setDeletingClient(true)
     setNotice(null)
+
+    const clientToDelete = clients.find(c => c.id === id)
+
+    if (clientToDelete?.user_id && session) {
+      await supabase.functions.invoke('delete-client', {
+        body: { userId: clientToDelete.user_id },
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      })
+    }
+
     const { error } = await supabase.from('clients').delete().eq('id', id)
     setDeletingClient(false)
     setConfirmDeleteClient(null)

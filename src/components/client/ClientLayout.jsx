@@ -22,23 +22,9 @@ export default function ClientLayout() {
 
   useEffect(() => {
     if (!session) return
-    supabase
-      .from('clients')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) return
-        const email = session.user.email ?? ''
-        const name = session.user.user_metadata?.name || email.split('@')[0]
-        supabase.from('clients').insert({
-          user_id: session.user.id,
-          email,
-          name,
-          plan: 'starter',
-          status: 'active',
-        })
-      })
+    supabase.functions.invoke('ensure-client-profile', {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
   }, [session])
 
   async function signOut() {
