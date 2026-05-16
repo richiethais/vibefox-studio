@@ -3,6 +3,7 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import SEOHead from '../../components/SEOHead'
 
 const CAL_LINK = 'https://cal.com/vibefoxcoaching/private-coaching-consultation'
+const CAL_EMBED_URL = `${CAL_LINK}/embed`
 const BRAND_ACCENT = '#b8906a'
 
 export default function PrivateCoachingThanksPage() {
@@ -38,9 +39,10 @@ export default function PrivateCoachingThanksPage() {
 
           <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
             <iframe
-              src={`${CAL_LINK}?embed=true`}
+              src={CAL_EMBED_URL}
               title="Book your coaching session"
-              className="h-[750px] w-full border-0"
+              loading="lazy"
+              className="h-[1000px] w-full border-0 sm:h-[900px]"
             />
           </div>
 
@@ -49,7 +51,6 @@ export default function PrivateCoachingThanksPage() {
             <a href={CAL_LINK} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: BRAND_ACCENT }}>
               Book here directly
             </a>
-            {' '}or visit {CAL_LINK}
           </p>
         </div>
       </MarketingLayout>
