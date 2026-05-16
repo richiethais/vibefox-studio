@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import SEOHead from '../../components/SEOHead'
@@ -6,7 +6,6 @@ import { supabase } from '../../lib/supabase'
 import { parseFunctionError } from '../../lib/supabaseFunctions'
 
 const DEFAULT_BOOKING_URL = 'https://cal.com/vibefoxcoaching/private-coaching-consultation'
-const CAL_EMBED_SCRIPT_SRC = 'https://app.cal.com/embed/embed.js'
 
 function normalizeBookingUrl(bookingUrl) {
   if (typeof bookingUrl !== 'string') return ''
@@ -17,16 +16,12 @@ function normalizeBookingUrl(bookingUrl) {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
 }
 
-function getCalLink(bookingUrl) {
-  try {
-    const normalizedUrl = normalizeBookingUrl(bookingUrl)
-    if (!normalizedUrl) return ''
+function getEmbedUrl(bookingUrl) {
+  const normalizedUrl = normalizeBookingUrl(bookingUrl)
+  if (!normalizedUrl) return ''
 
-    const url = new URL(normalizedUrl)
-    return url.pathname.replace(/^\/+|\/+$/g, '')
-  } catch {
-    return ''
-  }
+  const separator = normalizedUrl.includes('?') ? '&' : '?'
+  return `${normalizedUrl}${separator}embed=true`
 }
 
 export default function PrivateCoachingThanksPage() {
@@ -36,11 +31,9 @@ export default function PrivateCoachingThanksPage() {
   const [bookingUrl, setBookingUrl] = useState('')
   const [error, setError] = useState('')
   const [verifying, setVerifying] = useState(true)
-  const [embedError, setEmbedError] = useState('')
-  const embedContainerRef = useRef(null)
 
   const canUseDebugBooking = import.meta.env.DEV && debugBooking
-  const calLink = getCalLink(bookingUrl)
+  const embedUrl = getEmbedUrl(bookingUrl)
 
   useEffect(() => {
     let active = true
@@ -93,82 +86,6 @@ export default function PrivateCoachingThanksPage() {
 
   const hasAccess = Boolean(bookingUrl) && !error
 
-  useEffect(() => {
-    if (!hasAccess) return
-
-    if (!calLink) {
-      setEmbedError('The booking calendar could not be loaded.')
-      return
-    }
-
-    const container = embedContainerRef.current
-    if (!container) return
-
-    let cancelled = false
-    let script = null
-
-    container.innerHTML = ''
-    setEmbedError('')
-
-    function mountEmbed() {
-      if (cancelled) return
-
-      const cal = window.Cal
-      if (typeof cal !== 'function') {
-        setEmbedError('The booking calendar could not be loaded.')
-        return
-      }
-
-      container.innerHTML = ''
-      cal('init', { origin: 'https://cal.com' })
-      cal('ui', {
-        hideEventTypeDetails: true,
-        showTimezoneWhenEventDetailsHidden: true,
-      })
-      cal('inline', {
-        elementOrSelector: container,
-        calLink,
-      })
-    }
-
-    if (typeof window.Cal === 'function') {
-      mountEmbed()
-      return () => {
-        cancelled = true
-        container.innerHTML = ''
-      }
-    }
-
-    script = document.querySelector(`script[src="${CAL_EMBED_SCRIPT_SRC}"]`)
-
-    const handleLoad = () => mountEmbed()
-    const handleError = () => {
-      if (cancelled) return
-      setEmbedError('The booking calendar could not be loaded.')
-    }
-
-    if (script) {
-      script.addEventListener('load', handleLoad)
-      script.addEventListener('error', handleError)
-    } else {
-      script = document.createElement('script')
-      script.src = CAL_EMBED_SCRIPT_SRC
-      script.async = true
-      script.addEventListener('load', handleLoad)
-      script.addEventListener('error', handleError)
-      document.head.appendChild(script)
-    }
-
-    return () => {
-      cancelled = true
-      if (script) {
-        script.removeEventListener('load', handleLoad)
-        script.removeEventListener('error', handleError)
-      }
-      container.innerHTML = ''
-    }
-  }, [calLink, hasAccess])
-
   return (
     <>
       <SEOHead
@@ -212,16 +129,16 @@ export default function PrivateCoachingThanksPage() {
                   </p>
                 </div>
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                  <div
-                    ref={embedContainerRef}
+                  <iframe
+                    title="Book your private coaching session"
+                    src={embedUrl}
                     className="min-h-[760px] w-full overflow-hidden rounded-xl bg-white"
+                    style={{ border: 0 }}
+                    loading="lazy"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allow="camera; microphone; fullscreen; payment"
                   />
                 </div>
-                {embedError && (
-                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                    {embedError}
-                  </div>
-                )}
                 {error && (
                   <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                     {error}
