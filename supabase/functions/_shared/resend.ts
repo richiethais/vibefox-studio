@@ -1,6 +1,6 @@
 import { getAdminEmail } from './auth.ts'
 
-function escapeHtml(str: string) {
+export function escapeHtml(str: string) {
   return str
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
