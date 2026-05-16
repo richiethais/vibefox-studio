@@ -10,16 +10,18 @@ async function verifyStripeSignature(
 ): Promise<boolean> {
   if (!signature) return false
 
-  // Stripe signature header: "t=timestamp,v1=hash,..."
-  const parts = Object.fromEntries(
-    signature.split(',').map(part => {
-      const [key, value] = part.split('=')
-      return [key, value]
-    }),
-  )
-  const timestamp = parts.t
-  const expected = parts.v1
-  if (!timestamp || !expected) return false
+  // Stripe signature header: "t=timestamp,v1=hash,v1=hash,..."
+  const sigParts = signature.split(',').map(p => p.split('=', 2)) as [string, string][]
+  const timestamp = sigParts.find(([k]) => k === 't')?.[1]
+  const v1s = sigParts.filter(([k]) => k === 'v1').map(([, v]) => v)
+  if (!timestamp || v1s.length === 0) return false
+
+  // Replay-attack protection: timestamp must be within 5 minutes of now
+  const TOLERANCE_SECONDS = 300
+  const ts = Number(timestamp)
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > TOLERANCE_SECONDS) {
+    return false
+  }
 
   const signedPayload = `${timestamp}.${payload}`
   const enc = new TextEncoder()
@@ -35,20 +37,24 @@ async function verifyStripeSignature(
     .map(b => b.toString(16).padStart(2, '0'))
     .join('')
 
-  // Constant-time compare
-  if (computed.length !== expected.length) return false
-  let diff = 0
-  for (let i = 0; i < computed.length; i++) diff |= computed.charCodeAt(i) ^ expected.charCodeAt(i)
-  return diff === 0
+  // Constant-time compare against each candidate v1 (supports Stripe secret rotation)
+  for (const expected of v1s) {
+    if (computed.length !== expected.length) continue
+    let diff = 0
+    for (let i = 0; i < computed.length; i++) diff |= computed.charCodeAt(i) ^ expected.charCodeAt(i)
+    if (diff === 0) return true
+  }
+  return false
 }
 
-function buyerEmailHtml(firstName: string) {
+function buyerEmailHtml(firstName: string, amountTotal: number) {
   const safeName = escapeHtml(firstName || 'there')
+  const amountDisplay = `$${(amountTotal / 100).toFixed(2)}`
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 560px; margin: 0 auto;">
       <h2 style="color: #111;">Payment confirmed — let's get you on the calendar</h2>
       <p>Hi ${safeName},</p>
-      <p>Thanks for booking a 1:1 AI Software Engineering coaching session with Vibefox Studio. Your $500 payment was received.</p>
+      <p>Thanks for booking a 1:1 AI Software Engineering coaching session with Vibefox Studio. Your ${amountDisplay} payment was received.</p>
       <p>Pick a 60-minute slot here:</p>
       <p>
         <a href="${CAL_LINK}" style="display: inline-block; padding: 12px 20px; background: #111; color: #fff; text-decoration: none; border-radius: 8px;">
@@ -93,6 +99,11 @@ Deno.serve(async request => {
     customer_details?: { email?: string }
   }
 
+  if (!session || typeof session.id !== 'string') {
+    console.error('webhook: malformed session', event.data?.object)
+    return new Response('Malformed session', { status: 400 })
+  }
+
   const inquiryId = session.metadata?.inquiry_id
   if (!inquiryId) {
     console.warn('checkout.session.completed missing inquiry_id', session.id)
@@ -101,9 +112,10 @@ Deno.serve(async request => {
 
   const supabaseAdmin = getSupabaseAdminClient()
 
+  // Load inquiry for its metadata + email, but don't decide idempotency from this read.
   const { data: inquiry, error: loadError } = await supabaseAdmin
     .from('inquiries')
-    .select('id, status, email, name, metadata')
+    .select('id, email, name, metadata')
     .eq('id', inquiryId)
     .maybeSingle()
 
@@ -112,31 +124,45 @@ Deno.serve(async request => {
     return new Response('Inquiry not found', { status: 200 })
   }
 
-  // Idempotency — Stripe retries; only process once
-  if (inquiry.status === 'paid') {
-    return new Response('Already processed', { status: 200 })
+  const amountTotal = session.amount_total
+  if (typeof amountTotal !== 'number') {
+    console.error('webhook: session missing amount_total', session.id)
+    return new Response('Invalid session amount', { status: 200 })
   }
 
-  const { error: updateError } = await supabaseAdmin
+  // Atomic: only update if NOT already paid. Returns the updated row, or null if no row matched.
+  const { data: updated, error: updateError } = await supabaseAdmin
     .from('inquiries')
     .update({
       status: 'paid',
-      amount_paid_cents: session.amount_total ?? 50000,
+      amount_paid_cents: amountTotal,
       paid_at: new Date().toISOString(),
     })
     .eq('id', inquiryId)
+    .neq('status', 'paid')
+    .select('id')
+    .maybeSingle()
 
   if (updateError) {
     console.error('webhook: update failed', updateError)
     return new Response('Update failed', { status: 500 })
   }
 
+  if (!updated) {
+    // Another delivery already processed this payment — exit cleanly without re-sending emails.
+    return new Response('Already processed', { status: 200 })
+  }
+
   const meta = (inquiry.metadata || {}) as Record<string, string | null>
   const buyerEmail = inquiry.email || session.customer_email || session.customer_details?.email || ''
 
+  if (!buyerEmail) {
+    console.error('webhook: no buyer email for inquiry', inquiryId, session.id)
+  }
+
   // Admin notification
   await notifyAdmin({
-    subject: `💰 Coaching booked — $500 PAID — ${inquiry.name}`,
+    subject: `💰 Coaching booked — $${(amountTotal / 100).toFixed(2)} PAID — ${inquiry.name}`,
     html: buildNotificationHtml({
       'Name': inquiry.name || '—',
       'Email': inquiry.email || '—',
@@ -145,7 +171,7 @@ Deno.serve(async request => {
       'Experience': meta.experience_level || '—',
       'Reason': meta.reason || '—',
       'Desired outcome': meta.outcome || '—',
-      'Amount paid': `$${((session.amount_total ?? 50000) / 100).toFixed(2)}`,
+      'Amount paid': `$${(amountTotal / 100).toFixed(2)}`,
       'Stripe session': session.id,
     }),
   })
@@ -155,7 +181,7 @@ Deno.serve(async request => {
     await sendEmail({
       to: buyerEmail,
       subject: 'Your Vibefox coaching session is confirmed — book your time',
-      html: buyerEmailHtml(meta.first_name || ''),
+      html: buyerEmailHtml(meta.first_name || '', amountTotal),
       replyTo: 'richiethais@gmail.com',
     })
   }
