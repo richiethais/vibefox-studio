@@ -8,6 +8,7 @@ import FAQPage from '../pages/marketing/FAQPage.jsx'
 import BlogPage from '../pages/marketing/BlogPage.jsx'
 import BlogPostPage from '../pages/marketing/BlogPostPage.jsx'
 import ContactPage from '../pages/marketing/ContactPage.jsx'
+import PrivateCoachingPage from '../pages/marketing/PrivateCoachingPage.jsx'
 
 export function PublicRoutes({ initialPosts, initialPost, initialRelated } = {}) {
   return (
@@ -19,6 +20,7 @@ export function PublicRoutes({ initialPosts, initialPost, initialRelated } = {})
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/privatecoaching" element={<PrivateCoachingPage />} />
       <Route path="/blogs" element={<BlogPage initialPosts={initialPosts} />} />
       <Route
         path="/blogs/:slug"
