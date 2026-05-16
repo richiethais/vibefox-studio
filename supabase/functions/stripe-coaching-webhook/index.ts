@@ -63,7 +63,7 @@ function buyerEmailHtml(firstName: string, amountTotal: number) {
       </p>
       <p>Or paste this link in your browser: <a href="${CAL_LINK}">${CAL_LINK}</a></p>
       <p>If you have questions before the session, just reply to this email.</p>
-      <p>— Richie, Vibefox Studio</p>
+      <p>— The Vibefox Studio team</p>
     </div>
   `
 }
@@ -182,7 +182,7 @@ Deno.serve(async request => {
       to: buyerEmail,
       subject: 'Your Vibefox coaching session is confirmed — book your time',
       html: buyerEmailHtml(meta.first_name || '', amountTotal),
-      replyTo: 'richiethais@gmail.com',
+      replyTo: 'inquiries@vibefoxstudio.com',
     })
   }
 
