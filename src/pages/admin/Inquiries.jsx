@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { formatCurrency } from '../../lib/billing'
+import { BILLING_STATUS_COLORS, formatCurrency } from '../../lib/billing'
 import useIsMobile from '../../components/useIsMobile'
 
 const STATUS_COLORS = {
@@ -11,7 +11,7 @@ const STATUS_COLORS = {
 
 const COACHING_STATUS_COLORS = {
   pending_payment: { bg: '#fef3c7', text: '#d97706' },
-  paid: { bg: '#dcfce7', text: '#16a34a' },
+  paid: BILLING_STATUS_COLORS.paid,
   checkout_failed: { bg: '#fee2e2', text: '#dc2626' },
   new: { bg: '#eef0f3', text: '#52525b' },
 }
@@ -25,6 +25,11 @@ const BRAND_ACCENT = '#b8906a'
 
 function getFormKey(row) {
   return row?.form_key || 'contact'
+}
+
+function asText(v) {
+  if (v === null || v === undefined || v === '') return null
+  return typeof v === 'string' ? v : String(v)
 }
 
 function formatCoachingStatus(status) {
@@ -89,6 +94,8 @@ export default function AdminInquiries() {
           return (
             <button
               key={key}
+              type="button"
+              aria-pressed={isActive}
               onClick={() => setFormKeyFilter(key)}
               style={{
                 padding: '6px 14px',
@@ -251,6 +258,11 @@ function DetailBody({ selected, setStatus, onDelete }) {
   const formKey = getFormKey(selected)
   const isCoaching = formKey === 'coaching'
   const meta = selected.metadata || {}
+  const phone = asText(meta.phone)
+  const companyRole = asText(meta.company_role)
+  const experienceLevel = asText(meta.experience_level)
+  const reason = asText(meta.reason)
+  const outcome = asText(meta.outcome)
   const coachingStatusColor = isCoaching ? COACHING_STATUS_COLORS[selected.status] : null
   const stripeUrl = selected.stripe_session_id
     ? `https://dashboard.stripe.com/checkout/sessions/${selected.stripe_session_id}`
@@ -259,26 +271,26 @@ function DetailBody({ selected, setStatus, onDelete }) {
   return (
     <>
       <Detail label="Email" value={selected.email} />
-      {isCoaching && meta.phone && <Detail label="Phone" value={meta.phone} />}
+      {isCoaching && phone && <Detail label="Phone" value={phone} />}
       <Detail label="Company" value={selected.company || '—'} />
-      {isCoaching && meta.company_role && <Detail label="Role" value={meta.company_role} />}
+      {isCoaching && companyRole && <Detail label="Role" value={companyRole} />}
       <Detail label="Service" value={selected.service_type} />
       <Detail label="Budget" value={selected.budget} />
-      {isCoaching && meta.experience_level && <Detail label="Experience level" value={meta.experience_level} />}
+      {isCoaching && experienceLevel && <Detail label="Experience level" value={experienceLevel} />}
       <Detail label="Date" value={new Date(selected.created_at).toLocaleString()} />
 
       {isCoaching && (
         <>
-          {meta.reason && (
+          {reason && (
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 11, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>Reason</div>
-              <div style={{ fontSize: 13, color: '#18181a', lineHeight: 1.6 }}>{meta.reason}</div>
+              <div style={{ fontSize: 13, color: '#18181a', lineHeight: 1.6 }}>{reason}</div>
             </div>
           )}
-          {meta.outcome && (
+          {outcome && (
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 11, color: '#7a7888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>Desired outcome</div>
-              <div style={{ fontSize: 13, color: '#18181a', lineHeight: 1.6 }}>{meta.outcome}</div>
+              <div style={{ fontSize: 13, color: '#18181a', lineHeight: 1.6 }}>{outcome}</div>
             </div>
           )}
         </>
