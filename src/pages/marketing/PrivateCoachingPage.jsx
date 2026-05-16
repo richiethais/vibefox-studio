@@ -88,7 +88,7 @@ export default function PrivateCoachingPage() {
         <section className="mb-10 rounded-2xl border border-slate-200 bg-white p-8">
           <h2 className="mb-4 text-xl font-semibold text-slate-900">What you get</h2>
           <ul className="space-y-2 text-slate-700">
-            <li>• 60 minutes of focused 1:1 coaching with Richie (Vibefox Studio)</li>
+            <li>• 60 minutes of focused 1:1 coaching with Vibefox Studio</li>
             <li>• Live code review, architecture feedback, or pair-programming on your real project</li>
             <li>• Concrete next steps you can act on the same week</li>
             <li>• Follow-up notes in writing</li>
