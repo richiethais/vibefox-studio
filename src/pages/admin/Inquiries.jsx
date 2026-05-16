@@ -53,7 +53,11 @@ export default function AdminInquiries() {
   useEffect(() => { load() }, [load])
 
   async function setStatus(id, status) {
-    await supabase.from('inquiries').update({ status }).eq('id', id)
+    const { error } = await supabase.from('inquiries').update({ status }).eq('id', id)
+    if (error) {
+      alert(`Could not update status: ${error.message}`)
+      return
+    }
     await load()
     setSelected(s => s?.id === id ? { ...s, status } : s)
   }

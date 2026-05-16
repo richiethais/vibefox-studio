@@ -14,7 +14,7 @@ begin
   ) then
     alter table public.inquiries
       add constraint inquiries_status_check
-      check (status in ('new', 'pending_payment', 'paid', 'checkout_failed'));
+      check (status in ('new', 'contacted', 'converted', 'pending_payment', 'paid', 'checkout_failed'));
   end if;
 end$$;
 
