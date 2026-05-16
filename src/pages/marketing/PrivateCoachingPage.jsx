@@ -1,17 +1,29 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import Nav from '../../components/Nav'
-import { Footer } from '../../components/CTAFooter'
+import MarketingLayout from '../../components/marketing/MarketingLayout'
 import SEOHead from '../../components/SEOHead'
+import { supabase } from '../../lib/supabase'
+import { parseFunctionError } from '../../lib/supabaseFunctions'
 
-const SUPABASE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-coaching-checkout`
+const BRAND_ACCENT = '#b8906a'
 
 const ROLE_SUGGESTIONS = ['Student', 'Freelancer', 'Founder', 'Engineer', 'Designer']
 const EXPERIENCE_LEVELS = ['Beginner', 'Intermediate', 'Advanced']
 
+const focusRingStyle = {
+  outline: 'none',
+  boxShadow: `0 0 0 2px ${BRAND_ACCENT}33`,
+  borderColor: BRAND_ACCENT,
+}
+
 export default function PrivateCoachingPage() {
   const [params] = useSearchParams()
   const wasCanceled = params.get('canceled') === '1'
+
+  const companyRoleId = useId()
+  const reasonId = useId()
+  const outcomeId = useId()
+  const experienceLabelId = useId()
 
   const [form, setForm] = useState({
     first_name: '',
@@ -33,16 +45,14 @@ export default function PrivateCoachingPage() {
     setError('')
     setSubmitting(true)
     try {
-      const res = await fetch(SUPABASE_FUNCTION_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-        },
-        body: JSON.stringify(form),
+      const { data, error: fnError } = await supabase.functions.invoke('create-coaching-checkout', {
+        body: form,
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Could not start checkout.')
+      if (fnError) {
+        const parsed = await parseFunctionError(fnError, 'Could not start checkout.')
+        throw new Error(parsed.message || 'Could not start checkout.')
+      }
+      if (!data?.url) throw new Error('Checkout URL missing from response. Please try again.')
       window.location.href = data.url
     } catch (err) {
       setError(err.message || 'Something went wrong.')
@@ -51,17 +61,21 @@ export default function PrivateCoachingPage() {
   }
 
   return (
-    <>
+    <MarketingLayout hideCTA>
       <SEOHead
         title="Private Coaching & Consulting — Vibefox Studio"
         description="1:1 AI Software Engineering coaching with Vibefox Studio."
         path="/privatecoaching"
         noindex
       />
-      <Nav />
-      <main className="mx-auto max-w-3xl px-6 pt-32 pb-24">
+      <div className="mx-auto max-w-3xl px-6 pt-20 pb-24">
         <header className="mb-12 text-center">
-          <p className="mb-3 text-sm font-medium uppercase tracking-wider text-orange-500">Private</p>
+          <p
+            className="mb-3 text-sm font-medium uppercase tracking-wider"
+            style={{ color: BRAND_ACCENT }}
+          >
+            Private
+          </p>
           <h1 className="mb-4 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl">
             1:1 AI Software Engineering Coaching
           </h1>
@@ -91,29 +105,77 @@ export default function PrivateCoachingPage() {
           <h2 className="text-xl font-semibold text-slate-900">Tell me about you</h2>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="First name" required value={form.first_name} onChange={update('first_name')} />
-            <Field label="Last name" required value={form.last_name} onChange={update('last_name')} />
+            <Field
+              label="First name"
+              required
+              value={form.first_name}
+              onChange={update('first_name')}
+              autoComplete="given-name"
+            />
+            <Field
+              label="Last name"
+              required
+              value={form.last_name}
+              onChange={update('last_name')}
+              autoComplete="family-name"
+            />
           </div>
 
-          <Field type="email" label="Email" required value={form.email} onChange={update('email')} />
-          <Field label="Phone (optional)" value={form.phone} onChange={update('phone')} />
+          <Field
+            type="email"
+            label="Email"
+            required
+            value={form.email}
+            onChange={update('email')}
+            autoComplete="email"
+            inputMode="email"
+          />
+          <Field
+            type="tel"
+            label="Phone (optional)"
+            value={form.phone}
+            onChange={update('phone')}
+            autoComplete="tel"
+            inputMode="tel"
+          />
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Company or role</label>
+            <label
+              htmlFor={companyRoleId}
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
+              Company or role
+            </label>
             <input
+              id={companyRoleId}
               type="text"
               value={form.company_role}
               onChange={update('company_role')}
               placeholder="e.g. Founder at Acme, Student at NYU…"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none"
+              onFocus={(e) => Object.assign(e.target.style, focusRingStyle)}
+              onBlur={(e) => {
+                e.target.style.outline = ''
+                e.target.style.boxShadow = ''
+                e.target.style.borderColor = ''
+              }}
             />
             <div className="mt-2 flex flex-wrap gap-2">
               {ROLE_SUGGESTIONS.map((s) => (
                 <button
                   key={s}
                   type="button"
+                  aria-label={`Use "${s}" as company or role`}
                   onClick={() => setForm((p) => ({ ...p, company_role: s }))}
-                  className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600 hover:border-orange-500 hover:text-orange-600"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = BRAND_ACCENT
+                    e.currentTarget.style.color = BRAND_ACCENT
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = ''
+                    e.currentTarget.style.color = ''
+                  }}
+                  className="rounded-full border border-slate-300 px-3 py-1 text-xs text-slate-600"
                 >
                   {s}
                 </button>
@@ -122,50 +184,90 @@ export default function PrivateCoachingPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Experience level</label>
-            <div className="flex flex-wrap gap-2">
-              {EXPERIENCE_LEVELS.map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => setForm((p) => ({ ...p, experience_level: level }))}
-                  className={`rounded-full border px-4 py-1.5 text-sm transition ${
-                    form.experience_level === level
-                      ? 'border-orange-500 bg-orange-500 text-white'
-                      : 'border-slate-300 text-slate-700 hover:border-orange-500'
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
+            <p id={experienceLabelId} className="mb-1 block text-sm font-medium text-slate-700">
+              Experience level
+            </p>
+            <div
+              role="radiogroup"
+              aria-labelledby={experienceLabelId}
+              className="flex flex-wrap gap-2"
+            >
+              {EXPERIENCE_LEVELS.map((level) => {
+                const checked = form.experience_level === level
+                return (
+                  <label
+                    key={level}
+                    className="cursor-pointer rounded-full border px-4 py-1.5 text-sm transition"
+                    style={
+                      checked
+                        ? {
+                          borderColor: BRAND_ACCENT,
+                          background: BRAND_ACCENT,
+                          color: '#fff',
+                        }
+                        : { borderColor: '#cbd5e1', color: '#334155' }
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="experience_level"
+                      value={level}
+                      checked={checked}
+                      onChange={update('experience_level')}
+                      className="sr-only"
+                    />
+                    {level}
+                  </label>
+                )
+              })}
             </div>
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label
+              htmlFor={reasonId}
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
               What do you want coaching on? <span className="text-red-500">*</span>
             </label>
             <textarea
+              id={reasonId}
               required
               rows={4}
               value={form.reason}
               onChange={update('reason')}
               placeholder="The project, the stack, the specific problems you're stuck on…"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none"
+              onFocus={(e) => Object.assign(e.target.style, focusRingStyle)}
+              onBlur={(e) => {
+                e.target.style.outline = ''
+                e.target.style.boxShadow = ''
+                e.target.style.borderColor = ''
+              }}
             />
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label
+              htmlFor={outcomeId}
+              className="mb-1 block text-sm font-medium text-slate-700"
+            >
               What do you want to walk away with? <span className="text-red-500">*</span>
             </label>
             <textarea
+              id={outcomeId}
               required
               rows={3}
               value={form.outcome}
               onChange={update('outcome')}
               placeholder="A clearer architecture, a working feature, a decision made…"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none"
+              onFocus={(e) => Object.assign(e.target.style, focusRingStyle)}
+              onBlur={(e) => {
+                e.target.style.outline = ''
+                e.target.style.boxShadow = ''
+                e.target.style.borderColor = ''
+              }}
             />
           </div>
 
@@ -176,7 +278,13 @@ export default function PrivateCoachingPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white transition hover:bg-orange-500 disabled:cursor-not-allowed disabled:opacity-60"
+            onMouseEnter={(e) => {
+              if (!submitting) e.currentTarget.style.background = BRAND_ACCENT
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = ''
+            }}
+            className="w-full rounded-xl bg-slate-900 px-6 py-3 text-base font-semibold text-white transition disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? 'Starting checkout…' : 'Continue to checkout — $500'}
           </button>
@@ -185,24 +293,48 @@ export default function PrivateCoachingPage() {
             Secure payment via Stripe. You'll receive a confirmation email with your booking link.
           </p>
         </form>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </MarketingLayout>
   )
 }
 
-function Field({ label, type = 'text', required = false, value, onChange }) {
+function Field({
+  label,
+  type = 'text',
+  required = false,
+  value,
+  onChange,
+  autoComplete,
+  inputMode,
+}) {
+  const inputId = useId()
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">
+      <label
+        htmlFor={inputId}
+        className="mb-1 block text-sm font-medium text-slate-700"
+      >
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <input
+        id={inputId}
         type={type}
         required={required}
         value={value}
         onChange={onChange}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+        autoComplete={autoComplete}
+        inputMode={inputMode}
+        className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none"
+        onFocus={(e) => {
+          e.target.style.outline = 'none'
+          e.target.style.boxShadow = `0 0 0 2px ${BRAND_ACCENT}33`
+          e.target.style.borderColor = BRAND_ACCENT
+        }}
+        onBlur={(e) => {
+          e.target.style.outline = ''
+          e.target.style.boxShadow = ''
+          e.target.style.borderColor = ''
+        }}
       />
     </div>
   )
