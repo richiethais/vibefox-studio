@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import Cal, { getCalApi } from '@calcom/embed-react'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import SEOHead from '../../components/SEOHead'
 import { supabase } from '../../lib/supabase'
 import { parseFunctionError } from '../../lib/supabaseFunctions'
 
 const DEFAULT_BOOKING_URL = 'https://cal.com/vibefoxcoaching/private-coaching-consultation'
+const CAL_NAMESPACE = 'private-coaching-thanks'
 
 function normalizeBookingUrl(bookingUrl) {
   if (typeof bookingUrl !== 'string') return ''
@@ -24,6 +26,18 @@ function getEmbedUrl(bookingUrl) {
   return `${normalizedUrl}${separator}embed=true`
 }
 
+function getCalLink(bookingUrl) {
+  try {
+    const normalizedUrl = normalizeBookingUrl(bookingUrl)
+    if (!normalizedUrl) return ''
+
+    const url = new URL(normalizedUrl)
+    return url.pathname.replace(/^\/+|\/+$/g, '')
+  } catch {
+    return ''
+  }
+}
+
 export default function PrivateCoachingThanksPage() {
   const [params] = useSearchParams()
   const sessionId = params.get('session_id')
@@ -31,8 +45,10 @@ export default function PrivateCoachingThanksPage() {
   const [bookingUrl, setBookingUrl] = useState('')
   const [error, setError] = useState('')
   const [verifying, setVerifying] = useState(true)
+  const [embedError, setEmbedError] = useState('')
 
   const canUseDebugBooking = import.meta.env.DEV && debugBooking
+  const calLink = getCalLink(bookingUrl)
   const embedUrl = getEmbedUrl(bookingUrl)
 
   useEffect(() => {
@@ -86,6 +102,59 @@ export default function PrivateCoachingThanksPage() {
 
   const hasAccess = Boolean(bookingUrl) && !error
 
+  useEffect(() => {
+    if (!hasAccess || !calLink) return
+
+    let cancelled = false
+    let ready = false
+    const fallbackTimer = window.setTimeout(() => {
+      if (!cancelled && !ready) {
+        setEmbedError('The inline calendar is taking longer than expected. If it does not appear, use the direct booking link below.')
+      }
+    }, 8000)
+
+    async function configureEmbed() {
+      const cal = await getCalApi({ namespace: CAL_NAMESPACE })
+      if (cancelled) return
+
+      cal('ui', {
+        hideEventTypeDetails: true,
+        showTimezoneWhenEventDetailsHidden: true,
+        layout: 'month_view',
+      })
+
+      cal('on', {
+        action: 'linkReady',
+        callback: () => {
+          ready = true
+          if (!cancelled) setEmbedError('')
+        },
+      })
+
+      cal('on', {
+        action: 'linkFailed',
+        callback: () => {
+          ready = false
+          if (!cancelled) {
+            setEmbedError('The booking calendar could not be loaded inline. Use the direct booking link below.')
+          }
+        },
+      })
+    }
+
+    setEmbedError('')
+    configureEmbed().catch(() => {
+      if (!cancelled) {
+        setEmbedError('The booking calendar could not be loaded inline. Use the direct booking link below.')
+      }
+    })
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(fallbackTimer)
+    }
+  }, [calLink, hasAccess])
+
   return (
     <>
       <SEOHead
@@ -129,21 +198,35 @@ export default function PrivateCoachingThanksPage() {
                   </p>
                 </div>
                 <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
-                  <iframe
-                    title="Book your private coaching session"
-                    src={embedUrl}
+                  <Cal
+                    namespace={CAL_NAMESPACE}
+                    calLink={calLink}
                     className="min-h-[760px] w-full overflow-hidden rounded-xl bg-white"
-                    style={{ border: 0 }}
-                    loading="lazy"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    allow="camera; microphone; fullscreen; payment"
+                    style={{ width: '100%', height: '100%', overflow: 'scroll' }}
+                    config={{ layout: 'month_view' }}
                   />
                 </div>
+                {embedError && (
+                  <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                    {embedError}
+                  </div>
+                )}
                 {error && (
                   <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                     {error}
                   </div>
                 )}
+                <div className="mt-6 text-center">
+                  <a
+                    href={embedUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                    style={{ background: '#0f172a' }}
+                  >
+                    Open booking directly
+                  </a>
+                </div>
               </>
             ) : (
               <div className="py-12 text-center">
