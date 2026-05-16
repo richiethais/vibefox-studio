@@ -82,6 +82,11 @@ function formatAgendaType(type) {
   return 'General'
 }
 
+function formatStatusLabel(status) {
+  if (!status) return 'Unknown'
+  return String(status).replace(/_/g, ' ')
+}
+
 function truncate(value, maxLength) {
   const clean = String(value || '').trim()
   if (!clean) return 'No message body'
@@ -98,9 +103,10 @@ function getInviteStatusLabel(invite) {
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const isMobile = useIsMobile(768)
-  const [stats, setStats] = useState({ inquiries: 0, clients: 0, projects: 0, invoices: 0, drafts: 0 })
+  const [stats, setStats] = useState({ inquiries: 0, coaching: 0, clients: 0, projects: 0, invoices: 0, drafts: 0 })
   const [recent, setRecent] = useState({
     inquiries: [],
+    coaching: [],
     invoices: [],
     invites: [],
     draft: null,
@@ -115,11 +121,13 @@ export default function AdminDashboard() {
 
       const [
         inquiryCountRes,
+        coachingCountRes,
         clientCountRes,
         projectCountRes,
         invoiceCountRes,
         draftCountRes,
         inquiriesRes,
+        coachingRes,
         invoicesRes,
         invitesRes,
         latestDraftRes,
@@ -127,12 +135,14 @@ export default function AdminDashboard() {
         calendarRes,
         scheduledBlogsRes,
       ] = await Promise.all([
-        supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('status', 'new'),
+        supabase.from('inquiries').select('*', { count: 'exact', head: true }).neq('form_key', 'coaching').eq('status', 'new'),
+        supabase.from('inquiries').select('*', { count: 'exact', head: true }).eq('form_key', 'coaching'),
         supabase.from('clients').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
         supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('status', 'unpaid'),
         supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('status', 'draft'),
-        supabase.from('inquiries').select('id, name, service_type, created_at').eq('status', 'new').order('created_at', { ascending: false }).limit(5),
+        supabase.from('inquiries').select('id, name, service_type, created_at').neq('form_key', 'coaching').eq('status', 'new').order('created_at', { ascending: false }).limit(5),
+        supabase.from('inquiries').select('id, name, status, created_at, service_type').eq('form_key', 'coaching').order('created_at', { ascending: false }).limit(5),
         supabase.from('invoices').select('id, description, amount, created_at, clients(name)').eq('status', 'unpaid').order('created_at', { ascending: false }).limit(5),
         supabase.from('invite_tokens').select('token, name, email, used, created_at, expires_at').order('created_at', { ascending: false }).limit(5),
         supabase.from('blog_posts').select('id, title, excerpt, updated_at, slug, status').eq('status', 'draft').order('updated_at', { ascending: false }).limit(1).maybeSingle(),
@@ -163,6 +173,7 @@ export default function AdminDashboard() {
 
       setStats({
         inquiries: inquiryCountRes.count ?? 0,
+        coaching: coachingCountRes.count ?? 0,
         clients: clientCountRes.count ?? 0,
         projects: projectCountRes.count ?? 0,
         invoices: invoiceCountRes.count ?? 0,
@@ -171,6 +182,7 @@ export default function AdminDashboard() {
 
       setRecent({
         inquiries: inquiriesRes.data ?? [],
+        coaching: coachingRes.data ?? [],
         invoices: invoicesRes.data ?? [],
         invites: invitesRes.data ?? [],
         draft: latestDraftRes.data ?? null,
@@ -187,6 +199,7 @@ export default function AdminDashboard() {
 
   const cards = useMemo(() => ([
     { label: 'New inquiries', value: stats.inquiries, color: '#2563eb', route: '/admin/inquiries', hint: 'Needs follow-up' },
+    { label: 'Coaching CRM', value: stats.coaching, color: '#b8906a', route: '/admin/coaching', hint: 'Private coaching pipeline' },
     { label: 'Active clients', value: stats.clients, color: '#16a34a', route: '/admin/clients', hint: 'Current accounts' },
     { label: 'Active projects', value: stats.projects, color: '#7c3aed', route: '/admin/projects', hint: 'In progress' },
     { label: 'Open billing items', value: stats.invoices, color: '#d97706', route: '/admin/invoices', hint: 'Invoice and payment link follow-up' },
@@ -200,6 +213,7 @@ export default function AdminDashboard() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           {[
             { label: 'Review inquiries', route: '/admin/inquiries' },
+            { label: 'Open coaching', route: '/admin/coaching' },
             { label: 'Today\'s calendar', route: '/admin/calendar' },
             { label: 'New messages', route: '/admin/messages' },
             { label: 'Write blog', route: '/admin/blogs' },
@@ -233,7 +247,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(5, 1fr)', gap: 16, marginBottom: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, minmax(0, 1fr))', gap: 16, marginBottom: 18 }}>
         {cards.map((card, idx) => (
           <button
             key={card.label}
@@ -266,7 +280,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.15fr 1fr 1fr 1fr 1.1fr', gap: 16 }}>
+      <div className="anim-rise-6" style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, minmax(0, 1fr))', gap: 16 }}>
         <Panel title="New inquiries" actionLabel="Open CRM" onAction={() => navigate('/admin/inquiries')}>
           {recent.inquiries.length === 0 ? (
             <EmptyRow text="No new inquiries." />
@@ -276,6 +290,19 @@ export default function AdminDashboard() {
               title={row.name}
               subtitle={`${row.service_type || 'Service not set'} · ${formatDate(row.created_at)}`}
               onClick={() => navigate('/admin/inquiries')}
+            />
+          ))}
+        </Panel>
+
+        <Panel title="Coaching inquiries" actionLabel="Open coaching" onAction={() => navigate('/admin/coaching')}>
+          {recent.coaching.length === 0 ? (
+            <EmptyRow text="No coaching inquiries yet." />
+          ) : recent.coaching.map(row => (
+            <Row
+              key={row.id}
+              title={row.name}
+              subtitle={`${formatStatusLabel(row.status)} · ${formatDate(row.created_at)}`}
+              onClick={() => navigate('/admin/coaching')}
             />
           ))}
         </Panel>

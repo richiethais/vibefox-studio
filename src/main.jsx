@@ -5,6 +5,7 @@ import './index.css'
 import { AuthProvider } from './lib/auth'
 import AdminDashboard from './pages/admin/Dashboard.jsx'
 import AdminInquiries from './pages/admin/Inquiries.jsx'
+import AdminCoaching from './pages/admin/Coaching.jsx'
 import AdminClients from './pages/admin/Clients.jsx'
 import AdminProjects from './pages/admin/Projects.jsx'
 import AdminInvoices from './pages/admin/Invoices.jsx'
@@ -45,6 +46,7 @@ createRoot(document.getElementById('root')).render(
             <Route index element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="inquiries" element={<AdminInquiries />} />
+            <Route path="coaching" element={<AdminCoaching />} />
             <Route path="support" element={<AdminSupport />} />
             <Route path="clients" element={<AdminClients />} />
             <Route path="projects" element={<AdminProjects />} />

@@ -1,9 +1,10 @@
 import { getSupabaseAdminClient } from '../_shared/auth.ts'
 import { corsHeaders, json } from '../_shared/cors.ts'
+import { getStripeClient } from '../_shared/stripe.ts'
 
 const RATE_LIMIT_WINDOW_MS = 60_000
 const FORM_KEY = 'coaching'
-const SITE_URL = Deno.env.get('SITE_URL')?.trim() || 'https://vibefoxstudio.com'
+const DEFAULT_SITE_URL = 'https://vibefoxstudio.com'
 const PRICE_USD_CENTS = 50_000
 const PRICE_DISPLAY = '$500'
 
@@ -21,12 +22,41 @@ function cleanText(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
 }
 
+function normalizeBaseUrl(value: unknown) {
+  const candidate = cleanText(value)
+
+  if (!candidate) return ''
+
+  try {
+    const url = new URL(candidate)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return ''
+    return url.origin.replace(/\/+$/, '')
+  } catch {
+    return ''
+  }
+}
+
+async function markCheckoutFailed(supabaseAdmin: ReturnType<typeof getSupabaseAdminClient>, inquiryId: string) {
+  const { error } = await supabaseAdmin
+    .from('inquiries')
+    .update({ status: 'checkout_failed' })
+    .eq('id', inquiryId)
+
+  if (error) {
+    console.error('checkout_failed status update failed', { inquiryId, message: error.message })
+  }
+}
+
 Deno.serve(async request => {
   if (request.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (request.method !== 'POST') return badRequest('Method not allowed.', 405)
 
+  let stage = 'request start'
+
   try {
+    stage = 'initialize supabase admin client'
     const supabaseAdmin = getSupabaseAdminClient()
+    stage = 'parse request body'
     const body = await request.json()
 
     const firstName = cleanText(body.first_name)
@@ -38,6 +68,9 @@ Deno.serve(async request => {
     const reason = cleanText(body.reason)
     const outcome = cleanText(body.outcome)
     const sourceIp = getSourceIp(request)
+    const siteUrl = normalizeBaseUrl(request.headers.get('origin')) ||
+      normalizeBaseUrl(Deno.env.get('SITE_URL')) ||
+      DEFAULT_SITE_URL
 
     if (!firstName) return badRequest('First name is required.')
     if (!lastName) return badRequest('Last name is required.')
@@ -45,13 +78,13 @@ Deno.serve(async request => {
     if (!reason || reason.length < 20) return badRequest('Please share at least a couple sentences about what you want coaching on.')
     if (!outcome || outcome.length < 10) return badRequest('Please share what you want to walk away with.')
 
-    const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY')?.trim()
-    if (!stripeSecret) return json({ error: 'Stripe is not configured.' }, 500)
+    stage = 'initialize stripe client'
+    const stripe = getStripeClient()
 
-    // Rate limit (reuse existing table)
     const identifier = `${FORM_KEY}:${email}:${sourceIp || 'unknown'}`
     const windowStartIso = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
 
+    stage = 'check rate limit'
     const { data: existingRateLimit, error: rateLimitError } = await supabaseAdmin
       .from('inquiry_rate_limits')
       .select('created_at')
@@ -61,123 +94,125 @@ Deno.serve(async request => {
       .limit(1)
       .maybeSingle()
 
-    if (rateLimitError) return json({ error: rateLimitError.message }, 500)
+    if (rateLimitError) return json({ error: rateLimitError.message, stage }, 500)
     if (existingRateLimit?.created_at) {
       return json({ error: 'Please wait a moment before trying again.' }, 429)
     }
 
     const name = `${firstName} ${lastName}`.trim()
     const metadata = {
-      first_name: firstName,
-      last_name: lastName,
-      phone: phone || null,
       company_role: companyRole || null,
       experience_level: experienceLevel || null,
-      reason,
+      first_name: firstName,
+      last_name: lastName,
       outcome,
+      phone: phone || null,
+      reason,
     }
 
-    // NOTE: rate-limit is read-then-write so two concurrent submissions can both pass.
-    // Stripe Idempotency-Key (below) ensures any double-inserted inquiry gets the same checkout session.
+    stage = 'insert coaching inquiry'
     const { data: inquiry, error: inquiryError } = await supabaseAdmin
       .from('inquiries')
       .insert({
-        form_key: FORM_KEY,
-        status: 'pending_payment',
-        email,
-        name,
-        service_type: 'coaching',
         budget: PRICE_DISPLAY,
-        // `message` duplicates `reason` from metadata for admin UI compatibility.
+        email,
+        form_key: FORM_KEY,
         message: reason,
         metadata,
+        name,
+        service_type: 'coaching',
+        status: 'pending_payment',
       })
       .select('id')
       .single()
 
-    if (inquiryError) return json({ error: inquiryError.message }, 500)
+    if (inquiryError) return json({ error: inquiryError.message, stage }, 500)
 
     if (!inquiry?.id) {
       console.error('inquiry created without id', inquiry)
-      return json({ error: 'Could not start checkout. Try again.' }, 500)
+      return json({ error: 'Could not start checkout. Try again.', stage }, 500)
     }
 
-    const { error: limitInsertError } = await supabaseAdmin.from('inquiry_rate_limits').insert({
-      email,
-      form_key: FORM_KEY,
-      identifier,
-      source_ip: sourceIp,
-    })
+    stage = 'insert rate limit record'
+    const { error: limitInsertError } = await supabaseAdmin
+      .from('inquiry_rate_limits')
+      .insert({
+        email,
+        form_key: FORM_KEY,
+        identifier,
+        source_ip: sourceIp,
+      })
     if (limitInsertError) console.error('rate_limit insert failed', limitInsertError)
 
-    // Create Stripe Checkout Session
-    const stripeParams = new URLSearchParams()
-    stripeParams.append('mode', 'payment')
-    stripeParams.append('customer_email', email)
-    stripeParams.append('success_url', `${SITE_URL}/privatecoaching/thanks?session_id={CHECKOUT_SESSION_ID}`)
-    stripeParams.append('cancel_url', `${SITE_URL}/privatecoaching?canceled=1`)
-    stripeParams.append('line_items[0][price_data][currency]', 'usd')
-    stripeParams.append('line_items[0][price_data][unit_amount]', String(PRICE_USD_CENTS))
-    stripeParams.append('line_items[0][price_data][product_data][name]', '1:1 AI Software Engineering Coaching — 1 hour')
-    stripeParams.append('line_items[0][price_data][product_data][description]', 'Private 60-minute coaching session with Vibefox Studio')
-    stripeParams.append('line_items[0][quantity]', '1')
-    stripeParams.append('metadata[inquiry_id]', inquiry.id)
-    stripeParams.append('payment_intent_data[metadata][inquiry_id]', inquiry.id)
-
-    const stripeAbort = new AbortController()
-    const stripeTimeout = setTimeout(() => stripeAbort.abort(), 10_000)
-    let stripeRes: Response
+    stage = 'create stripe checkout session'
+    let session: { id?: string; url?: string }
     try {
-      stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${stripeSecret}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Idempotency-Key': 'coaching-checkout-' + inquiry.id,
+      session = await stripe.checkout.sessions.create({
+        cancel_url: `${siteUrl}/privatecoaching?canceled=1`,
+        client_reference_id: inquiry.id,
+        customer_creation: 'always',
+        customer_email: email,
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                description: 'Private 60-minute coaching session with Vibefox Studio',
+                name: '1:1 AI Software Engineering Coaching - 1 hour',
+              },
+              unit_amount: PRICE_USD_CENTS,
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          inquiry_id: inquiry.id,
         },
-        body: stripeParams.toString(),
-        signal: stripeAbort.signal,
+        mode: 'payment',
+        payment_intent_data: {
+          metadata: {
+            inquiry_id: inquiry.id,
+          },
+        },
+        success_url: `${siteUrl}/privatecoaching/thanks?session_id={CHECKOUT_SESSION_ID}`,
+      }, {
+        idempotencyKey: `coaching-checkout-${inquiry.id}`,
       })
-    } catch (fetchError) {
-      console.error('stripe checkout fetch failed', fetchError)
-      await supabaseAdmin
-        .from('inquiries')
-        .update({ status: 'checkout_failed' })
-        .eq('id', inquiry.id)
-      return json({ error: 'Could not start checkout. Try again.' }, 500)
-    } finally {
-      clearTimeout(stripeTimeout)
+    } catch (error) {
+      const code = (error as { code?: string })?.code || null
+      const message = error instanceof Error ? error.message : 'Unknown Stripe error.'
+      const type = (error as { type?: string })?.type || null
+      console.error('stripe checkout error', {
+        code,
+        message,
+        stage,
+        type,
+      })
+      await markCheckoutFailed(supabaseAdmin, inquiry.id)
+      return json({ error: 'Could not start checkout. Try again.', stage }, 500)
     }
-
-    if (!stripeRes.ok) {
-      const errText = await stripeRes.text()
-      console.error('stripe checkout error', errText)
-      await supabaseAdmin
-        .from('inquiries')
-        .update({ status: 'checkout_failed' })
-        .eq('id', inquiry.id)
-      return json({ error: 'Could not start checkout. Try again.' }, 500)
-    }
-
-    const session = await stripeRes.json() as { id?: string; url?: string }
 
     if (!session?.id || !session?.url) {
       console.error('stripe returned invalid session', session)
-      await supabaseAdmin
-        .from('inquiries')
-        .update({ status: 'checkout_failed' })
-        .eq('id', inquiry.id)
-      return json({ error: 'Could not start checkout. Try again.' }, 500)
+      await markCheckoutFailed(supabaseAdmin, inquiry.id)
+      return json({ error: 'Could not start checkout. Try again.', stage }, 500)
     }
 
-    await supabaseAdmin
+    stage = 'persist stripe session id'
+    const { error: updateError } = await supabaseAdmin
       .from('inquiries')
       .update({ stripe_session_id: session.id })
       .eq('id', inquiry.id)
 
+    if (updateError) {
+      await markCheckoutFailed(supabaseAdmin, inquiry.id)
+      return json({ error: updateError.message, stage }, 500)
+    }
+
     return json({ url: session.url, inquiry_id: inquiry.id })
   } catch (error) {
-    console.error('create-coaching-checkout unexpected', error)
-    return json({ error: 'Unexpected error. Please try again.' }, 500)
+    const message = error instanceof Error ? error.message : 'Unexpected error. Please try again.'
+    console.error('create-coaching-checkout unexpected', { message, stage })
+    return json({ error: message, stage }, 500)
   }
 })

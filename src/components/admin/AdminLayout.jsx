@@ -8,6 +8,7 @@ import useIsMobile from '../useIsMobile'
 const navItems = [
   { to: '/admin/dashboard', label: 'Dashboard' },
   { to: '/admin/inquiries', label: 'Inquiries' },
+  { to: '/admin/coaching', label: 'Coaching' },
   { to: '/admin/support', label: 'Support' },
   { to: '/admin/clients', label: 'Clients' },
   { to: '/admin/projects', label: 'Projects' },
