@@ -47,17 +47,17 @@ function getCalConfig(isMobile) {
 }
 
 function getEmbedHeight(isMobile) {
-  return isMobile ? 'min(88vw, 360px)' : '760px'
+  return isMobile ? 'min(88vw, 360px)' : '860px'
 }
 
 function getEmbedMaxWidth(isMobile) {
-  return isMobile ? '420px' : '1040px'
+  return isMobile ? '420px' : '1200px'
 }
 
 function getEmbedClassName(isMobile) {
   return [
     'w-full overflow-hidden rounded-xl bg-white',
-    isMobile ? 'aspect-square' : 'h-[760px]',
+    isMobile ? 'aspect-square' : 'h-[860px]',
   ].join(' ')
 }
 
@@ -112,6 +112,9 @@ export default function PrivateCoachingThanksPage() {
   const [error, setError] = useState('')
   const [verifying, setVerifying] = useState(true)
   const [embedError, setEmbedError] = useState('')
+  const [alreadyBooked, setAlreadyBooked] = useState(false)
+  const [bookingDetails, setBookingDetails] = useState(null)
+  const [finalizingBooking, setFinalizingBooking] = useState(false)
 
   const canUseDebugBooking = import.meta.env.DEV && debugBooking
   const calLink = getCalLink(bookingUrl)
@@ -120,7 +123,6 @@ export default function PrivateCoachingThanksPage() {
   const embedHeight = getEmbedHeight(isMobile)
   const embedMaxWidth = getEmbedMaxWidth(isMobile)
   const embedClassName = getEmbedClassName(isMobile)
-  const uiConfig = getUiConfig(isMobile)
 
   useEffect(() => {
     let active = true
@@ -151,12 +153,23 @@ export default function PrivateCoachingThanksPage() {
           throw new Error(parsed.message || 'Could not verify coaching access.')
         }
 
+        if (data?.already_booked) {
+          if (!active) return
+          setBookingUrl('')
+          setAlreadyBooked(true)
+          setBookingDetails(data.booking || null)
+          setError('')
+          return
+        }
+
         if (!data?.booking_url) {
           throw new Error('Booking link missing from verification response.')
         }
 
         if (!active) return
         setBookingUrl(data.booking_url)
+        setAlreadyBooked(false)
+        setBookingDetails(null)
         setError('')
       } catch (err) {
         if (!active) return
@@ -171,13 +184,14 @@ export default function PrivateCoachingThanksPage() {
     return () => { active = false }
   }, [canUseDebugBooking, sessionId])
 
-  const hasAccess = Boolean(bookingUrl) && !error
+  const hasAccess = Boolean(bookingUrl) && !error && !alreadyBooked
 
   useEffect(() => {
     if (!hasAccess || !calLink) return
 
     let cancelled = false
     let ready = false
+    let completionStarted = false
     const fallbackTimer = window.setTimeout(() => {
       if (!cancelled && !ready) {
         setEmbedError('The inline calendar is taking longer than expected. If it does not appear, use the direct booking link below.')
@@ -188,7 +202,7 @@ export default function PrivateCoachingThanksPage() {
       const cal = await getCalApi({ namespace: CAL_NAMESPACE })
       if (cancelled) return
 
-      cal('ui', uiConfig)
+      cal('ui', getUiConfig(isMobile))
 
       cal('on', {
         action: 'linkReady',
@@ -207,6 +221,53 @@ export default function PrivateCoachingThanksPage() {
           }
         },
       })
+
+      cal('on', {
+        action: 'bookingSuccessfulV2',
+        callback: async event => {
+          const payload = event?.detail?.data || event?.data || {}
+          const bookingUid = payload?.uid || ''
+
+          if (!sessionId || !bookingUid || cancelled || completionStarted) return
+
+          completionStarted = true
+          setFinalizingBooking(true)
+          setEmbedError('')
+
+          try {
+            const { data, error: fnError } = await supabase.functions.invoke('complete-coaching-booking', {
+              body: {
+                session_id: sessionId,
+                booking_uid: bookingUid,
+                booking_start_at: payload?.startTime || null,
+                booking_end_at: payload?.endTime || null,
+              },
+            })
+
+            if (fnError) {
+              const parsed = await parseFunctionError(fnError, 'Could not finalize coaching booking.')
+              throw new Error(parsed.message || 'Could not finalize coaching booking.')
+            }
+
+            if (cancelled) return
+
+            setAlreadyBooked(true)
+            setBookingUrl('')
+            setBookingDetails({
+              uid: data?.booking_uid || bookingUid,
+              start_at: payload?.startTime || null,
+              end_at: payload?.endTime || null,
+            })
+            setError('')
+          } catch (err) {
+            if (!cancelled) {
+              setEmbedError(err.message || 'Your booking was made, but we could not lock this session yet. Please refresh before trying again.')
+            }
+          } finally {
+            if (!cancelled) setFinalizingBooking(false)
+          }
+        },
+      })
     }
 
     setEmbedError('')
@@ -220,7 +281,7 @@ export default function PrivateCoachingThanksPage() {
       cancelled = true
       window.clearTimeout(fallbackTimer)
     }
-  }, [calLink, hasAccess, uiConfig])
+  }, [calLink, hasAccess, isMobile, sessionId])
 
   return (
     <>
@@ -231,7 +292,7 @@ export default function PrivateCoachingThanksPage() {
         noindex
       />
       <MarketingLayout hideCTA>
-        <div className="mx-auto max-w-5xl px-4 pt-14 pb-16 sm:px-6 sm:pt-20 sm:pb-24">
+        <div className="mx-auto max-w-[1320px] px-4 pt-14 pb-16 sm:px-6 sm:pt-20 sm:pb-24">
           <header className="mb-6 text-center sm:mb-10">
             <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
               <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -255,6 +316,26 @@ export default function PrivateCoachingThanksPage() {
                 <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-slate-900" />
                 <h2 className="text-xl font-semibold text-slate-900">Verifying your booking access…</h2>
                 <p className="mt-3 text-sm text-slate-500">This usually takes just a moment.</p>
+              </div>
+            ) : alreadyBooked ? (
+              <div className="py-10 text-center sm:py-14">
+                <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-green-600">
+                  <svg className="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-semibold text-slate-900">Your session is already booked</h2>
+                <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
+                  This private coaching payment can only be used once, and your booking link has been locked.
+                </p>
+                {bookingDetails?.start_at && (
+                  <p className="mt-4 text-sm font-medium text-slate-900">
+                    Scheduled for {new Date(bookingDetails.start_at).toLocaleString()}
+                  </p>
+                )}
+                <p className="mt-4 text-xs text-slate-500">
+                  Need to change your time? Email inquiries@vibefoxstudio.com and we’ll help you reschedule.
+                </p>
               </div>
             ) : hasAccess ? (
               <>
@@ -280,22 +361,29 @@ export default function PrivateCoachingThanksPage() {
                     {embedError}
                   </div>
                 )}
+                {finalizingBooking && (
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                    Finalizing your booking…
+                  </div>
+                )}
                 {error && (
                   <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
                     {error}
                   </div>
                 )}
-                <div className="mt-6 text-center">
-                  <a
-                    href={embedUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-                    style={{ background: '#0f172a' }}
-                  >
-                    Open booking directly
-                  </a>
-                </div>
+                {embedError && (
+                  <div className="mt-6 text-center">
+                    <a
+                      href={embedUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90"
+                      style={{ background: '#0f172a' }}
+                    >
+                      Open booking directly
+                    </a>
+                  </div>
+                )}
               </>
             ) : (
               <div className="py-12 text-center">

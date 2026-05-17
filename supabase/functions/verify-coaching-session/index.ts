@@ -53,7 +53,7 @@ Deno.serve(async request => {
     const supabaseAdmin = getSupabaseAdminClient()
     const { data: inquiry, error: inquiryError } = await supabaseAdmin
       .from('inquiries')
-      .select('id, form_key, status, stripe_session_id, amount_paid_cents, paid_at')
+      .select('id, form_key, status, stripe_session_id, amount_paid_cents, paid_at, booked_at, cal_booking_uid, cal_booking_start_at, cal_booking_end_at')
       .eq('id', inquiryId)
       .maybeSingle()
 
@@ -70,6 +70,20 @@ Deno.serve(async request => {
     }
 
     if (inquiry.status !== 'paid') {
+      if (inquiry.status === 'booked') {
+        return json({
+          already_booked: true,
+          booked_at: inquiry.booked_at,
+          booking: {
+            uid: inquiry.cal_booking_uid,
+            start_at: inquiry.cal_booking_start_at,
+            end_at: inquiry.cal_booking_end_at,
+          },
+          inquiry_id: inquiryId,
+          ok: true,
+        })
+      }
+
       await supabaseAdmin
         .from('inquiries')
         .update({
@@ -84,6 +98,7 @@ Deno.serve(async request => {
     const bookingUrl = normalizeHttpsUrl(Deno.env.get('CAL_BOOKING_URL')) || DEFAULT_BOOKING_URL
 
     return json({
+      already_booked: false,
       booking_url: bookingUrl,
       inquiry_id: inquiryId,
       ok: true,

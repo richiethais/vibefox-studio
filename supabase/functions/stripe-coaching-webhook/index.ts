@@ -1,7 +1,7 @@
 import { getSupabaseAdminClient } from '../_shared/auth.ts'
 import { notifyAdmin, sendEmail, buildNotificationHtml, escapeHtml } from '../_shared/resend.ts'
 
-const CAL_LINK = 'https://cal.com/vibefoxcoaching/private-coaching-consultation'
+const DEFAULT_SITE_URL = 'https://vibefoxstudio.com'
 
 async function verifyStripeSignature(
   payload: string,
@@ -47,7 +47,24 @@ async function verifyStripeSignature(
   return false
 }
 
-function buyerEmailHtml(firstName: string, amountTotal: number) {
+function cleanText(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
+}
+
+function normalizeBaseUrl(value: unknown) {
+  const candidate = cleanText(value)
+  if (!candidate) return ''
+
+  try {
+    const url = new URL(candidate)
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return ''
+    return url.origin.replace(/\/+$/, '')
+  } catch {
+    return ''
+  }
+}
+
+function buyerEmailHtml(firstName: string, amountTotal: number, bookingAccessUrl: string) {
   const safeName = escapeHtml(firstName || 'there')
   const amountDisplay = `$${(amountTotal / 100).toFixed(2)}`
   return `
@@ -57,11 +74,11 @@ function buyerEmailHtml(firstName: string, amountTotal: number) {
       <p>Thanks for booking a 1:1 AI Software Engineering coaching session with Vibefox Studio. Your ${amountDisplay} payment was received.</p>
       <p>Pick a 60-minute slot here:</p>
       <p>
-        <a href="${CAL_LINK}" style="display: inline-block; padding: 12px 20px; background: #111; color: #fff; text-decoration: none; border-radius: 8px;">
+        <a href="${bookingAccessUrl}" style="display: inline-block; padding: 12px 20px; background: #111; color: #fff; text-decoration: none; border-radius: 8px;">
           Book your coaching session
         </a>
       </p>
-      <p>Or paste this link in your browser: <a href="${CAL_LINK}">${CAL_LINK}</a></p>
+      <p>Or paste this link in your browser: <a href="${bookingAccessUrl}">${bookingAccessUrl}</a></p>
       <p>If you have questions before the session, just reply to this email.</p>
       <p>— The Vibefox Studio team</p>
     </div>
@@ -111,6 +128,8 @@ Deno.serve(async request => {
   }
 
   const supabaseAdmin = getSupabaseAdminClient()
+  const siteUrl = normalizeBaseUrl(Deno.env.get('SITE_URL')) || DEFAULT_SITE_URL
+  const bookingAccessUrl = `${siteUrl}/privatecoaching/thanks?session_id=${encodeURIComponent(session.id)}`
 
   // Load inquiry for its metadata + email, but don't decide idempotency from this read.
   const { data: inquiry, error: loadError } = await supabaseAdmin
@@ -139,7 +158,7 @@ Deno.serve(async request => {
       paid_at: new Date().toISOString(),
     })
     .eq('id', inquiryId)
-    .neq('status', 'paid')
+    .in('status', ['pending_payment', 'checkout_failed'])
     .select('id')
     .maybeSingle()
 
@@ -181,7 +200,7 @@ Deno.serve(async request => {
     await sendEmail({
       to: buyerEmail,
       subject: 'Your Vibefox coaching session is confirmed — book your time',
-      html: buyerEmailHtml(meta.first_name || '', amountTotal),
+      html: buyerEmailHtml(meta.first_name || '', amountTotal, bookingAccessUrl),
       replyTo: 'inquiries@vibefoxstudio.com',
     })
   }

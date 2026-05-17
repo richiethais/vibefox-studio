@@ -12,6 +12,7 @@ const STATUS_COLORS = {
 const COACHING_STATUS_COLORS = {
   pending_payment: { bg: '#fef3c7', text: '#d97706' },
   paid: BILLING_STATUS_COLORS.paid,
+  booked: { bg: '#dcfce7', text: '#15803d' },
   checkout_failed: { bg: '#fee2e2', text: '#dc2626' },
   new: { bg: '#eef0f3', text: '#52525b' },
 }
@@ -272,6 +273,9 @@ function DetailBody({ selected, setStatus, onDelete }) {
   const stripeUrl = selected.stripe_session_id
     ? `https://dashboard.stripe.com/checkout/sessions/${selected.stripe_session_id}`
     : null
+  const calBookingUrl = selected.cal_booking_uid
+    ? `https://cal.com/booking/${selected.cal_booking_uid}`
+    : null
 
   return (
     <>
@@ -308,6 +312,9 @@ function DetailBody({ selected, setStatus, onDelete }) {
             )}
           </div>
           {selected.paid_at && <Detail label="Paid at" value={new Date(selected.paid_at).toLocaleString()} />}
+          {selected.booked_at && <Detail label="Booked at" value={new Date(selected.booked_at).toLocaleString()} />}
+          {selected.cal_booking_start_at && <Detail label="Session start" value={new Date(selected.cal_booking_start_at).toLocaleString()} />}
+          {selected.cal_booking_end_at && <Detail label="Session end" value={new Date(selected.cal_booking_end_at).toLocaleString()} />}
           {stripeUrl && (
             <a
               href={stripeUrl}
@@ -316,6 +323,16 @@ function DetailBody({ selected, setStatus, onDelete }) {
               style={{ fontSize: 12, color: BRAND_ACCENT, textDecoration: 'underline', wordBreak: 'break-all' }}
             >
               View Stripe session →
+            </a>
+          )}
+          {calBookingUrl && (
+            <a
+              href={calBookingUrl}
+              target="_blank"
+              rel="noreferrer"
+              style={{ display: 'block', marginTop: 8, fontSize: 12, color: BRAND_ACCENT, textDecoration: 'underline', wordBreak: 'break-all' }}
+            >
+              View Cal booking →
             </a>
           )}
         </div>
