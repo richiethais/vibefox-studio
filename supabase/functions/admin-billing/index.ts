@@ -72,6 +72,19 @@ function sanitizeCustomFields(input: unknown) {
     .filter(item => item.name && item.value)
 }
 
+function sanitizePaymentType(value: unknown) {
+  const cleaned = cleanText(value)
+  if (cleaned === 'subscription') return 'subscription'
+  return 'one_time'
+}
+
+function sanitizeBillingInterval(value: unknown) {
+  const cleaned = cleanText(value)
+  if (cleaned === 'yearly') return 'yearly'
+  if (cleaned === 'monthly') return 'monthly'
+  return null
+}
+
 function buildInvoiceDescription(lineItems: ReturnType<typeof sanitizeLineItems>, fallback: string) {
   const summary = cleanText(fallback)
   if (summary) return summary
@@ -82,6 +95,13 @@ function formatLineItemLabel(item: ReturnType<typeof sanitizeLineItems>[number])
   const quantityLabel = item.quantity > 1 ? ` (x${item.quantity})` : ''
   if (item.description) return `${item.name}${quantityLabel} - ${item.description}`
   return `${item.name}${quantityLabel}`
+}
+
+function generateInvoiceToken() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = new Uint8Array(8)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, b => chars[b % chars.length]).join('')
 }
 
 function getDueDateDays(dueDateRaw: string) {
@@ -263,8 +283,13 @@ Deno.serve(async request => {
     const customerPhone = normalizePhone(body.customer_phone || client.phone)
     const description = buildInvoiceDescription(lineItems, cleanText(body.description))
     const totalAmountMinor = lineItems.reduce((sum, item) => sum + item.amount * item.quantity, 0)
+    const paymentType = sanitizePaymentType(body.payment_type)
+    const billingInterval = paymentType === 'subscription' ? sanitizeBillingInterval(body.billing_interval) || 'monthly' : null
+    const businessName = cleanText(body.business_name) || null
     const invoiceRowPayload = {
       amount: totalAmountMinor / 100,
+      billing_interval: billingInterval,
+      business_name: businessName,
       client_id: client.id,
       currency,
       custom_fields: customFields,
@@ -272,8 +297,10 @@ Deno.serve(async request => {
       customer_name_snapshot: customerName || null,
       description,
       due_date: cleanText(body.due_date) || null,
+      invoice_token: generateInvoiceToken(),
       line_items: lineItems,
       metadata: {},
+      payment_type: paymentType,
       status: 'unpaid',
     }
 
@@ -320,6 +347,7 @@ Deno.serve(async request => {
       return json({
         billingRecord: invoiceRow,
         kind: 'payment_link',
+        publicUrl: invoiceRow?.invoice_token ? `/invoice/${invoiceRow.invoice_token}` : null,
         url: paymentLink.url,
       })
     }
@@ -408,6 +436,7 @@ Deno.serve(async request => {
       billingRecord: invoiceRow,
       invoicePdf: deliveredInvoice.invoice_pdf,
       kind: 'invoice',
+      publicUrl: invoiceRow?.invoice_token ? `/invoice/${invoiceRow.invoice_token}` : null,
       status: stripeStatus,
       url: deliveredInvoice.hosted_invoice_url,
       warning: deliveryWarning,
