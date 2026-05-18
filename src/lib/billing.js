@@ -38,3 +38,18 @@ export function getBillingActionLabel(invoice) {
 export function isStripeBacked(invoice) {
   return Boolean(invoice?.stripe_invoice_id || invoice?.stripe_payment_link_id)
 }
+
+export const PAYMENT_TYPE_LABELS = {
+  one_time: 'One-time',
+  subscription: 'Subscription',
+}
+
+export const BILLING_INTERVAL_LABELS = {
+  monthly: 'Monthly',
+  yearly: 'Yearly',
+}
+
+export function getPublicInvoiceUrl(invoice) {
+  if (!invoice?.invoice_token) return ''
+  return `${window.location.origin}/invoice/${invoice.invoice_token}`
+}
