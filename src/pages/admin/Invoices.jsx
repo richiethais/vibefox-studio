@@ -188,7 +188,7 @@ export default function AdminInvoices() {
 
   const billingValidationError = useMemo(() => {
     if (!session) return 'Admin session expired. Sign in again.'
-    if (!billingForm.client_id) return 'Select a client.'
+    if (!billingForm.customer_name.trim()) return 'Customer name is required.'
 
     const hasLineItemError = billingForm.line_items.some(item => {
       const amount = Number(item.amount)
@@ -566,7 +566,7 @@ export default function AdminInvoices() {
 
                 return (
                   <tr key={invoice.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
-                    <td style={{ color: '#18181a', fontWeight: 500, padding: '12px 16px' }}>{invoice.clients?.name ?? 'Unassigned'}</td>
+                    <td style={{ color: '#18181a', fontWeight: 500, padding: '12px 16px' }}>{invoice.clients?.name || invoice.customer_name_snapshot || 'Unassigned'}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
                         <span style={{ ...badge, background: '#f3f4f6', color: '#4b5563' }}>
@@ -655,11 +655,45 @@ export default function AdminInvoices() {
                 </div>
               )}
 
-              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1.2fr 0.8fr' }}>
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
                 <div>
-                  <Label>Client</Label>
+                  <Label>Customer name *</Label>
+                  <input placeholder="John Smith" style={inp} value={billingForm.customer_name} onChange={setBillingField('customer_name')} />
+                </div>
+                <div>
+                  <Label>Customer email{billingForm.kind === 'invoice' ? ' *' : ''}</Label>
+                  <input placeholder="john@example.com" style={inp} type="email" value={billingForm.customer_email} onChange={setBillingField('customer_email')} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
+                <div>
+                  <Label>Business name</Label>
+                  <input
+                    placeholder="Optional"
+                    style={inp}
+                    value={billingForm.business_name}
+                    onChange={setBillingField('business_name')}
+                  />
+                </div>
+                <div>
+                  <Label>Customer phone</Label>
+                  <input
+                    inputMode="tel"
+                    pattern="[0-9()\\-\\s]+"
+                    placeholder="(555) 123-4567"
+                    style={inp}
+                    value={billingForm.customer_phone}
+                    onChange={handleBillingPhoneChange}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
+                <div>
+                  <Label>Link to CRM client</Label>
                   <select value={billingForm.client_id} onChange={handleBillingClientChange} style={inp}>
-                    <option value="">Select client *</option>
+                    <option value="">None (manual entry)</option>
                     {clients.map(client => (
                       <option key={client.id} value={client.id}>{client.name}</option>
                     ))}
@@ -700,40 +734,6 @@ export default function AdminInvoices() {
                   value={billingForm.description}
                   onChange={setBillingField('description')}
                 />
-              </div>
-
-              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
-                <div>
-                  <Label>Customer name</Label>
-                  <input style={inp} value={billingForm.customer_name} onChange={setBillingField('customer_name')} />
-                </div>
-                <div>
-                  <Label>Business name</Label>
-                  <input
-                    placeholder="Optional"
-                    style={inp}
-                    value={billingForm.business_name}
-                    onChange={setBillingField('business_name')}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
-                <div>
-                  <Label>Customer email</Label>
-                  <input style={inp} type="email" value={billingForm.customer_email} onChange={setBillingField('customer_email')} />
-                </div>
-                <div>
-                  <Label>Customer phone</Label>
-                  <input
-                    inputMode="tel"
-                    pattern="[0-9()\\-\\s]+"
-                    placeholder="(555) 123-4567"
-                    style={inp}
-                    value={billingForm.customer_phone}
-                    onChange={handleBillingPhoneChange}
-                  />
-                </div>
               </div>
 
               <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 14, padding: 16 }}>

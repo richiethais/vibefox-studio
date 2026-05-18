@@ -259,38 +259,43 @@ Deno.serve(async request => {
     }
 
     const clientId = cleanText(body.client_id)
+    let client: { id: string; name: string; email: string; phone: string; company: string } | null = null
 
-    if (!clientId) {
-      return json({ error: 'Client selection is required.' }, 400)
-    }
+    if (clientId) {
+      stage = 'load client'
+      const { data: clientData, error: clientError } = await supabaseAdmin
+        .from('clients')
+        .select('id, name, email, phone, company')
+        .eq('id', clientId)
+        .single()
 
-    stage = 'load client'
-    const { data: client, error: clientError } = await supabaseAdmin
-      .from('clients')
-      .select('id, name, email, phone, company')
-      .eq('id', clientId)
-      .single()
-
-    if (clientError || !client) {
-      return json({ error: clientError?.message || 'Client not found.' }, 404)
+      if (clientError || !clientData) {
+        return json({ error: clientError?.message || 'Client not found.' }, 404)
+      }
+      client = clientData
     }
 
     const currency = (cleanText(body.currency) || DEFAULT_CURRENCY).toLowerCase()
     const lineItems = sanitizeLineItems(body.line_items)
     const customFields = sanitizeCustomFields(body.custom_fields)
-    const customerEmail = cleanText(body.customer_email).toLowerCase() || cleanText(client.email).toLowerCase()
-    const customerName = cleanText(body.customer_name) || cleanText(client.name)
-    const customerPhone = normalizePhone(body.customer_phone || client.phone)
+    const customerEmail = cleanText(body.customer_email).toLowerCase() || (client ? cleanText(client.email).toLowerCase() : '')
+    const customerName = cleanText(body.customer_name) || (client ? cleanText(client.name) : '')
+    const customerPhone = normalizePhone(body.customer_phone || (client ? client.phone : ''))
     const description = buildInvoiceDescription(lineItems, cleanText(body.description))
     const totalAmountMinor = lineItems.reduce((sum, item) => sum + item.amount * item.quantity, 0)
     const paymentType = sanitizePaymentType(body.payment_type)
     const billingInterval = paymentType === 'subscription' ? sanitizeBillingInterval(body.billing_interval) || 'monthly' : null
     const businessName = cleanText(body.business_name) || null
+
+    if (!customerName) {
+      return json({ error: 'Customer name is required.' }, 400)
+    }
+
     const invoiceRowPayload = {
       amount: totalAmountMinor / 100,
       billing_interval: billingInterval,
       business_name: businessName,
-      client_id: client.id,
+      client_id: client?.id || null,
       currency,
       custom_fields: customFields,
       customer_email_snapshot: customerEmail || null,
@@ -321,8 +326,8 @@ Deno.serve(async request => {
           quantity: item.quantity,
         })),
         metadata: {
-          client_id: client.id,
-          client_name: client.name || '',
+          client_id: client?.id || '',
+          client_name: client?.name || customerName || '',
           customer_email: customerEmail || '',
         },
         submit_type: 'pay',
@@ -376,7 +381,7 @@ Deno.serve(async request => {
       days_until_due: getDueDateDays(cleanText(body.due_date)),
       footer: cleanText(body.footer) || undefined,
       metadata: {
-        client_id: client.id,
+        client_id: client?.id || '',
       },
     })
 
