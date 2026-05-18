@@ -10,6 +10,7 @@ import BlogPostPage from '../pages/marketing/BlogPostPage.jsx'
 import ContactPage from '../pages/marketing/ContactPage.jsx'
 import PrivateCoachingPage from '../pages/marketing/PrivateCoachingPage.jsx'
 import PrivateCoachingThanksPage from '../pages/marketing/PrivateCoachingThanksPage.jsx'
+import InvoicePage from '../pages/marketing/InvoicePage.jsx'
 
 export function PublicRoutes({ initialPosts, initialPost, initialRelated } = {}) {
   return (
@@ -23,6 +24,7 @@ export function PublicRoutes({ initialPosts, initialPost, initialRelated } = {})
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/privatecoaching" element={<PrivateCoachingPage />} />
       <Route path="/privatecoaching/thanks" element={<PrivateCoachingThanksPage />} />
+      <Route path="/invoice/:token" element={<InvoicePage />} />
       <Route path="/blogs" element={<BlogPage initialPosts={initialPosts} />} />
       <Route
         path="/blogs/:slug"
