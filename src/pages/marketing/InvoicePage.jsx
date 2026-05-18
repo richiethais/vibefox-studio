@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import MarketingLayout from '../../components/marketing/MarketingLayout'
 import useIsMobile from '../../components/useIsMobile'
@@ -60,15 +60,15 @@ export default function InvoicePage() {
   const [payLoading, setPayLoading] = useState(false)
   const [payError, setPayError] = useState(null)
 
+  const [pollExhausted, setPollExhausted] = useState(false)
   const pollCount = useRef(0)
   const pollTimer = useRef(null)
 
   const isSuccess = searchParams.get('status') === 'success'
   const isPaid = invoice?.paid_at || invoice?.status === 'paid'
-  const isProcessing = isSuccess && !isPaid && pollCount.current < 5
+  const isProcessing = isSuccess && !isPaid && !pollExhausted
 
-  // Fetch invoice
-  async function fetchInvoice() {
+  const fetchInvoice = useCallback(async () => {
     const { data, error } = await supabase
       .from('invoices')
       .select('invoice_token, description, line_items, amount, currency, payment_type, billing_interval, business_name, customer_name_snapshot, due_date, status, paid_at, stripe_invoice_url')
@@ -81,31 +81,44 @@ export default function InvoicePage() {
       setInvoice(data)
     }
     setLoading(false)
-  }
+  }, [token])
 
   useEffect(() => {
-    fetchInvoice()
+    let cancelled = false
+    supabase
+      .from('invoices')
+      .select('invoice_token, description, line_items, amount, currency, payment_type, billing_interval, business_name, customer_name_snapshot, due_date, status, paid_at, stripe_invoice_url')
+      .eq('invoice_token', token)
+      .single()
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error || !data) {
+          setNotFound(true)
+        } else {
+          setInvoice(data)
+        }
+        setLoading(false)
+      })
     return () => {
+      cancelled = true
       if (pollTimer.current) clearInterval(pollTimer.current)
     }
   }, [token])
 
-  // Auto-refresh polling for processing state
   useEffect(() => {
-    if (isSuccess && !isPaid && !loading) {
-      pollTimer.current = setInterval(() => {
-        pollCount.current += 1
-        if (pollCount.current >= 5) {
-          clearInterval(pollTimer.current)
-          // After 5 attempts, just show success
-          setInvoice((prev) => prev ? { ...prev, status: 'paid' } : prev)
-        } else {
-          fetchInvoice()
-        }
-      }, 3000)
-      return () => clearInterval(pollTimer.current)
-    }
-  }, [isSuccess, isPaid, loading])
+    if (!isSuccess || isPaid || loading || pollExhausted) return
+    pollTimer.current = setInterval(() => {
+      pollCount.current += 1
+      if (pollCount.current >= 5) {
+        clearInterval(pollTimer.current)
+        setPollExhausted(true)
+        setInvoice((prev) => prev ? { ...prev, status: 'paid' } : prev)
+      } else {
+        fetchInvoice()
+      }
+    }, 3000)
+    return () => clearInterval(pollTimer.current)
+  }, [isSuccess, isPaid, loading, pollExhausted, fetchInvoice])
 
   // Pay now handler
   async function handlePayNow() {
@@ -127,7 +140,7 @@ export default function InvoicePage() {
         setPayError('Unable to start checkout. Please try again.')
         setPayLoading(false)
       }
-    } catch (err) {
+    } catch {
       setPayError('Something went wrong. Please try again.')
       setPayLoading(false)
     }
