@@ -60,7 +60,8 @@ Deno.serve(async request => {
     const lineItems = Array.isArray(invoice.line_items) ? invoice.line_items : []
     const currency = invoice.currency || 'usd'
     const isSubscription = invoice.payment_type === 'subscription'
-    const interval = invoice.billing_interval || 'monthly'
+    const rawInterval = invoice.billing_interval || 'monthly'
+    const interval = rawInterval === 'yearly' ? 'year' : 'month'
 
     if (lineItems.length === 0) {
       return json({ error: 'This invoice has no line items.' }, 400)
