@@ -64,6 +64,8 @@ function createCustomField() {
 
 function createBillingForm(kind = 'invoice') {
   return {
+    billing_interval: 'monthly',
+    business_name: '',
     client_id: '',
     currency: 'usd',
     custom_fields: kind === 'invoice' ? [createCustomField()] : [],
@@ -75,6 +77,7 @@ function createBillingForm(kind = 'invoice') {
     footer: 'Questions about this billing item? Reply to this email and we will handle it directly.',
     kind,
     line_items: [createLineItem()],
+    payment_type: 'one_time',
     send_invoice_now: false,
   }
 }
@@ -349,6 +352,9 @@ export default function AdminInvoices() {
           name: item.name.trim(),
           quantity: 1,
         })),
+        billing_interval: billingForm.billing_interval,
+        business_name: billingForm.business_name.trim(),
+        payment_type: billingForm.payment_type,
         send_invoice_now: billingForm.send_invoice_now,
       },
       headers: {
@@ -363,15 +369,19 @@ export default function AdminInvoices() {
       return
     }
 
+    const publicUrl = data?.publicUrl
+      ? `${window.location.origin}${data.publicUrl}`
+      : ''
+
     setNotice({
-      actionHref: data?.url || '',
-      actionLabel: billingForm.kind === 'payment_link' ? 'Open payment link' : 'Open invoice',
+      actionHref: publicUrl || data?.url || '',
+      actionLabel: publicUrl ? 'Copy invoice link' : (billingForm.kind === 'payment_link' ? 'Open payment link' : 'Open invoice'),
       type: 'success',
       text: data?.warning
-        ? `Invoice created in Stripe. Email delivery warning: ${data.warning}`
+        ? `Invoice created. Warning: ${data.warning}`
         : billingForm.kind === 'payment_link'
           ? 'Payment link created.'
-          : 'Invoice created in Stripe.',
+          : 'Invoice created.',
     })
     setBillingModal(null)
     setBillingForm(createBillingForm())
@@ -558,9 +568,16 @@ export default function AdminInvoices() {
                   <tr key={invoice.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
                     <td style={{ color: '#18181a', fontWeight: 500, padding: '12px 16px' }}>{invoice.clients?.name ?? 'Unassigned'}</td>
                     <td style={{ padding: '12px 16px' }}>
-                      <span style={{ ...badge, background: '#f3f4f6', color: '#4b5563' }}>
-                        {BILLING_KIND_LABELS[invoice.kind] || 'Invoice'}
-                      </span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <span style={{ ...badge, background: '#f3f4f6', color: '#4b5563' }}>
+                          {BILLING_KIND_LABELS[invoice.kind] || 'Invoice'}
+                        </span>
+                        {invoice.payment_type === 'subscription' && (
+                          <span style={{ ...badge, background: '#ede9fe', color: '#7c3aed' }}>
+                            {invoice.billing_interval === 'yearly' ? 'Yearly' : 'Monthly'}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td style={{ color: '#7a7888', maxWidth: 320, padding: '12px 16px' }}>
                       <div style={{ color: '#18181a', fontWeight: 500, marginBottom: 4 }}>{invoice.description}</div>
@@ -582,6 +599,17 @@ export default function AdminInvoices() {
                     <td style={{ color: '#7a7888', padding: '12px 16px' }}>{invoice.due_date || '-'}</td>
                     <td style={{ padding: '12px 16px' }}>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                        {invoice.invoice_token && (
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/invoice/${invoice.invoice_token}`)
+                              setNotice({ type: 'success', text: 'Invoice link copied.' })
+                            }}
+                            style={ghostBtn}
+                          >
+                            Copy link
+                          </button>
+                        )}
                         {actionUrl && (
                           <a href={actionUrl} rel="noreferrer" style={ghostBtn} target="_blank">
                             {actionLabel}
@@ -645,6 +673,25 @@ export default function AdminInvoices() {
                 </div>
               </div>
 
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
+                <div>
+                  <Label>Payment type</Label>
+                  <select value={billingForm.payment_type} onChange={setBillingField('payment_type')} style={inp}>
+                    <option value="one_time">One-time payment</option>
+                    <option value="subscription">Subscription</option>
+                  </select>
+                </div>
+                {billingForm.payment_type === 'subscription' && (
+                  <div>
+                    <Label>Billing interval</Label>
+                    <select value={billingForm.billing_interval} onChange={setBillingField('billing_interval')} style={inp}>
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
               <div>
                 <Label>Description</Label>
                 <input
@@ -655,11 +702,23 @@ export default function AdminInvoices() {
                 />
               </div>
 
-              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr 1fr' }}>
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
                 <div>
                   <Label>Customer name</Label>
                   <input style={inp} value={billingForm.customer_name} onChange={setBillingField('customer_name')} />
                 </div>
+                <div>
+                  <Label>Business name</Label>
+                  <input
+                    placeholder="Optional"
+                    style={inp}
+                    value={billingForm.business_name}
+                    onChange={setBillingField('business_name')}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gap: 12, gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr' }}>
                 <div>
                   <Label>Customer email</Label>
                   <input style={inp} type="email" value={billingForm.customer_email} onChange={setBillingField('customer_email')} />
