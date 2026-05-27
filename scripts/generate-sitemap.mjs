@@ -15,6 +15,11 @@ const staticRoutes = [
   { path: '/pricing', changefreq: 'weekly', priority: '0.8' },
   { path: '/faq', changefreq: 'monthly', priority: '0.75' },
   { path: '/blogs', changefreq: 'weekly', priority: '0.95' },
+  { path: '/privacy-policy', changefreq: 'yearly', priority: '0.30' },
+  { path: '/terms-of-service', changefreq: 'yearly', priority: '0.30' },
+  { path: '/cookie-policy', changefreq: 'yearly', priority: '0.25' },
+  { path: '/refund-policy', changefreq: 'yearly', priority: '0.25' },
+  { path: '/accessibility', changefreq: 'yearly', priority: '0.25' },
 ]
 
 const cityRoutes = cities.map(city => ({

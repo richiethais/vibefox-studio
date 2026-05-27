@@ -66,6 +66,48 @@ export const PUBLIC_ROUTE_SEO = {
     keywords:
       'jacksonville seo blogs, digital marketing blogs jacksonville florida, seo tips jacksonville florida, local seo blogs, best digital marketing agency in jacksonville florida',
   },
+  '/privacy-policy': {
+    title: 'Privacy Policy | Vibefox Studio',
+    description:
+      'Read the Vibefox Studio Privacy Policy for details about data collection, client portal information, payments, cookies, storage, and privacy choices.',
+    keywords:
+      'vibefox studio privacy policy, website privacy policy, client portal privacy',
+  },
+  '/terms-of-service': {
+    title: 'Terms of Service | Vibefox Studio',
+    description:
+      'Read the Vibefox Studio Terms of Service for website use, project services, client responsibilities, payments, intellectual property, and limitations.',
+    keywords:
+      'vibefox studio terms of service, website terms, service terms',
+  },
+  '/cookie-policy': {
+    title: 'Cookie Policy | Vibefox Studio',
+    description:
+      'Read the Vibefox Studio Cookie Policy for information about essential cookies, browser storage, authentication, and future tracking updates.',
+    keywords:
+      'vibefox studio cookie policy, cookie notice, browser storage',
+  },
+  '/refund-policy': {
+    title: 'Refund & Cancellation Policy | Vibefox Studio',
+    description:
+      'Read the Vibefox Studio Refund and Cancellation Policy for project work, monthly services, coaching sessions, and third-party costs.',
+    keywords:
+      'vibefox studio refund policy, cancellation policy, coaching refunds',
+  },
+  '/accessibility': {
+    title: 'Accessibility Statement | Vibefox Studio',
+    description:
+      'Read the Vibefox Studio Accessibility Statement and learn how to report accessibility barriers on the website or client experience.',
+    keywords:
+      'vibefox studio accessibility statement, website accessibility',
+  },
+  '/disclaimer': {
+    title: 'Website Disclaimer | Vibefox Studio',
+    description:
+      'Read the Vibefox Studio Website Disclaimer for information about marketing content, third-party links, testimonials, and results.',
+    keywords:
+      'vibefox studio disclaimer, website disclaimer, marketing results disclaimer',
+  },
 }
 
 const BLOG_TITLE_OVERRIDES_BY_SLUG = {

@@ -290,7 +290,15 @@ export default function PrivateCoachingPage() {
           </button>
 
           <p className="text-center text-xs text-slate-500">
-            Secure payment via Stripe. You'll receive a confirmation email with your booking link.
+            Secure payment via Stripe. By continuing, you agree to our{' '}
+            <a href="/terms-of-service" className="font-semibold text-slate-700 underline underline-offset-2">
+              Terms
+            </a>
+            {' '}and{' '}
+            <a href="/refund-policy" className="font-semibold text-slate-700 underline underline-offset-2">
+              Refund Policy
+            </a>
+            . You'll receive a confirmation email with your booking link.
           </p>
         </form>
       </div>

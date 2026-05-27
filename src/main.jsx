@@ -29,6 +29,7 @@ import AdminLayout from './components/admin/AdminLayout.jsx'
 import ClientLayout from './components/client/ClientLayout.jsx'
 import { AdminRoute, ClientRoute } from './components/ProtectedRoute.jsx'
 import { PublicRoutes } from './routes/PublicRoutes.jsx'
+import CookieNotice from './components/CookieNotice.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -69,6 +70,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="support" element={<ClientSupport />} />
           </Route>
         </Routes>
+        <CookieNotice />
       </BrowserRouter>
     </AuthProvider>
   </StrictMode>

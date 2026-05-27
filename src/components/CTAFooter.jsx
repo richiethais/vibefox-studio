@@ -63,7 +63,7 @@ export function Footer() {
   return (
     <footer style={{ padding: isMobile ? '48px 24px 32px' : '56px 40px 36px', borderTop: '1px solid rgba(0,0,0,0.08)', background: '#faf9f7' }}>
       <div style={{ maxWidth: 1040, margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.6fr 1fr 1fr 1fr', gap: isMobile ? 28 : 40, marginBottom: isMobile ? 30 : 44 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.4fr repeat(4, 1fr)', gap: isMobile ? 28 : 30, marginBottom: isMobile ? 30 : 44 }}>
           <div>
             <BrandLogo href="/" size="nav" />
             <p style={{ fontSize: 13, color: '#7a7888', marginTop: 10, lineHeight: 1.6, maxWidth: isMobile ? 'none' : 200, fontWeight: 300 }}>
@@ -75,6 +75,7 @@ export function Footer() {
             { heading: 'Services', links: [['Landing Pages','/services'],['Business Websites','/services'],['Custom Web Apps','/services'],['SEO & Content','/services']] },
             { heading: 'Plans', links: [['Essential — $200/mo','/pricing'],['Growth — $500/mo','/pricing'],['Pro — $900/mo','/pricing'],['Blogs','/blogs']] },
             { heading: 'Contact', links: [['inquiries@vibefoxstudio.com','mailto:inquiries@vibefoxstudio.com'],['Jacksonville, FL','/contact'],['FAQ','/faq']] },
+            { heading: 'Legal', links: [['Privacy Policy','/privacy-policy'],['Terms of Service','/terms-of-service'],['Cookie Policy','/cookie-policy'],['Refund Policy','/refund-policy'],['Accessibility','/accessibility']] },
           ].map(col => (
             <div key={col.heading}>
               <div style={{ fontSize: 11.5, fontWeight: 700, color: '#18181a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 13 }}>{col.heading}</div>

@@ -24,7 +24,20 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const DIST_DIR = path.resolve(__dirname, '../dist')
 const SSR_DIST_DIR = path.resolve(__dirname, '../dist-ssr')
 
-const STATIC_ROUTES = ['/', '/services', '/work', '/pricing', '/faq', '/contact', '/blogs']
+const STATIC_ROUTES = [
+  '/',
+  '/services',
+  '/work',
+  '/pricing',
+  '/faq',
+  '/contact',
+  '/blogs',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/cookie-policy',
+  '/refund-policy',
+  '/accessibility',
+]
 
 function escapeAttr(str) {
   return String(str)

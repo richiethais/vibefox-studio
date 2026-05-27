@@ -266,7 +266,11 @@ export default function ContactPage() {
                   {loading ? 'Sending...' : 'Send message'}
                 </button>
                 <p style={{ fontSize: 12, color: '#7a7888', lineHeight: 1.5, margin: 0 }}>
-                  Most inquiries receive a personal response with suggested next steps, timeline guidance, and whether your project is a fit for our current schedule.
+                  By sending this form, you agree to our{' '}
+                  <a href="/terms-of-service" style={{ color: '#8f6844', fontWeight: 700 }}>Terms</a>
+                  {' '}and acknowledge our{' '}
+                  <a href="/privacy-policy" style={{ color: '#8f6844', fontWeight: 700 }}>Privacy Policy</a>
+                  . Most inquiries receive a personal response with suggested next steps, timeline guidance, and whether your project is a fit for our current schedule.
                 </p>
               </form>
             )}
