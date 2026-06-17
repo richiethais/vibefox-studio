@@ -329,6 +329,7 @@ Deno.serve(async request => {
           client_id: client?.id || '',
           client_name: client?.name || customerName || '',
           customer_email: customerEmail || '',
+          invoice_token: invoiceRowPayload.invoice_token,
         },
         submit_type: 'pay',
       })

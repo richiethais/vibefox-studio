@@ -67,6 +67,7 @@ export default function InvoicePage() {
   const isSuccess = searchParams.get('status') === 'success'
   const isPaid = invoice?.paid_at || invoice?.status === 'paid'
   const isProcessing = isSuccess && !isPaid && !pollExhausted
+  const isConfirmPending = isSuccess && !isPaid && pollExhausted
 
   const fetchInvoice = useCallback(async () => {
     const { data, error } = await supabase
@@ -112,7 +113,6 @@ export default function InvoicePage() {
       if (pollCount.current >= 5) {
         clearInterval(pollTimer.current)
         setPollExhausted(true)
-        setInvoice((prev) => prev ? { ...prev, status: 'paid' } : prev)
       } else {
         fetchInvoice()
       }
@@ -187,6 +187,31 @@ export default function InvoicePage() {
           Your payment is being confirmed. This page will update automatically.
         </p>
         <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  function renderConfirmPending() {
+    return (
+      <div style={{ ...cardStyle, textAlign: 'center', padding: isMobile ? '40px 20px' : '60px 36px' }}>
+        <div style={{ marginBottom: 16 }}>
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="11" fill="#fef3c7" />
+            <path d="M12 7v5l3 2" stroke="#b8906a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+        <h2 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', margin: '0 0 8px' }}>We're confirming your payment</h2>
+        <p style={{ fontSize: 14, color: '#7a7888', margin: '0 0 8px', lineHeight: 1.5 }}>
+          Thanks! If your payment went through, your bank will show the charge shortly. This page may take a few minutes
+          to update while we confirm with Stripe.
+        </p>
+        <p style={{ fontSize: 14, color: '#7a7888', margin: 0, lineHeight: 1.5 }}>
+          If you don't see a confirmation soon, email{' '}
+          <a href="mailto:inquiries@vibefoxstudio.com" style={{ color: '#18181a', fontWeight: 500 }}>
+            inquiries@vibefoxstudio.com
+          </a>{' '}
+          and we'll sort it out.
+        </p>
       </div>
     )
   }
@@ -372,6 +397,8 @@ export default function InvoicePage() {
     content = renderPaid()
   } else if (isProcessing) {
     content = renderProcessing()
+  } else if (isConfirmPending) {
+    content = renderConfirmPending()
   } else {
     content = renderUnpaid()
   }

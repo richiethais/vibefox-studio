@@ -70,6 +70,7 @@ Deno.serve(async request => {
     amount_total?: number
     subscription?: string
     mode?: string
+    payment_link?: string
   }
 
   if (!session?.id) {
@@ -79,8 +80,11 @@ Deno.serve(async request => {
 
   const invoiceToken = session.metadata?.invoice_token
   const invoiceId = session.metadata?.invoice_id
+  // Payment Links created from the CRM don't carry invoice_token/invoice_id in
+  // metadata, but the completed session references the originating payment link.
+  const paymentLinkId = typeof session.payment_link === 'string' ? session.payment_link : null
 
-  if (!invoiceToken && !invoiceId) {
+  if (!invoiceToken && !invoiceId && !paymentLinkId) {
     return new Response('Not an invoice checkout', { status: 200 })
   }
 
@@ -92,14 +96,16 @@ Deno.serve(async request => {
 
   if (invoiceId) {
     query.eq('id', invoiceId)
-  } else {
+  } else if (invoiceToken) {
     query.eq('invoice_token', invoiceToken)
+  } else {
+    query.eq('stripe_payment_link_id', paymentLinkId)
   }
 
   const { data: invoice, error: loadError } = await query.single()
 
   if (loadError || !invoice) {
-    console.error('webhook: invoice not found', { invoiceId, invoiceToken, error: loadError })
+    console.error('webhook: invoice not found', { invoiceId, invoiceToken, paymentLinkId, error: loadError })
     return new Response('Invoice not found', { status: 200 })
   }
 
