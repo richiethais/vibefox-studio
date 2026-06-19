@@ -15,20 +15,21 @@ const h = React.createElement
 
 // Brand tokens (mirrors tailwind.config.js)
 const INK = '#18181a'
+const CREAM = '#f3ede1'
 const MUTED = '#7a7888'
-const GOLD = '#b8906a'
-const GOLD_SOFT = 'rgba(184,144,106,0.30)'
+const GOLD = '#c8a97e'
+const GOLD2 = '#b8906a'
 const HAIRLINE = 'rgba(184,144,106,0.38)'
 
-// Fetch a Google font as TTF (an old UA forces the non-woff2 format Satori needs).
-async function loadGoogleFont(query, text) {
-  const url = `https://fonts.googleapis.com/css2?family=${query}${text ? `&text=${encodeURIComponent(text)}` : ''}`
+// Fetch a Google font binary. An old UA forces a Satori-compatible format
+// (ttf/otf/woff) rather than woff2, which Satori cannot parse.
+async function loadGoogleFont(query) {
   const css = await (
-    await fetch(url, {
+    await fetch(`https://fonts.googleapis.com/css2?family=${query}`, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)' },
     })
   ).text()
-  const match = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"]?(?:truetype|opentype)['"]?\)/)
+  const match = css.match(/src:\s*url\(([^)]+)\)\s*format\(['"]?(?:truetype|opentype|woff)['"]?\)/)
   if (!match) throw new Error('font src not found')
   return (await fetch(match[1])).arrayBuffer()
 }
@@ -55,12 +56,22 @@ async function loadFonts() {
 function statusPill(invoice) {
   if (isInvoicePaid(invoice)) return { label: 'Paid', color: '#3f7d57' }
   if (invoice?.status === 'overdue') return { label: 'Overdue', color: '#b4543f' }
-  return { label: 'Unpaid', color: GOLD }
+  return { label: 'Unpaid', color: GOLD2 }
 }
 
-function hairline(extra = {}) {
-  return h('div', { style: { display: 'flex', height: '1px', background: HAIRLINE, ...extra } })
+// Scale the serif amount so longer totals stay on one line.
+function amountFontSize(amount) {
+  const len = amount.length
+  if (len <= 7) return 150
+  if (len <= 9) return 128
+  if (len <= 11) return 106
+  return 88
 }
+
+const diamond = (size, color, mr) =>
+  h('div', {
+    style: { display: 'flex', width: `${size}px`, height: `${size}px`, background: color, transform: 'rotate(45deg)', marginRight: `${mr}px` },
+  })
 
 function buildCard(invoice) {
   const paid = isInvoicePaid(invoice)
@@ -73,62 +84,34 @@ function buildCard(invoice) {
 
   return h(
     'div',
-    {
-      style: {
-        width: '1200px',
-        height: '630px',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: '#f5f3f0',
-        backgroundImage: 'linear-gradient(140deg, #faf9f7 0%, #f1ece4 100%)',
-        padding: '78px 84px',
-        fontFamily: 'DM Sans',
-        color: INK,
-      },
-    },
-    // Header — wordmark + status pill
+    { style: { width: '1200px', height: '630px', display: 'flex', fontFamily: 'DM Sans' } },
+    // Left — dark editorial sidebar
     h(
       'div',
-      { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+      {
+        style: {
+          display: 'flex',
+          flexDirection: 'column',
+          width: '400px',
+          background: 'linear-gradient(160deg, #1f1e23 0%, #2c2934 100%)',
+          padding: '64px 56px',
+          justifyContent: 'space-between',
+        },
+      },
       h(
         'div',
         { style: { display: 'flex', alignItems: 'center' } },
-        h('div', {
-          style: {
-            display: 'flex',
-            width: '13px',
-            height: '13px',
-            background: GOLD,
-            transform: 'rotate(45deg)',
-            marginRight: '20px',
-          },
-        }),
-        h(
-          'div',
-          { style: { display: 'flex', fontFamily: 'DM Serif Display', fontSize: '42px', color: INK } },
-          'Vibefox Studio',
-        ),
+        diamond(13, GOLD, 16),
+        h('div', { style: { display: 'flex', fontFamily: 'DM Serif Display', fontSize: '34px', color: CREAM } }, 'Vibefox'),
       ),
       h(
         'div',
-        {
-          style: {
-            display: 'flex',
-            padding: '9px 26px',
-            border: `1.5px solid ${pill.color}`,
-            borderRadius: '999px',
-            color: pill.color,
-            fontSize: '20px',
-            fontWeight: 600,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-          },
-        },
-        pill.label,
+        { style: { display: 'flex', flexDirection: 'column' } },
+        h('div', { style: { display: 'flex', fontFamily: 'DM Serif Display', fontSize: '44px', color: GOLD } }, paid ? 'Receipt' : 'Invoice'),
+        h('div', { style: { display: 'flex', fontSize: '21px', color: '#9a96a4', marginTop: '10px' } }, 'Vibefox Studio'),
       ),
     ),
-    hairline({ marginTop: '34px' }),
-    // Main — amount block
+    // Right — cream panel with the amount
     h(
       'div',
       {
@@ -136,83 +119,72 @@ function buildCard(invoice) {
           display: 'flex',
           flexDirection: 'column',
           flexGrow: 1,
-          justifyContent: 'center',
+          background: 'linear-gradient(140deg, #faf9f7 0%, #f1ece4 100%)',
+          padding: '66px 70px',
+          justifyContent: 'space-between',
         },
       },
       h(
         'div',
-        {
-          style: {
-            display: 'flex',
-            fontSize: '23px',
-            fontWeight: 600,
-            color: GOLD,
-            textTransform: 'uppercase',
-            letterSpacing: '0.22em',
-            marginBottom: '18px',
-          },
-        },
-        paid ? 'Amount paid' : 'Amount due',
-      ),
-      h(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            fontFamily: 'DM Serif Display',
-            fontSize: '158px',
-            lineHeight: 1,
-            color: INK,
-          },
-        },
-        amount,
-      ),
-      h(
-        'div',
-        {
-          style: {
-            display: 'flex',
-            fontSize: '36px',
-            fontWeight: 500,
-            color: INK,
-            marginTop: '34px',
-          },
-        },
-        who,
-      ),
-      h(
-        'div',
-        { style: { display: 'flex', fontSize: '24px', color: MUTED, marginTop: '8px' } },
-        subline,
-      ),
-    ),
-    // Footer
-    h(
-      'div',
-      { style: { display: 'flex', flexDirection: 'column' } },
-      hairline({ marginBottom: '26px' }),
-      h(
-        'div',
-        { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+        { style: { display: 'flex', justifyContent: 'flex-end' } },
         h(
           'div',
-          { style: { display: 'flex', alignItems: 'center', fontSize: '23px', fontWeight: 500, color: GOLD } },
-          h('div', {
+          {
             style: {
               display: 'flex',
-              width: '8px',
-              height: '8px',
+              padding: '9px 26px',
+              border: `1.5px solid ${pill.color}`,
               borderRadius: '999px',
-              background: GOLD,
-              marginRight: '14px',
+              color: pill.color,
+              fontSize: '20px',
+              fontWeight: 600,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
             },
-          }),
-          paid ? 'Payment received — thank you' : 'Secure online payment',
+          },
+          pill.label,
+        ),
+      ),
+      h(
+        'div',
+        { style: { display: 'flex', flexDirection: 'column' } },
+        h(
+          'div',
+          {
+            style: {
+              display: 'flex',
+              fontSize: '23px',
+              fontWeight: 600,
+              color: GOLD2,
+              textTransform: 'uppercase',
+              letterSpacing: '0.22em',
+              marginBottom: '16px',
+            },
+          },
+          paid ? 'Amount paid' : 'Amount due',
         ),
         h(
           'div',
-          { style: { display: 'flex', fontSize: '23px', fontWeight: 500, color: MUTED, letterSpacing: '0.02em' } },
-          'vibefoxstudio.com',
+          { style: { display: 'flex', fontFamily: 'DM Serif Display', fontSize: `${amountFontSize(amount)}px`, lineHeight: 1, color: INK } },
+          amount,
+        ),
+        h('div', { style: { display: 'flex', fontSize: '34px', fontWeight: 500, color: INK, marginTop: '30px' } }, who),
+        h('div', { style: { display: 'flex', fontSize: '23px', color: MUTED, marginTop: '8px' } }, subline),
+      ),
+      h(
+        'div',
+        { style: { display: 'flex', flexDirection: 'column' } },
+        h('div', { style: { display: 'flex', height: '1px', background: HAIRLINE, marginBottom: '22px' } }),
+        h(
+          'div',
+          { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+          h(
+            'div',
+            { style: { display: 'flex', alignItems: 'center', fontSize: '22px', fontWeight: 500, color: GOLD2 } },
+            h('div', { style: { display: 'flex', width: '8px', height: '8px', borderRadius: '999px', background: GOLD2, marginRight: '14px' } }),
+            paid ? 'Payment received — thank you' : 'Secure online payment',
+          ),
+          h('div', { style: { display: 'flex', fontSize: '22px', color: MUTED } }, 'vibefoxstudio.com'),
         ),
       ),
     ),
