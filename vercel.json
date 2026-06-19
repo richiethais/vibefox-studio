@@ -20,7 +20,7 @@
     { "source": "/join", "destination": "/index.html" },
     { "source": "/reset-password", "destination": "/index.html" },
     { "source": "/:slug-digital-marketing-agency", "destination": "/:slug-digital-marketing-agency/index.html" },
-    { "source": "/invoice/:token", "destination": "/index.html" },
+    { "source": "/invoice/:token", "destination": "/api/invoice-meta?token=:token" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
