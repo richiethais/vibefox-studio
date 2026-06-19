@@ -6,5 +6,6 @@ dist-ssr
 .env
 .env.local
 .worktrees/
+.claude/worktrees/
 .vercel
 api/_blog-template.js
