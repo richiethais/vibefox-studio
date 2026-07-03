@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
+import { MobileCard, MobileCardHeader, MobileCardList, MobileCardMeta } from '../../components/admin/MobileCardList'
 
 const STATUS_COLORS = {
   open: { bg: '#dbeafe', text: '#1d4ed8' },
@@ -45,6 +46,21 @@ export default function AdminSupport() {
       <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', marginBottom: 24, letterSpacing: '-0.4px' }}>Support Requests</h1>
 
       <div style={{ display: 'grid', gridTemplateColumns: (selected && !isMobile) ? '1fr 380px' : '1fr', gap: 20 }}>
+        {isMobile ? (
+          <MobileCardList emptyText="No support requests yet.">
+            {rows.map(r => (
+              <MobileCard key={r.id} onClick={() => setSelected(r)} selected={selected?.id === r.id}>
+                <MobileCardHeader
+                  title={r.title}
+                  right={<span style={{ ...badge, background: STATUS_COLORS[r.status]?.bg, color: STATUS_COLORS[r.status]?.text }}>{r.status}</span>}
+                />
+                <MobileCardMeta>
+                  {r.clients?.name ?? '—'} · {new Date(r.created_at).toLocaleDateString()}
+                </MobileCardMeta>
+              </MobileCard>
+            ))}
+          </MobileCardList>
+        ) : (
         <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -83,6 +99,7 @@ export default function AdminSupport() {
           </table>
           </div>
         </div>
+        )}
 
         {/* Mobile detail drawer */}
         {selected && isMobile && (

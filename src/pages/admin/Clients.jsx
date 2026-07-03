@@ -2,6 +2,8 @@ import { useCallback, useMemo, useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/useAuth'
 import useIsMobile from '../../components/useIsMobile'
+import { MobileCard, MobileCardActions, MobileCardHeader, MobileCardList, MobileCardMeta } from '../../components/admin/MobileCardList'
+import { mobileActionBtn, mobileDangerBtn } from '../../components/admin/mobileCardStyles'
 
 const PLANS = ['starter', 'growth', 'pro']
 const STATUSES = ['active', 'inactive']
@@ -291,6 +293,31 @@ export default function AdminClients() {
         </div>
       )}
 
+      {isMobile ? (
+        <MobileCardList loading={loading} loadingText="Loading clients…" emptyText="No clients yet.">
+          {clients.map(client => (
+            <MobileCard key={client.id}>
+              <MobileCardHeader
+                title={client.name}
+                right={<span style={{ ...badge, background: client.status === 'active' ? '#dcfce7' : '#f3f4f6', color: client.status === 'active' ? '#16a34a' : '#6b7280' }}>{client.status}</span>}
+              />
+              <MobileCardMeta>
+                {client.email}
+                <br />
+                {client.company || 'No company'} · {client.plan} plan
+                {client.created_at ? ` · Joined ${new Date(client.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}` : ''}
+              </MobileCardMeta>
+              <MobileCardActions>
+                <button onClick={() => openEdit(client)} style={mobileActionBtn}>Edit</button>
+                <button onClick={() => sendInvite(client)} disabled={invitingClientId === client.id} style={mobileActionBtn}>
+                  {invitingClientId === client.id ? 'Sending…' : 'Invite'}
+                </button>
+                <button onClick={() => setConfirmDeleteClient(client)} style={mobileDangerBtn}>Delete</button>
+              </MobileCardActions>
+            </MobileCard>
+          ))}
+        </MobileCardList>
+      ) : (
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -341,8 +368,62 @@ export default function AdminClients() {
           </table>
         </div>
       </div>
+      )}
 
-      <div style={{ marginTop: 24, background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+      <div style={{ marginTop: 24, alignItems: 'center', display: 'flex', justifyContent: 'space-between', marginBottom: isMobile ? 12 : 0, padding: isMobile ? '0 2px' : 0 }}>
+        {isMobile && (
+          <>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#18181a' }}>Invite links</h2>
+            <span style={{ fontSize: 12, color: '#7a7888' }}>{pendingInviteLinks.length} total</span>
+          </>
+        )}
+      </div>
+
+      {isMobile ? (
+        <MobileCardList emptyText="No pending invite links.">
+          {pendingInviteLinks.map(link => {
+            const status = getLinkStatus(link)
+            const url = buildInviteLink(link.token)
+            return (
+              <MobileCard key={link.token}>
+                <MobileCardHeader
+                  title={link.name || link.email}
+                  right={<span style={{ ...badge, background: status.bg, color: status.text, textTransform: 'none' }}>{status.label}</span>}
+                />
+                <MobileCardMeta>
+                  {link.email}
+                  {link.created_at ? ` · ${new Date(link.created_at).toLocaleDateString()}` : ''}
+                </MobileCardMeta>
+                <MobileCardActions>
+                  {status.label === 'Pending' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(url)
+                          setCopiedToken(link.token)
+                          setTimeout(() => setCopiedToken(''), 1800)
+                        }}
+                        style={mobileActionBtn}
+                      >
+                        {copiedToken === link.token ? 'Copied' : 'Copy link'}
+                      </button>
+                      <a href={url} target="_blank" rel="noreferrer" style={mobileActionBtn}>Open</a>
+                    </>
+                  )}
+                  <button
+                    onClick={() => deleteInviteLink(link.token)}
+                    disabled={deletingToken === link.token}
+                    style={mobileDangerBtn}
+                  >
+                    {deletingToken === link.token ? 'Deleting…' : 'Delete'}
+                  </button>
+                </MobileCardActions>
+              </MobileCard>
+            )
+          })}
+        </MobileCardList>
+      ) : (
+      <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#18181a' }}>Invite links</h2>
           <span style={{ fontSize: 12, color: '#7a7888' }}>{pendingInviteLinks.length} total</span>
@@ -412,6 +493,7 @@ export default function AdminClients() {
           </table>
         </div>
       </div>
+      )}
 
       {linkModal && (
         <div style={overlay}>

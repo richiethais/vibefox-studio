@@ -996,11 +996,30 @@ export default function AdminBlogs() {
 }
 
 function PostTable({ title, posts, loading, emptyText, renderActions, showPublishedDate = false }) {
+  const isMobile = useIsMobile(768)
+
   return (
     <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, overflow: 'hidden' }}>
       <div style={{ padding: '12px 14px', borderBottom: '1px solid rgba(0,0,0,0.07)', fontSize: 14, fontWeight: 600, color: '#18181a' }}>{title}</div>
       {loading ? (
         <div style={{ padding: 14, color: '#7a7888', fontSize: 13 }}>Loading…</div>
+      ) : isMobile ? (
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {posts.map(post => (
+            <div key={post.id} style={{ borderBottom: '1px solid rgba(0,0,0,0.04)', padding: '12px 14px' }}>
+              <div style={{ color: '#18181a', fontSize: 13, fontWeight: 500, lineHeight: 1.4, marginBottom: 3 }}>{post.title}</div>
+              <div style={{ color: '#7a7888', fontSize: 12, marginBottom: 8 }}>
+                {showPublishedDate ? 'Published' : 'Updated'} {formatDate(showPublishedDate ? post.published_at : post.updated_at)}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                {renderActions(post)}
+              </div>
+            </div>
+          ))}
+          {posts.length === 0 && (
+            <div style={{ padding: 14, color: '#7a7888', fontSize: 13 }}>{emptyText}</div>
+          )}
+        </div>
       ) : (
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { BILLING_STATUS_COLORS, formatCurrency } from '../../lib/billing'
 import useIsMobile from '../useIsMobile'
+import { MobileCard, MobileCardHeader, MobileCardList, MobileCardMeta } from './MobileCardList'
 
 const STATUS_COLORS = {
   new: { bg: '#dbeafe', text: '#1d4ed8' },
@@ -103,6 +104,34 @@ export default function InquiryWorkspace({ scope = 'contact' }) {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: (selected && !isMobile) ? '1fr 380px' : '1fr', gap: 20 }}>
+        {isMobile ? (
+          <MobileCardList emptyText={emptyText}>
+            {filteredRows.map(row => {
+              const isCoaching = isCoachingRow(row)
+              const meta = row.metadata || {}
+              const coachingStatusColor = isCoaching ? COACHING_STATUS_COLORS[row.status] : null
+              const statusBadge = isCoachingScope
+                ? { background: coachingStatusColor?.bg || '#eef0f3', color: coachingStatusColor?.text || '#52525b', label: formatStatusLabel(row.status) || '—' }
+                : { background: STATUS_COLORS[row.status]?.bg || '#eef0f3', color: STATUS_COLORS[row.status]?.text || '#52525b', label: row.status || '—' }
+              return (
+                <MobileCard key={row.id} onClick={() => setSelected(row)} selected={selected?.id === row.id}>
+                  <MobileCardHeader
+                    title={row.name}
+                    right={<span style={{ ...badge, background: statusBadge.background, color: statusBadge.color }}>{statusBadge.label}</span>}
+                  />
+                  <MobileCardMeta>
+                    {row.email}
+                    <br />
+                    {isCoachingScope
+                      ? [asText(meta.company_role), asText(meta.experience_level)].filter(Boolean).join(' · ') || 'No details'
+                      : [row.service_type, row.budget].filter(Boolean).join(' · ') || 'No details'}
+                    {' · '}{new Date(row.created_at).toLocaleDateString()}
+                  </MobileCardMeta>
+                </MobileCard>
+              )
+            })}
+          </MobileCardList>
+        ) : (
         <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
           <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -195,6 +224,7 @@ export default function InquiryWorkspace({ scope = 'contact' }) {
             </table>
           </div>
         </div>
+        )}
 
         {selected && isMobile && (
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>

@@ -11,6 +11,8 @@ import {
 } from '../../lib/billing'
 import { parseFunctionError } from '../../lib/supabaseFunctions'
 import useIsMobile from '../../components/useIsMobile'
+import { MobileCard, MobileCardActions, MobileCardHeader, MobileCardList, MobileCardMeta } from '../../components/admin/MobileCardList'
+import { mobileActionBtn, mobileDangerBtn } from '../../components/admin/mobileCardStyles'
 
 const STATUSES = ['unpaid', 'paid', 'overdue']
 const CURRENCIES = ['usd', 'eur', 'gbp', 'cad']
@@ -531,6 +533,60 @@ export default function AdminInvoices() {
         </div>
       )}
 
+      {isMobile ? (
+        <MobileCardList loading={loading} loadingText="Loading billing items..." emptyText="No billing items yet.">
+          {invoices.map(invoice => {
+            const actionUrl = getBillingActionUrl(invoice)
+            const actionLabel = getBillingActionLabel(invoice)
+            const statusColor = BILLING_STATUS_COLORS[invoice.status] || BILLING_STATUS_COLORS.unpaid
+
+            return (
+              <MobileCard key={invoice.id}>
+                <MobileCardHeader
+                  title={invoice.clients?.name || invoice.customer_name_snapshot || 'Unassigned'}
+                  right={<span style={{ ...badge, background: statusColor.bg, color: statusColor.text }}>{invoice.status}</span>}
+                />
+                <div style={{ color: '#18181a', fontSize: 13, fontWeight: 500, marginBottom: 4 }}>{invoice.description}</div>
+                <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+                  <span style={{ color: '#18181a', fontSize: 17, fontWeight: 700 }}>{formatCurrency(invoice.amount, invoice.currency)}</span>
+                  <span style={{ ...badge, background: '#f3f4f6', color: '#4b5563' }}>{BILLING_KIND_LABELS[invoice.kind] || 'Invoice'}</span>
+                  {invoice.payment_type === 'subscription' && (
+                    <span style={{ ...badge, background: '#ede9fe', color: '#7c3aed' }}>
+                      {invoice.billing_interval === 'yearly' ? 'Yearly' : 'Monthly'}
+                    </span>
+                  )}
+                </div>
+                <MobileCardMeta>
+                  {invoice.stripe_invoice_status || (isStripeBacked(invoice) ? 'created' : 'manual')}
+                  {invoice.due_date ? ` · Due ${invoice.due_date}` : ''}
+                </MobileCardMeta>
+                <MobileCardActions>
+                  {invoice.invoice_token && (
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/invoice/${invoice.invoice_token}`)
+                        setNotice({ type: 'success', text: 'Invoice link copied.' })
+                      }}
+                      style={mobileActionBtn}
+                    >
+                      Copy link
+                    </button>
+                  )}
+                  {actionUrl && (
+                    <a href={actionUrl} rel="noreferrer" style={mobileActionBtn} target="_blank">
+                      {actionLabel}
+                    </a>
+                  )}
+                  <button onClick={() => openEdit(invoice)} style={mobileActionBtn}>
+                    {isStripeBacked(invoice) ? 'Update status' : 'Edit'}
+                  </button>
+                  <button onClick={() => setDeleteModal(invoice)} style={mobileDangerBtn}>Delete</button>
+                </MobileCardActions>
+              </MobileCard>
+            )
+          })}
+        </MobileCardList>
+      ) : (
       <div style={{ background: 'white', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ borderCollapse: 'collapse', fontSize: 13, width: '100%' }}>
@@ -630,6 +686,7 @@ export default function AdminInvoices() {
           </table>
         </div>
       </div>
+      )}
 
       {billingModal && (
         <div style={overlay}>

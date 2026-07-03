@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import useIsMobile from '../../components/useIsMobile'
+import { MobileCard, MobileCardActions, MobileCardHeader, MobileCardList, MobileCardMeta } from '../../components/admin/MobileCardList'
+import { mobileActionBtn } from '../../components/admin/mobileCardStyles'
 
 const STATUSES = ['proposal', 'active', 'complete']
 const STATUS_COLORS = {
@@ -134,6 +136,25 @@ export default function AdminProjects() {
         </div>
       )}
 
+      {isMobile ? (
+        <MobileCardList loading={loading} loadingText="Loading projects…" emptyText="No projects yet.">
+          {projects.map(project => (
+            <MobileCard key={project.id}>
+              <MobileCardHeader
+                title={project.title}
+                right={<span style={{ ...badge, background: STATUS_COLORS[project.status]?.bg, color: STATUS_COLORS[project.status]?.text }}>{project.status}</span>}
+              />
+              <MobileCardMeta>
+                {project.clients?.name ?? '—'}
+                {project.due_date ? ` · Due ${project.due_date}` : ''}
+              </MobileCardMeta>
+              <MobileCardActions>
+                <button onClick={() => openEdit(project)} style={mobileActionBtn}>Edit</button>
+              </MobileCardActions>
+            </MobileCard>
+          ))}
+        </MobileCardList>
+      ) : (
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -176,6 +197,7 @@ export default function AdminProjects() {
           </table>
         </div>
       </div>
+      )}
 
       {modal && (
         <div style={overlay}>
