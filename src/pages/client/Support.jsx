@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/useAuth'
+import { useClientRecord } from '../../lib/useClientRecord'
 import { parseFunctionError } from '../../lib/supabaseFunctions'
 
 const STATUS_COLORS = {
@@ -33,8 +33,7 @@ const FAQ_ITEMS = [
 ]
 
 export default function ClientSupport() {
-  const session = useAuth()
-  const [clientId, setClientId] = useState(null)
+  const { clientId, loading: clientLoading, error: clientError } = useClientRecord()
   const [requests, setRequests] = useState([])
   const [form, setForm] = useState({ description: '', title: '' })
   const [loading, setLoading] = useState(true)
@@ -42,14 +41,13 @@ export default function ClientSupport() {
   const [notice, setNotice] = useState(null)
   const [openFaq, setOpenFaq] = useState(null)
 
-  const load = useCallback(async id => {
-    const targetClientId = id ?? clientId
-    if (!targetClientId) return
+  const load = useCallback(async () => {
+    if (!clientId) return
 
     const { data, error } = await supabase
       .from('requests')
       .select('*')
-      .eq('client_id', targetClientId)
+      .eq('client_id', clientId)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -63,32 +61,18 @@ export default function ClientSupport() {
   }, [clientId])
 
   useEffect(() => {
-    if (!session) return
-
-    const timer = window.setTimeout(async () => {
-      const { data, error } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .maybeSingle()
-
-      if (error) {
-        setNotice({ text: error.message, type: 'error' })
-        setLoading(false)
-        return
-      }
-
-      if (!data) {
-        setLoading(false)
-        return
-      }
-
-      setClientId(data.id)
-      load(data.id)
-    }, 0)
-
-    return () => window.clearTimeout(timer)
-  }, [session, load])
+    if (clientLoading) return
+    if (clientError) {
+      setNotice({ text: clientError.message || 'Could not load your account.', type: 'error' })
+      setLoading(false)
+      return
+    }
+    if (!clientId) {
+      setLoading(false)
+      return
+    }
+    load()
+  }, [clientLoading, clientError, clientId, load])
 
   useEffect(() => {
     if (!notice) return undefined

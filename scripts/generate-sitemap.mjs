@@ -20,6 +20,7 @@ const staticRoutes = [
   { path: '/cookie-policy', changefreq: 'yearly', priority: '0.25' },
   { path: '/refund-policy', changefreq: 'yearly', priority: '0.25' },
   { path: '/accessibility', changefreq: 'yearly', priority: '0.25' },
+  { path: '/disclaimer', changefreq: 'yearly', priority: '0.25' },
 ]
 
 const cityRoutes = cities.map(city => ({

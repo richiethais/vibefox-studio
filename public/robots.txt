@@ -3,5 +3,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /client/
 Disallow: /join
+Disallow: /login
+Disallow: /reset-password
 
 Sitemap: https://www.vibefoxstudio.com/sitemap.xml

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { clearAuthPersistenceMode, supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/useAuth'
+import { clearClientRecordCache } from '../../lib/useClientRecord'
 import BrandLogo from '../BrandLogo'
 import SEOHead from '../SEOHead'
 import useIsMobile from '../useIsMobile'
@@ -12,6 +13,7 @@ const navItems = [
   { to: '/client/invoices', label: 'Invoices' },
   { to: '/client/messages', label: 'Messages' },
   { to: '/client/support', label: 'Support' },
+  { to: '/client/account', label: 'Account' },
 ]
 
 export default function ClientLayout() {
@@ -28,6 +30,7 @@ export default function ClientLayout() {
   }, [session])
 
   async function signOut() {
+    clearClientRecordCache()
     clearAuthPersistenceMode()
     await supabase.auth.signOut()
     navigate('/client/login')

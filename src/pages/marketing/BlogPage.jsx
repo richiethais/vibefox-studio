@@ -67,6 +67,8 @@ export default function BlogPage({ initialPosts }) {
                       <img
                         src={post.coverImageUrl}
                         alt={post.title}
+                        loading="lazy"
+                        decoding="async"
                         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       />
                     </div>

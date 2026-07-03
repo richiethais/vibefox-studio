@@ -5,7 +5,7 @@ import MarketingLayout from '../../components/marketing/MarketingLayout'
 import useIsMobile from '../../components/useIsMobile'
 import { useFadeUp } from '../../components/useFadeUp'
 import { getCityBySlug } from '../../data/cities'
-import { SITE_URL, DEFAULT_DISPLAY_NAME, mergeKeywords } from '../../lib/publicSeo'
+import { SITE_URL, DEFAULT_DISPLAY_NAME, getBreadcrumbSchema, mergeKeywords } from '../../lib/publicSeo'
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -157,6 +157,12 @@ export default function CityLandingPage() {
   if (!city) {
     return (
       <MarketingLayout hideCTA>
+        <SEOHead
+          title="Page not found"
+          description="We couldn't find the page you're looking for."
+          path={`/${citySlug || ''}`}
+          noindex
+        />
         <div style={{ padding: '160px 20px 120px', textAlign: 'center' }}>
           <h1 style={{
             fontFamily: "'DM Serif Display', serif",
@@ -214,6 +220,10 @@ export default function CityLandingPage() {
         acceptedAnswer: { '@type': 'Answer', text: f.a },
       })),
     },
+    getBreadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: `${city.name} Digital Marketing Agency`, path },
+    ]),
   ]
 
   return (
@@ -473,7 +483,7 @@ export default function CityLandingPage() {
           </blockquote>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', overflow: 'hidden', border: '2px solid rgba(200,169,126,0.3)', flexShrink: 0 }}>
-              <img src="/olympia-cafe-hero.webp" alt="Olympia Cafe" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/olympia-cafe-hero.webp" alt="Olympia Cafe" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div style={{ textAlign: 'left' }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a' }}>Olympia Cafe</div>

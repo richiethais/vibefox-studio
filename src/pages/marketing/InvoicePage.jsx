@@ -69,6 +69,22 @@ export default function InvoicePage() {
   const isProcessing = isSuccess && !isPaid && !pollExhausted
   const isConfirmPending = isSuccess && !isPaid && pollExhausted
 
+  // Private token URLs — keep out of search indexes without touching the
+  // server-injected OG tags that power link previews.
+  useEffect(() => {
+    let tag = document.head.querySelector('meta[name="robots"]')
+    if (!tag) {
+      tag = document.createElement('meta')
+      tag.setAttribute('name', 'robots')
+      document.head.appendChild(tag)
+    }
+    const previous = tag.getAttribute('content')
+    tag.setAttribute('content', 'noindex,nofollow')
+    return () => {
+      if (previous) tag.setAttribute('content', previous)
+    }
+  }, [])
+
   const fetchInvoice = useCallback(async () => {
     const { data, error } = await supabase
       .from('invoices')

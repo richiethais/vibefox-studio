@@ -11,11 +11,11 @@ import FAQ from './components/FAQ'
 import Contact from './components/Contact'
 import { Footer } from './components/CTAFooter'
 import SEOHead from './components/SEOHead'
-import { getLocalBusinessSchema, getPublicRouteSeo } from './lib/publicSeo'
+import { getLocalBusinessSchema, getPublicRouteSeo, getWebSiteSchema } from './lib/publicSeo'
 
 export default function App() {
   const seo = getPublicRouteSeo('/')
-  const localBusinessSchema = getLocalBusinessSchema()
+  const structuredData = [getWebSiteSchema(), getLocalBusinessSchema()]
 
   return (
     <>
@@ -26,7 +26,7 @@ export default function App() {
         appendBrand={false}
         image={seo.image}
         keywords={seo.keywords}
-        structuredData={localBusinessSchema}
+        structuredData={structuredData}
       />
       <Nav />
       <Hero />

@@ -12,10 +12,12 @@ import {
   getBlogPostSeo,
   getCityPageSeo,
   getCityStructuredData,
+  getBreadcrumbSchema,
   getFaqStructuredData,
   getLocalBusinessSchema,
   getPublicRouteSeo,
   getServicesStructuredData,
+  getWebSiteSchema,
   mergeKeywords,
 } from '../src/lib/publicSeo.js'
 import { cities } from '../src/data/cities.js'
@@ -37,6 +39,7 @@ const STATIC_ROUTES = [
   '/cookie-policy',
   '/refund-policy',
   '/accessibility',
+  '/disclaimer',
 ]
 
 function escapeAttr(str) {
@@ -141,7 +144,7 @@ function replaceMeta(html, seo, structuredData) {
 }
 
 function getStructuredDataForRoute(routePath, posts) {
-  if (routePath === '/') return getLocalBusinessSchema()
+  if (routePath === '/') return [getWebSiteSchema(), getLocalBusinessSchema()]
   if (routePath === '/services') return [getLocalBusinessSchema(), getServicesStructuredData()]
   if (routePath === '/faq') return [getLocalBusinessSchema(), getFaqStructuredData()]
   if (routePath === '/blogs') return [getLocalBusinessSchema(), getBlogIndexStructuredData(posts)]
@@ -197,7 +200,10 @@ async function main() {
     const html = replaceMeta(
       injectAppHtml(template, appHtml),
       seo,
-      [getLocalBusinessSchema(), seo.structuredData],
+      [
+        getLocalBusinessSchema(),
+        ...(Array.isArray(seo.structuredData) ? seo.structuredData : [seo.structuredData]),
+      ],
     )
     const outputPath = path.join(DIST_DIR, 'blogs', post.slug, 'index.html')
     await mkdir(path.dirname(outputPath), { recursive: true })
@@ -212,7 +218,14 @@ async function main() {
     const html = replaceMeta(
       injectAppHtml(template, appHtml),
       seo,
-      [getLocalBusinessSchema(), getCityStructuredData(city.slug)],
+      [
+        getLocalBusinessSchema(),
+        getCityStructuredData(city.slug),
+        getBreadcrumbSchema([
+          { name: 'Home', path: '/' },
+          { name: `${city.name} Digital Marketing Agency`, path: routePath },
+        ]),
+      ],
     )
     const outputPath = path.join(DIST_DIR, `${city.slug}-digital-marketing-agency`, 'index.html')
     await mkdir(path.dirname(outputPath), { recursive: true })

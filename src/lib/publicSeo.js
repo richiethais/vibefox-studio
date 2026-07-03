@@ -1,4 +1,5 @@
 import { cities } from '../data/cities.js'
+import { faqs } from '../content/faqs.js'
 
 export const SITE_URL = 'https://www.vibefoxstudio.com'
 export const DEFAULT_SITE_NAME = 'VibefoxStudio'
@@ -253,24 +254,38 @@ export function getFaqStructuredData() {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: [
-      {
-        '@type': 'Question',
-        name: 'How do I choose the best digital marketing agency in Jacksonville, Florida?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Look for a clear SEO strategy, measurable reporting, local market knowledge, and transparent communication cadence.',
-        },
-      },
-      {
-        '@type': 'Question',
-        name: 'Do you offer ongoing SEO content publishing?',
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: 'Yes. Weekly or monthly blog publishing and on-page optimization are available in growth plans.',
-        },
-      },
-    ],
+    mainEntity: faqs.map(item => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  }
+}
+
+export function getWebSiteSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    name: DEFAULT_SITE_NAME,
+    alternateName: DEFAULT_DISPLAY_NAME,
+    url: SITE_URL,
+    publisher: { '@id': `${SITE_URL}/#organization` },
+    inLanguage: 'en-US',
+  }
+}
+
+// items: [{ name, path }] — path relative to SITE_URL, e.g. '/blogs'
+export function getBreadcrumbSchema(items) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.path === '/' ? `${SITE_URL}/` : `${SITE_URL}${item.path}`,
+    })),
   }
 }
 
@@ -329,6 +344,13 @@ export function getBlogPostSeo(post) {
     image: post.coverImageUrl || DEFAULT_IMAGE,
     publishedTime: post.publishedAt,
     modifiedTime: post.updatedAt || post.publishedAt,
-    structuredData: getBlogPostStructuredData(post),
+    structuredData: [
+      getBlogPostStructuredData(post),
+      getBreadcrumbSchema([
+        { name: 'Home', path: '/' },
+        { name: 'Blogs', path: '/blogs' },
+        { name: post.title, path: `/blogs/${post.slug}` },
+      ]),
+    ],
   }
 }

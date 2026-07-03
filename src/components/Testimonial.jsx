@@ -31,7 +31,7 @@ export default function Testimonial() {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 13, position: 'relative' }}>
             <div style={{ width: 42, height: 42, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: '2px solid rgba(200,169,126,0.3)' }}>
-              <img src="/olympia-cafe-hero.webp" alt="Olympia Cafe" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src="/olympia-cafe-hero.webp" alt="Olympia Cafe" loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#18181a' }}>Olympia Cafe</div>

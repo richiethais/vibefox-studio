@@ -22,6 +22,7 @@ import ClientProjects from './pages/client/Projects.jsx'
 import ClientInvoices from './pages/client/Invoices.jsx'
 import ClientMessages from './pages/client/Messages.jsx'
 import ClientSupport from './pages/client/Support.jsx'
+import ClientAccount from './pages/client/Account.jsx'
 import Login from './pages/Login.jsx'
 import Join from './pages/Join.jsx'
 import ResetPassword from './pages/ResetPassword.jsx'
@@ -68,6 +69,7 @@ createRoot(document.getElementById('root')).render(
             <Route path="invoices" element={<ClientInvoices />} />
             <Route path="messages" element={<ClientMessages />} />
             <Route path="support" element={<ClientSupport />} />
+            <Route path="account" element={<ClientAccount />} />
           </Route>
         </Routes>
         <CookieNotice />

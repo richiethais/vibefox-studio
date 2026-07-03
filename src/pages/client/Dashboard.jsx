@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/useAuth'
+import { useClientRecord } from '../../lib/useClientRecord'
 import { BILLING_STATUS_COLORS, formatCurrency } from '../../lib/billing'
 import useIsMobile from '../../components/useIsMobile'
 
@@ -18,7 +18,7 @@ const REQUEST_STATUS_COLORS = {
 }
 
 export default function ClientDashboard() {
-  const session = useAuth()
+  const { client, clientId, loading: clientLoading } = useClientRecord()
   const navigate = useNavigate()
   const isMobile = useIsMobile(768)
   const [projects, setProjects] = useState([])
@@ -28,14 +28,14 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!session) return
-    supabase.from('clients').select('id').eq('user_id', session.user.id).maybeSingle().then(({ data: client }) => {
-      if (!client) { setLoading(false); return }
+    if (clientLoading) return
+    const timer = window.setTimeout(() => {
+      if (!clientId) { setLoading(false); return }
       Promise.all([
-        supabase.from('projects').select('*').eq('client_id', client.id).eq('status', 'active').order('created_at', { ascending: false }).limit(5),
-        supabase.from('invoices').select('*').eq('client_id', client.id).neq('status', 'paid').order('due_date', { ascending: true }),
-        supabase.from('messages').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).limit(3),
-        supabase.from('requests').select('*').eq('client_id', client.id).neq('status', 'done').order('created_at', { ascending: false }).limit(5),
+        supabase.from('projects').select('*').eq('client_id', clientId).eq('status', 'active').order('created_at', { ascending: false }).limit(5),
+        supabase.from('invoices').select('*').eq('client_id', clientId).neq('status', 'paid').order('due_date', { ascending: true }),
+        supabase.from('messages').select('*').eq('client_id', clientId).order('created_at', { ascending: false }).limit(3),
+        supabase.from('requests').select('*').eq('client_id', clientId).neq('status', 'done').order('created_at', { ascending: false }).limit(5),
       ]).then(([projectsRes, invoicesRes, messagesRes, requestsRes]) => {
         setProjects(projectsRes.data ?? [])
         setInvoices(invoicesRes.data ?? [])
@@ -43,13 +43,15 @@ export default function ClientDashboard() {
         setRequests(requestsRes.data ?? [])
         setLoading(false)
       })
-    })
-  }, [session])
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [clientLoading, clientId])
 
   const totalDue = invoices.reduce((sum, inv) => sum + Number(inv.amount || 0), 0)
   const hasOverdue = invoices.some(inv => inv.status === 'overdue')
+  const firstName = (client?.name || '').trim().split(/\s+/)[0]
 
-  if (loading) {
+  if (loading || clientLoading) {
     return (
       <div>
         <h1 style={headingStyle}>Dashboard</h1>
@@ -60,7 +62,10 @@ export default function ClientDashboard() {
 
   return (
     <div>
-      <h1 style={headingStyle}>Dashboard</h1>
+      <h1 style={{ ...headingStyle, marginBottom: 6 }}>{firstName ? `Welcome back, ${firstName}` : 'Dashboard'}</h1>
+      <div style={{ fontSize: 13, color: '#7a7888', marginBottom: 28 }}>
+        Here's the latest on your projects, billing, and messages.
+      </div>
 
       {/* Summary cards */}
       <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>

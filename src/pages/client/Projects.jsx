@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/useAuth'
+import { useClientRecord } from '../../lib/useClientRecord'
 
 const STATUS_COLORS = {
   proposal: { bg: '#f3f4f6', text: '#6b7280' },
@@ -9,16 +9,30 @@ const STATUS_COLORS = {
 }
 
 export default function ClientProjects() {
-  const session = useAuth()
+  const { clientId, loading: clientLoading } = useClientRecord()
   const [projects, setProjects] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!session) return
-    supabase.from('clients').select('id').eq('user_id', session.user.id).maybeSingle().then(({ data: client }) => {
-      if (!client) return
-      supabase.from('projects').select('*').eq('client_id', client.id).order('created_at', { ascending: false }).then(({ data }) => setProjects(data ?? []))
-    })
-  }, [session])
+    if (clientLoading) return
+    const timer = window.setTimeout(() => {
+      if (!clientId) { setLoading(false); return }
+      supabase.from('projects').select('*').eq('client_id', clientId).order('created_at', { ascending: false }).then(({ data }) => {
+        setProjects(data ?? [])
+        setLoading(false)
+      })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [clientLoading, clientId])
+
+  if (loading || clientLoading) {
+    return (
+      <div>
+        <h1 style={{ fontSize: 22, fontWeight: 600, color: '#18181a', marginBottom: 24, letterSpacing: '-0.4px' }}>Projects</h1>
+        <div style={{ color: '#7a7888', fontSize: 13 }}>Loading…</div>
+      </div>
+    )
+  }
 
   return (
     <div>

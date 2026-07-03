@@ -132,7 +132,7 @@ export default function BlogPostPage({ initialPost, initialRelated }) {
               <article key={item.slug} style={{ background: '#faf9f7', borderRadius: 14, border: '1px solid rgba(0,0,0,0.08)', padding: isMobile ? 15 : 18 }}>
                 {item.coverImageUrl && (
                   <div style={{ width: '100%', aspectRatio: '16 / 10', borderRadius: 14, overflow: 'hidden', background: 'linear-gradient(135deg, #f6f1ea 0%, #eee6db 100%)', border: '1px solid rgba(0,0,0,0.06)', marginBottom: 10, boxShadow: '0 8px 20px rgba(0,0,0,0.08)' }}>
-                    <img src={item.coverImageUrl} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <img src={item.coverImageUrl} alt={item.title} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                   </div>
                 )}
                 <div style={{ fontSize: 12, color: '#7a7888', marginBottom: 8 }}>{new Date(item.publishedAt).toLocaleDateString()} · {item.readTime}</div>

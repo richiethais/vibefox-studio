@@ -1,32 +1,33 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/useAuth'
+import { useClientRecord } from '../../lib/useClientRecord'
 import useIsMobile from '../../components/useIsMobile'
 
 export default function ClientMessages() {
-  const session = useAuth()
+  const { clientId, loading: clientLoading, error: clientError } = useClientRecord()
   const isMobile = useIsMobile(768)
-  const [clientId, setClientId] = useState(null)
   const [messages, setMessages] = useState([])
   const [body, setBody] = useState('')
   const [loadingMessages, setLoadingMessages] = useState(true)
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
+  const scrollRef = useRef(null)
 
-  const loadMessages = useCallback(async id => {
-    const targetClientId = id ?? clientId
-    if (!targetClientId) return
+  const loadMessages = useCallback(async ({ silent = false } = {}) => {
+    if (!clientId) return
 
-    setLoadingMessages(true)
+    if (!silent) setLoadingMessages(true)
     const { data, error: loadError } = await supabase
       .from('messages')
       .select('*')
-      .eq('client_id', targetClientId)
+      .eq('client_id', clientId)
       .order('created_at')
 
     if (loadError) {
-      setError(loadError.message || 'Could not load messages.')
-      setLoadingMessages(false)
+      if (!silent) {
+        setError(loadError.message || 'Could not load messages.')
+        setLoadingMessages(false)
+      }
       return
     }
 
@@ -35,32 +36,52 @@ export default function ClientMessages() {
   }, [clientId])
 
   useEffect(() => {
-    if (!session) return
-
-    const timer = window.setTimeout(async () => {
-      const { data, error: clientError } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .maybeSingle()
-
+    if (clientLoading) return
+    const timer = window.setTimeout(() => {
       if (clientError) {
-        setError(clientError.message)
+        setError(clientError.message || 'Could not load your account.')
         setLoadingMessages(false)
         return
       }
-
-      if (!data) {
+      if (!clientId) {
         setLoadingMessages(false)
         return
       }
-
-      setClientId(data.id)
-      loadMessages(data.id)
+      loadMessages()
     }, 0)
-
     return () => window.clearTimeout(timer)
-  }, [session, loadMessages])
+  }, [clientLoading, clientError, clientId, loadMessages])
+
+  // Live updates: realtime subscription with a slow polling fallback.
+  useEffect(() => {
+    if (!clientId) return
+
+    const channel = supabase
+      .channel(`client-messages-${clientId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `client_id=eq.${clientId}` },
+        payload => {
+          setMessages(current => (
+            current.some(message => message.id === payload.new.id) ? current : [...current, payload.new]
+          ))
+        },
+      )
+      .subscribe()
+
+    const poll = window.setInterval(() => loadMessages({ silent: true }), 30_000)
+
+    return () => {
+      supabase.removeChannel(channel)
+      window.clearInterval(poll)
+    }
+  }, [clientId, loadMessages])
+
+  // Keep the newest message in view.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [messages, loadingMessages])
 
   async function send() {
     if (!body.trim() || !clientId || sending) return
@@ -81,7 +102,7 @@ export default function ClientMessages() {
     }
 
     setBody('')
-    await loadMessages()
+    await loadMessages({ silent: true })
     setSending(false)
   }
 
@@ -96,18 +117,23 @@ export default function ClientMessages() {
       )}
 
       <div style={{ background: 'white', borderRadius: 14, border: '1px solid rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column', height: isMobile ? 'calc(100vh - 160px)' : 500 }}>
-        <div style={{ flex: 1, overflow: 'auto', padding: isMobile ? 14 : 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {loadingMessages && <div style={{ textAlign: 'center', color: '#7a7888', fontSize: 13, paddingTop: 26 }}>Loading messages…</div>}
+        <div ref={scrollRef} style={{ flex: 1, overflow: 'auto', padding: isMobile ? 14 : 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {(loadingMessages || clientLoading) && <div style={{ textAlign: 'center', color: '#7a7888', fontSize: 13, paddingTop: 26 }}>Loading messages…</div>}
 
-          {!loadingMessages && messages.length === 0 && (
-            <div style={{ textAlign: 'center', color: '#7a7888', fontSize: 13, paddingTop: 40 }}>No messages yet.</div>
+          {!loadingMessages && !clientLoading && messages.length === 0 && (
+            <div style={{ textAlign: 'center', color: '#7a7888', fontSize: 13, paddingTop: 40 }}>
+              No messages yet. Say hello — we typically reply within one business day.
+            </div>
           )}
 
           {!loadingMessages && messages.map(message => (
-            <div key={message.id} style={{ display: 'flex', justifyContent: message.from_admin ? 'flex-start' : 'flex-end' }}>
+            <div key={message.id} style={{ display: 'flex', flexDirection: 'column', alignItems: message.from_admin ? 'flex-start' : 'flex-end' }}>
               <div style={{ maxWidth: isMobile ? '85%' : '70%', padding: '10px 14px', borderRadius: 12, fontSize: 13, lineHeight: 1.5, background: message.from_admin ? '#f3f4f6' : '#18181a', color: message.from_admin ? '#18181a' : 'white' }}>
                 {message.from_admin && <div style={{ fontSize: 10, fontWeight: 600, color: '#b8906a', marginBottom: 4 }}>Vibefox Studio</div>}
                 {message.body}
+              </div>
+              <div style={{ fontSize: 10, color: '#a8a6b3', marginTop: 3, padding: '0 4px' }}>
+                {new Date(message.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
               </div>
             </div>
           ))}
