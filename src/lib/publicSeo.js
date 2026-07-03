@@ -1,5 +1,5 @@
 import { cities } from '../data/cities.js'
-import { faqs } from '../content/faqs.js'
+import { faqs, supportFaqs } from '../content/faqs.js'
 
 export const SITE_URL = 'https://www.vibefoxstudio.com'
 export const DEFAULT_SITE_NAME = 'VibefoxStudio'
@@ -59,6 +59,13 @@ export const PUBLIC_ROUTE_SEO = {
     description: 'Get in touch with Vibefox Studio. We typically respond within 24 hours.',
     keywords:
       'contact jacksonville digital marketing agency, web design inquiry jacksonville florida',
+  },
+  '/support': {
+    title: 'Support | Vibefox Studio',
+    description:
+      'Get help with invoices and payments, website change requests, or client portal access. Vibefox Studio support responds within 1 business day.',
+    keywords:
+      'vibefox studio support, invoice payment help, client portal help, website support jacksonville',
   },
   '/blogs': {
     title: 'Jacksonville SEO Blogs | Vibefox Studio',
@@ -255,6 +262,18 @@ export function getFaqStructuredData() {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     mainEntity: faqs.map(item => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: { '@type': 'Answer', text: item.a },
+    })),
+  }
+}
+
+export function getSupportFaqStructuredData() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: supportFaqs.map(item => ({
       '@type': 'Question',
       name: item.q,
       acceptedAnswer: { '@type': 'Answer', text: item.a },

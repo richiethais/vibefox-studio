@@ -17,6 +17,7 @@ import {
   getLocalBusinessSchema,
   getPublicRouteSeo,
   getServicesStructuredData,
+  getSupportFaqStructuredData,
   getWebSiteSchema,
   mergeKeywords,
 } from '../src/lib/publicSeo.js'
@@ -33,6 +34,7 @@ const STATIC_ROUTES = [
   '/pricing',
   '/faq',
   '/contact',
+  '/support',
   '/blogs',
   '/privacy-policy',
   '/terms-of-service',
@@ -147,6 +149,7 @@ function getStructuredDataForRoute(routePath, posts) {
   if (routePath === '/') return [getWebSiteSchema(), getLocalBusinessSchema()]
   if (routePath === '/services') return [getLocalBusinessSchema(), getServicesStructuredData()]
   if (routePath === '/faq') return [getLocalBusinessSchema(), getFaqStructuredData()]
+  if (routePath === '/support') return [getLocalBusinessSchema(), getSupportFaqStructuredData()]
   if (routePath === '/blogs') return [getLocalBusinessSchema(), getBlogIndexStructuredData(posts)]
   return getLocalBusinessSchema()
 }

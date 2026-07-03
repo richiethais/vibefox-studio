@@ -8,6 +8,7 @@ import FAQPage from '../pages/marketing/FAQPage.jsx'
 import BlogPage from '../pages/marketing/BlogPage.jsx'
 import BlogPostPage from '../pages/marketing/BlogPostPage.jsx'
 import ContactPage from '../pages/marketing/ContactPage.jsx'
+import SupportPage from '../pages/marketing/SupportPage.jsx'
 import PrivateCoachingPage from '../pages/marketing/PrivateCoachingPage.jsx'
 import PrivateCoachingThanksPage from '../pages/marketing/PrivateCoachingThanksPage.jsx'
 import InvoicePage from '../pages/marketing/InvoicePage.jsx'
@@ -23,6 +24,8 @@ export function PublicRoutes({ initialPosts, initialPost, initialRelated } = {})
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/faq" element={<FAQPage />} />
       <Route path="/contact" element={<ContactPage />} />
+      <Route path="/support" element={<SupportPage />} />
+      <Route path="/help" element={<Navigate to="/support" replace />} />
       <Route path="/privacy-policy" element={<LegalPage type="privacy-policy" />} />
       <Route path="/privacy" element={<LegalPage type="privacy" />} />
       <Route path="/terms-of-service" element={<LegalPage type="terms-of-service" />} />
