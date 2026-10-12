@@ -11,7 +11,7 @@ const PAYMENT_FREQUENCIES = ['monthly', 'yearly']
 const plans = [
   {
     name: 'Essential',
-    price: { monthly: 200, yearly: 170 },
+    price: { monthly: 100, yearly: 85 },
     desc: 'Keep your site running reliably.',
     features: ['Hosting & SSL certificate', 'Uptime monitoring', 'Security updates', 'Database management', 'Minor content updates', '48-hour support response'],
     featured: false,
@@ -19,7 +19,7 @@ const plans = [
   },
   {
     name: 'Growth',
-    price: { monthly: 500, yearly: 425 },
+    price: { monthly: 200, yearly: 170 },
     desc: 'For businesses that want to grow.',
     features: ['Everything in Essential', 'SEO optimization', '2 blog posts per month', 'Search Console monitoring', 'Monthly performance report', 'Minor design updates', '24-hour priority support'],
     featured: false,
@@ -27,9 +27,9 @@ const plans = [
   },
   {
     name: 'Pro',
-    price: { monthly: 900, yearly: 765 },
+    price: { monthly: 500, yearly: 425 },
     desc: 'Full-service digital partner.',
-    features: ['Everything in Growth', '4 blog posts per month', 'Active link building', 'Quarterly section redesign', 'Conversion optimization', 'Same-day priority support', 'Monthly strategy call'],
+    features: ['Everything in Growth', '4 blog posts per month', 'Active link building', 'Quarterly section redesign', 'Conversion optimization', 'Same-day priority support'],
     featured: true,
     popular: false,
   },
@@ -38,7 +38,7 @@ const plans = [
 const projectPlans = [
   {
     name: 'Landing Pages',
-    price: '1,500',
+    price: '750',
     desc: 'High-converting single-page websites tailored for lead generation or product launches.',
     features: ['Custom design & development', 'Conversion optimization', 'Mobile responsiveness', 'Basic SEO setup', 'Analytics integration'],
     featured: false,
@@ -46,7 +46,7 @@ const projectPlans = [
   },
   {
     name: 'Company Sites',
-    price: '3,500',
+    price: '1,500',
     desc: 'Professional multi-page websites designed to establish your brand and drive growth.',
     features: ['Everything in Landing Pages', 'Up to 10 pages', 'Advanced SEO foundation', 'Content management system (CMS)', 'Performance optimization'],
     featured: true,

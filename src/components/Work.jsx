@@ -18,6 +18,18 @@ const projects = [
   },
   {
     tag: 'Website',
+    title: 'Pickleball Court Concepts',
+    url: 'https://pickleballcourtconcepts.com',
+    desc: "A full custom website for Tennessee's premier pickleball court builders, built to showcase their gallery of finished courts, explain their services, and make it easy for homeowners, complexes, and clubs to request a quote. The site is structured for local search and fast lead capture across the state.",
+    heroImg: '/pickleball-court-concepts-hero.webp',
+    foodImgs: ['/pickleball-court-installation.webp', '/pickleball-resurfacing-repair.webp', '/pickleball-community-complex.webp'],
+    label: 'Court Builder Website',
+    sub: 'Pickleball Court Builder · Tennessee',
+    bg: 'linear-gradient(135deg, #e6f4ea 0%, #cfe9d8 100%)',
+    accent: '#1a7a4c',
+  },
+  {
+    tag: 'Website',
     title: 'Fatboy Fried Rice',
     url: 'https://fatboyfriedrice.com',
     desc: 'A bold website for Jacksonville\'s favorite Asian fusion food truck, complete with online ordering, catering details, team highlights, and menu content that is easy to browse on the go. We structured the page to support branded search, local discovery, and fast decision-making for hungry customers ready to order.',

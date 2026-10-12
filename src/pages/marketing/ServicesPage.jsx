@@ -22,8 +22,8 @@ const serviceDetails = [
     gradient: 'linear-gradient(135deg, #ebf2ff, #d8e8ff)',
     desc: 'Multi-page sites that tell your story, build trust, and turn visitors into customers. Easy to update, impossible to outgrow.',
     includes: ['Up to 8 custom pages', 'CMS for content updates', 'Google Business integration', 'Analytics tracking'],
-    image: null,
-    imageAlt: null,
+    image: '/pickleball-court-concepts-hero.webp',
+    imageAlt: 'Pickleball Court Concepts business website built by VibeFox Studio',
   },
   {
     icon: 'app',
