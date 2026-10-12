@@ -979,7 +979,17 @@ export default function AdminInvoices() {
             <p style={{ color: '#7a7888', fontSize: 13, margin: '0 0 16px', lineHeight: 1.5 }}>
               Are you sure you want to delete <strong style={{ color: '#18181a' }}>{deleteModal.description || 'this item'}</strong>?
               {isStripeBacked(deleteModal) && (
-                <> This will also {deleteModal.stripe_invoice_id ? 'void the invoice' : 'deactivate the payment link'} on Stripe. This cannot be undone.</>
+                <>
+                  {' '}This will also{' '}
+                  {deleteModal.stripe_invoice_id
+                    ? 'void the invoice'
+                    : deleteModal.stripe_payment_link_id
+                      ? 'deactivate the payment link'
+                      : deleteModal.payment_type === 'subscription'
+                        ? 'cancel the subscription (if the customer has already paid)'
+                        : 'remove it'}{' '}
+                  on Stripe. This cannot be undone.
+                </>
               )}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>

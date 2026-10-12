@@ -36,7 +36,12 @@ export function getBillingActionLabel(invoice) {
 }
 
 export function isStripeBacked(invoice) {
-  return Boolean(invoice?.stripe_invoice_id || invoice?.stripe_payment_link_id)
+  // Subscriptions never get a one-time stripe_invoice_id/stripe_payment_link_id
+  // (see admin-billing) — their real Stripe object is created lazily when the
+  // customer checks out via /invoice/{token}. Treat them as Stripe-backed too
+  // so their amount/description stay locked and deletes route through the
+  // server function that can cancel the live subscription.
+  return Boolean(invoice?.stripe_invoice_id || invoice?.stripe_payment_link_id || invoice?.payment_type === 'subscription')
 }
 
 export const PAYMENT_TYPE_LABELS = {

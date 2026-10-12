@@ -242,6 +242,16 @@ Deno.serve(async request => {
         }
       }
 
+      if (invoice.stripe_subscription_id) {
+        stage = 'cancel stripe subscription'
+        try {
+          await stripe.subscriptions.cancel(invoice.stripe_subscription_id)
+        } catch (error) {
+          stripeWarning = error instanceof Error ? error.message : 'Could not cancel Stripe subscription.'
+          console.error('admin-billing delete stripe warning', { message: stripeWarning })
+        }
+      }
+
       stage = 'delete invoice from crm'
       const { error: deleteError } = await supabaseAdmin
         .from('invoices')
