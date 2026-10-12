@@ -60,80 +60,165 @@ Deno.serve(async request => {
     return new Response('Invalid JSON', { status: 400 })
   }
 
-  if (event.type !== 'checkout.session.completed') {
+  const handledEvents = [
+    'checkout.session.completed',
+    'invoice.paid',
+    'invoice.payment_failed',
+    'customer.subscription.deleted',
+  ]
+
+  if (!handledEvents.includes(event.type)) {
     return new Response('Event ignored', { status: 200 })
-  }
-
-  const session = event.data.object as {
-    id: string
-    metadata?: Record<string, string>
-    amount_total?: number
-    subscription?: string
-    mode?: string
-    payment_link?: string
-  }
-
-  if (!session?.id) {
-    console.error('webhook: malformed session', event.data?.object)
-    return new Response('Malformed session', { status: 400 })
-  }
-
-  const invoiceToken = session.metadata?.invoice_token
-  const invoiceId = session.metadata?.invoice_id
-  // Payment Links created from the CRM don't carry invoice_token/invoice_id in
-  // metadata, but the completed session references the originating payment link.
-  const paymentLinkId = typeof session.payment_link === 'string' ? session.payment_link : null
-
-  if (!invoiceToken && !invoiceId && !paymentLinkId) {
-    return new Response('Not an invoice checkout', { status: 200 })
   }
 
   const supabaseAdmin = getSupabaseAdminClient()
 
-  const query = supabaseAdmin
-    .from('invoices')
-    .select('id, status, paid_at')
+  // First payment — fired for both one-time checkouts and the initial charge
+  // on a new subscription.
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object as {
+      id: string
+      metadata?: Record<string, string>
+      amount_total?: number
+      subscription?: string
+      mode?: string
+      payment_link?: string
+    }
 
-  if (invoiceId) {
-    query.eq('id', invoiceId)
-  } else if (invoiceToken) {
-    query.eq('invoice_token', invoiceToken)
-  } else {
-    query.eq('stripe_payment_link_id', paymentLinkId)
+    if (!session?.id) {
+      console.error('webhook: malformed session', event.data?.object)
+      return new Response('Malformed session', { status: 400 })
+    }
+
+    const invoiceToken = session.metadata?.invoice_token
+    const invoiceId = session.metadata?.invoice_id
+    // Payment Links created from the CRM don't carry invoice_token/invoice_id in
+    // metadata, but the completed session references the originating payment link.
+    const paymentLinkId = typeof session.payment_link === 'string' ? session.payment_link : null
+
+    if (!invoiceToken && !invoiceId && !paymentLinkId) {
+      return new Response('Not an invoice checkout', { status: 200 })
+    }
+
+    const query = supabaseAdmin
+      .from('invoices')
+      .select('id, status, paid_at')
+
+    if (invoiceId) {
+      query.eq('id', invoiceId)
+    } else if (invoiceToken) {
+      query.eq('invoice_token', invoiceToken)
+    } else {
+      query.eq('stripe_payment_link_id', paymentLinkId)
+    }
+
+    const { data: invoice, error: loadError } = await query.single()
+
+    if (loadError || !invoice) {
+      console.error('webhook: invoice not found', { invoiceId, invoiceToken, paymentLinkId, error: loadError })
+      return new Response('Invoice not found', { status: 200 })
+    }
+
+    if (invoice.paid_at) {
+      return new Response('Already processed', { status: 200 })
+    }
+
+    const updatePayload: Record<string, unknown> = {
+      paid_at: new Date().toISOString(),
+      status: 'paid',
+      stripe_checkout_session_id: session.id,
+    }
+
+    if (session.subscription) {
+      updatePayload.stripe_subscription_id = session.subscription
+    }
+
+    const { error: updateError } = await supabaseAdmin
+      .from('invoices')
+      .update(updatePayload)
+      .eq('id', invoice.id)
+      .is('paid_at', null)
+
+    if (updateError) {
+      console.error('webhook: update failed', updateError)
+      return new Response('Update failed', { status: 500 })
+    }
+
+    console.log('invoice marked paid', { invoiceId: invoice.id, sessionId: session.id })
+    return new Response('ok', { status: 200 })
   }
 
-  const { data: invoice, error: loadError } = await query.single()
+  // Renewals and failed charges on an existing subscription — Stripe auto-
+  // generates a new Invoice object each billing cycle, keyed to the
+  // subscription id we saved from the initial checkout.session.completed.
+  if (event.type === 'invoice.paid' || event.type === 'invoice.payment_failed') {
+    const stripeInvoice = event.data.object as {
+      subscription?: string | { id: string }
+      billing_reason?: string
+    }
+    const subscriptionId = typeof stripeInvoice.subscription === 'string'
+      ? stripeInvoice.subscription
+      : stripeInvoice.subscription?.id
 
-  if (loadError || !invoice) {
-    console.error('webhook: invoice not found', { invoiceId, invoiceToken, paymentLinkId, error: loadError })
-    return new Response('Invoice not found', { status: 200 })
+    if (!subscriptionId) {
+      return new Response('Not a subscription invoice', { status: 200 })
+    }
+
+    // The very first invoice on a new subscription fires alongside
+    // checkout.session.completed, which already records the subscription id
+    // and marks the invoice paid — skip it here to avoid a race where this
+    // event arrives first and finds no matching row yet.
+    if (stripeInvoice.billing_reason === 'subscription_create') {
+      return new Response('Initial charge handled by checkout.session.completed', { status: 200 })
+    }
+
+    const { data: invoice, error: loadError } = await supabaseAdmin
+      .from('invoices')
+      .select('id')
+      .eq('stripe_subscription_id', subscriptionId)
+      .single()
+
+    if (loadError || !invoice) {
+      console.error('webhook: subscription invoice not matched', { subscriptionId, error: loadError })
+      return new Response('Invoice not found', { status: 200 })
+    }
+
+    const updatePayload = event.type === 'invoice.paid'
+      ? { status: 'paid', paid_at: new Date().toISOString() }
+      : { status: 'overdue' }
+
+    const { error: updateError } = await supabaseAdmin
+      .from('invoices')
+      .update(updatePayload)
+      .eq('id', invoice.id)
+
+    if (updateError) {
+      console.error('webhook: subscription renewal update failed', updateError)
+      return new Response('Update failed', { status: 500 })
+    }
+
+    console.log('subscription invoice updated', { invoiceId: invoice.id, eventType: event.type })
+    return new Response('ok', { status: 200 })
   }
 
-  if (invoice.paid_at) {
-    return new Response('Already processed', { status: 200 })
+  // Subscription cancelled (by the customer or for repeated payment failure)
+  // — flag it so it stops reading as a healthy, paid subscription in the CRM.
+  if (event.type === 'customer.subscription.deleted') {
+    const subscription = event.data.object as { id: string }
+
+    const { error: updateError } = await supabaseAdmin
+      .from('invoices')
+      .update({ status: 'overdue' })
+      .eq('stripe_subscription_id', subscription.id)
+
+    if (updateError) {
+      console.error('webhook: subscription cancellation update failed', updateError)
+      return new Response('Update failed', { status: 500 })
+    }
+
+    console.log('subscription canceled', { subscriptionId: subscription.id })
+    return new Response('ok', { status: 200 })
   }
 
-  const updatePayload: Record<string, unknown> = {
-    paid_at: new Date().toISOString(),
-    status: 'paid',
-    stripe_checkout_session_id: session.id,
-  }
-
-  if (session.subscription) {
-    updatePayload.stripe_subscription_id = session.subscription
-  }
-
-  const { error: updateError } = await supabaseAdmin
-    .from('invoices')
-    .update(updatePayload)
-    .eq('id', invoice.id)
-    .is('paid_at', null)
-
-  if (updateError) {
-    console.error('webhook: update failed', updateError)
-    return new Response('Update failed', { status: 500 })
-  }
-
-  console.log('invoice marked paid', { invoiceId: invoice.id, sessionId: session.id })
-  return new Response('ok', { status: 200 })
+  return new Response('Event ignored', { status: 200 })
 })

@@ -310,29 +310,39 @@ Deno.serve(async request => {
     }
 
     if (action === 'create_payment_link') {
-      stage = 'create stripe payment link'
-      const paymentLink = await stripe.paymentLinks.create({
-        billing_address_collection: 'required',
-        customer_creation: 'always',
-        line_items: lineItems.map(item => ({
-          price_data: {
-            currency,
-            product_data: {
-              description: item.description || undefined,
-              name: item.name,
+      // Stripe Payment Links only support one-time payment mode — they can't
+      // bill on a recurring schedule. For subscriptions, the real checkout
+      // happens on our own /invoice/{token} page (create-invoice-checkout
+      // builds a proper subscription Checkout Session there), so we skip
+      // creating a Stripe object here rather than hand out a link that would
+      // silently charge the customer once instead of monthly/yearly.
+      let paymentLink: { id: string; url: string } | null = null
+
+      if (paymentType === 'one_time') {
+        stage = 'create stripe payment link'
+        paymentLink = await stripe.paymentLinks.create({
+          billing_address_collection: 'required',
+          customer_creation: 'always',
+          line_items: lineItems.map(item => ({
+            price_data: {
+              currency,
+              product_data: {
+                description: item.description || undefined,
+                name: item.name,
+              },
+              unit_amount: item.amount,
             },
-            unit_amount: item.amount,
+            quantity: item.quantity,
+          })),
+          metadata: {
+            client_id: client?.id || '',
+            client_name: client?.name || customerName || '',
+            customer_email: customerEmail || '',
+            invoice_token: invoiceRowPayload.invoice_token,
           },
-          quantity: item.quantity,
-        })),
-        metadata: {
-          client_id: client?.id || '',
-          client_name: client?.name || customerName || '',
-          customer_email: customerEmail || '',
-          invoice_token: invoiceRowPayload.invoice_token,
-        },
-        submit_type: 'pay',
-      })
+          submit_type: 'pay',
+        })
+      }
 
       stage = 'insert payment link into crm'
       const { data: invoiceRow, error: insertError } = await supabaseAdmin
@@ -340,8 +350,8 @@ Deno.serve(async request => {
         .insert({
           ...invoiceRowPayload,
           kind: 'payment_link',
-          stripe_payment_link_id: paymentLink.id,
-          stripe_payment_link_url: paymentLink.url,
+          stripe_payment_link_id: paymentLink?.id || null,
+          stripe_payment_link_url: paymentLink?.url || null,
         })
         .select('*')
         .single()
@@ -354,7 +364,7 @@ Deno.serve(async request => {
         billingRecord: invoiceRow,
         kind: 'payment_link',
         publicUrl: invoiceRow?.invoice_token ? `/invoice/${invoiceRow.invoice_token}` : null,
-        url: paymentLink.url,
+        url: paymentLink?.url || null,
       })
     }
 
@@ -366,59 +376,72 @@ Deno.serve(async request => {
       return json({ error: 'Customer email is required to create an invoice.' }, 400)
     }
 
-    stage = 'find or create stripe customer'
-    const customer = await findOrCreateCustomer(stripe, {
-      email: customerEmail,
-      name: customerName,
-      phone: customerPhone,
-    })
-
-    stage = 'create draft stripe invoice'
-    const draftInvoice = await stripe.invoices.create({
-      auto_advance: false,
-      collection_method: 'send_invoice',
-      custom_fields: customFields.length > 0 ? customFields : undefined,
-      customer: customer.id,
-      days_until_due: getDueDateDays(cleanText(body.due_date)),
-      footer: cleanText(body.footer) || undefined,
-      metadata: {
-        client_id: client?.id || '',
-      },
-    })
-
-    stage = 'create stripe invoice items'
-    for (const item of lineItems) {
-      await stripe.invoiceItems.create({
-        amount: item.amount * item.quantity,
-        currency,
-        customer: customer.id,
-        description: formatLineItemLabel(item),
-        invoice: draftInvoice.id,
-      })
-    }
-
-    stage = 'finalize stripe invoice'
-    const finalizedInvoice = await stripe.invoices.finalizeInvoice(draftInvoice.id, {
-      auto_advance: false,
-    })
-
-    const shouldSendInvoice = Boolean(body.send_invoice_now)
-    let deliveredInvoice = finalizedInvoice
+    // Stripe's Invoicing API (used below) only bills once. For subscriptions,
+    // the real checkout happens on our own /invoice/{token} page
+    // (create-invoice-checkout builds a proper subscription Checkout Session
+    // there), so we skip creating a Stripe invoice here rather than hand out
+    // a hosted invoice link that would only ever collect a single payment.
+    let stripeInvoiceId: string | null = null
+    let stripeInvoicePdf: string | null = null
+    let stripeInvoiceStatus: string | null = null
+    let stripeInvoiceUrl: string | null = null
     let deliveryWarning: string | null = null
 
-    if (shouldSendInvoice) {
-      stage = 'send stripe invoice'
-      try {
-        deliveredInvoice = await stripe.invoices.sendInvoice(finalizedInvoice.id)
-      } catch (error) {
-        deliveryWarning = error instanceof Error ? error.message : 'Stripe invoice email delivery failed.'
-        console.error('admin-billing delivery warning', { message: deliveryWarning })
+    if (paymentType === 'one_time') {
+      stage = 'find or create stripe customer'
+      const customer = await findOrCreateCustomer(stripe, {
+        email: customerEmail,
+        name: customerName,
+        phone: customerPhone,
+      })
+
+      stage = 'create draft stripe invoice'
+      const draftInvoice = await stripe.invoices.create({
+        auto_advance: false,
+        collection_method: 'send_invoice',
+        custom_fields: customFields.length > 0 ? customFields : undefined,
+        customer: customer.id,
+        days_until_due: getDueDateDays(cleanText(body.due_date)),
+        footer: cleanText(body.footer) || undefined,
+        metadata: {
+          client_id: client?.id || '',
+        },
+      })
+
+      stage = 'create stripe invoice items'
+      for (const item of lineItems) {
+        await stripe.invoiceItems.create({
+          amount: item.amount * item.quantity,
+          currency,
+          customer: customer.id,
+          description: formatLineItemLabel(item),
+          invoice: draftInvoice.id,
+        })
       }
+
+      stage = 'finalize stripe invoice'
+      const finalizedInvoice = await stripe.invoices.finalizeInvoice(draftInvoice.id, {
+        auto_advance: false,
+      })
+
+      const shouldSendInvoice = Boolean(body.send_invoice_now)
+      let deliveredInvoice = finalizedInvoice
+
+      if (shouldSendInvoice) {
+        stage = 'send stripe invoice'
+        try {
+          deliveredInvoice = await stripe.invoices.sendInvoice(finalizedInvoice.id)
+        } catch (error) {
+          deliveryWarning = error instanceof Error ? error.message : 'Stripe invoice email delivery failed.'
+          console.error('admin-billing delivery warning', { message: deliveryWarning })
+        }
+      }
+
+      stripeInvoiceId = deliveredInvoice.id
+      stripeInvoicePdf = deliveredInvoice.invoice_pdf ?? null
+      stripeInvoiceStatus = cleanText(deliveredInvoice.status) || 'open'
+      stripeInvoiceUrl = deliveredInvoice.hosted_invoice_url ?? null
     }
-
-    stage = 'prepare stripe invoice response'
-
-    const stripeStatus = cleanText(deliveredInvoice.status) || 'open'
 
     stage = 'insert stripe invoice into crm'
     const { data: invoiceRow, error: insertError } = await supabaseAdmin
@@ -426,10 +449,10 @@ Deno.serve(async request => {
       .insert({
         ...invoiceRowPayload,
         kind: 'invoice',
-        stripe_invoice_id: deliveredInvoice.id,
-        stripe_invoice_pdf: deliveredInvoice.invoice_pdf,
-        stripe_invoice_status: stripeStatus,
-        stripe_invoice_url: deliveredInvoice.hosted_invoice_url,
+        stripe_invoice_id: stripeInvoiceId,
+        stripe_invoice_pdf: stripeInvoicePdf,
+        stripe_invoice_status: stripeInvoiceStatus,
+        stripe_invoice_url: stripeInvoiceUrl,
       })
       .select('*')
       .single()
@@ -440,11 +463,11 @@ Deno.serve(async request => {
 
     return json({
       billingRecord: invoiceRow,
-      invoicePdf: deliveredInvoice.invoice_pdf,
+      invoicePdf: stripeInvoicePdf,
       kind: 'invoice',
       publicUrl: invoiceRow?.invoice_token ? `/invoice/${invoiceRow.invoice_token}` : null,
-      status: stripeStatus,
-      url: deliveredInvoice.hosted_invoice_url,
+      status: stripeInvoiceStatus,
+      url: stripeInvoiceUrl,
       warning: deliveryWarning,
     })
   } catch (error) {
